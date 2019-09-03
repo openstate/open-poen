@@ -1,0 +1,37 @@
+import os
+
+# On a new deployment (whether production or development) make
+# a copy of this file called 'config.py' and change 'False' for
+# SECRET_KEY to a newly generated string using these python commands:
+# $ import os
+# $ os.urandom(24)
+
+basedir = os.path.abspath(os.path.dirname(__file__))
+
+
+class Config(object):
+    with open('docker/secrets-db-name.txt') as IN:
+        DB_NAME = IN.readline().strip()
+    with open('docker/secrets-db-user.txt') as IN:
+        DB_USER = IN.readline().strip()
+    with open('docker/secrets-db-password.txt') as IN:
+        DB_PASSWORD = IN.readline().strip()
+
+    SECRET_KEY = False
+    SERVER_NAME = 'openpoen.nl'
+    PREFERRED_URL_SCHEME = 'https'
+    FORCE_HOST_FOR_REDIRECTS = 'openpoen.nl'
+    USE_SESSION_FOR_NEXT = True
+
+    BABEL_DEFAULT_LOCALE = 'nl'
+
+    SQLALCHEMY_DATABASE_URI = 'postgresql://%s:%s@poen_db_1:5432/%s' % (DB_USER, DB_PASSWORD, DB_NAME)
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+    MAIL_SERVER = ''
+    MAIL_PORT = ''
+    MAIL_USE_TLS = True
+    MAIL_USERNAME = ''
+    MAIL_PASSWORD = ''
+    FROM = ''
+    ADMINS = ['']

@@ -1,0 +1,22 @@
+# NOTE: Production config (also make any relevant changes to
+# Dockerfile-app-dev)
+
+
+FROM python:3.7.4
+MAINTAINER Open State Foundation <developers@openstate.eu>
+
+RUN echo "Europe/Amsterdam" > /etc/timezone \
+    && dpkg-reconfigure -f noninteractive tzdata
+
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y locales
+
+RUN sed -i -e 's/# nl_NL.UTF-8 UTF-8/nl_NL.UTF-8 UTF-8/' /etc/locale.gen \
+    && dpkg-reconfigure --frontend=noninteractive locales
+
+WORKDIR /opt/poen
+RUN pip install --upgrade pip
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+ENV FLASK_APP=website.py
+CMD uwsgi --socket 0.0.0.0:5000 --touch-reload=uwsgi-touch-reload --processes 8 -w website:app

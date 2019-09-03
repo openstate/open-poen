@@ -1,0 +1,21 @@
+version: "3.1"
+services:
+  nginx:
+    # Uncomment these ports when developing locally and haven't
+    # also installed nginx-load-balancer locally
+    #ports:
+    #  - "80:80"
+    #  - "443:443"
+    volumes:
+      - ./nginx-dev/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx-dev/conf.d/:/etc/nginx/conf.d/
+    restart: "no"
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile-app-dev
+    restart: "no"
+  db:
+    restart: "no"
+  node:
+    restart: "no"

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block head %}
+  <meta property="og:title" content="Open Poen - Dashboard" />
+  {{ super() }}
+{% endblock %}
+
+{% block content %}
+  <div>
+    > Dashboard
+  </div>
+
+  <h1 class="title-pad">{{ user.name }}</h1>
+{% endblock %}

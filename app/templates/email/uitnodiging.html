@@ -1,0 +1,24 @@
+Beste mevrouw of meneer,
+<br>
+<br>
+<br>
+Bij dezen nodigen wij u graag uit om deel te nemen aan het platform 'Open Poen'. Dit is het platform waar burgers laagdrempelig subisidies kunnen ontvangen en hun uitgaven publiekelijk kunnen delen en verantwoorden.
+<br>
+<br>
+<b>Hoe kan ik inloggen?</b>
+<br>
+Er is al een account voor u aangemaakt met het e-mailadres {{ user.email }}. Om in te loggen hoeft u alleen nog een <a href="{{ url_for('reset_wachtwoord', token=token, _external=True) }}" target="_blank" rel="noopener">wachtwoord aan te maken voor uw account</a>.
+<br>
+<br>
+U kunt ook de volgende pagina bezoeken:
+<br>
+{{ url_for('reset_wachtwoord', token=token, _external=True) }}
+<br>
+<br>
+<u>Deze pagina komt over 24 uur te vervallen, dus maak alvast een account aan</u>. Mocht u niet binnen die tijd een wachtwoord aangemaakt hebben dan kunt u een <a href="{{ url_for('reset_wachtwoord_verzoek', _external=True) }}" target="_blank" rel="noopener">nieuw verzoek indienen</a>.
+<br>
+<br>
+<br>
+Met vriendelijke groet,
+<br>
+openpoen.nl

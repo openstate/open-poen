@@ -1,0 +1,16 @@
+*.swp
+*.pyc
+
+log/*
+upload/*
+exports/*
+
+docker/docker-entrypoint-initdb.d/*sql.gz
+docker/docker-entrypoint-initdb.d/backups/*sql.gz
+docker/secrets-*.txt
+
+app/static/*
+app/assets/node_modules/*
+app/.cache-loader/*
+
+config.py

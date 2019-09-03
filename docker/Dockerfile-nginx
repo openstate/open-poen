@@ -1,0 +1,7 @@
+FROM nginx:1.17.3-alpine
+MAINTAINER Open State Foundation <developers@openstate.eu>
+
+WORKDIR /usr/share/nginx/html
+
+# Debug: use the nginx binary which was compiled with '--with-debug'
+# CMD ["nginx-debug", "-g", "daemon off;"]

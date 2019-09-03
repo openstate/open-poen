@@ -1,0 +1,67 @@
+version: "3.1"
+services:
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile-nginx
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/conf.d/:/etc/nginx/conf.d/
+      - ../log/nginx/:/var/log/nginx/
+      # 'static' contains the 'dist' folder after compiling the assets.
+      # We don't mount 'dist' directly as this folder is recreated on
+      # compilation and will therefor be unmounted after running gulp.
+      - ../app/static/:/usr/share/nginx/html/static/
+      - ../files/:/usr/share/nginx/html/files/
+    networks:
+      - nginx-load-balancer
+      - internal
+    restart: always
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile-app
+    volumes:
+      - ../:/opt/poen
+    networks:
+      - internal
+    restart: always
+  db:
+    image: postgres:11.5
+    secrets:
+      - db_name
+      - db_user
+      - db_password
+    environment:
+      - "POSTGRES_DB_FILE=/run/secrets/db_name"
+      - "POSTGRES_USER_FILE=/run/secrets/db_user"
+      - "POSTGRES_PASSWORD_FILE=/run/secrets/db_password"
+    working_dir: /docker-entrypoint-initdb.d/backups
+    networks:
+      - internal
+    volumes:
+      - db:/var/lib/postgresql/data
+      - "./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d"
+    restart: always
+  node:
+    image: node:12.9.1
+    working_dir: /opt/poen/assets
+    volumes:
+      - ../app:/opt/poen
+    restart: always
+    # Use this to keep the container running
+    tty: true
+secrets:
+  db_name:
+    file: ./secrets-db-name.txt
+  db_user:
+    file: ./secrets-db-user.txt
+  db_password:
+    file: ./secrets-db-password.txt
+networks:
+  internal:
+  nginx-load-balancer:
+    external:
+      name: docker_nginx-load-balancer
+volumes:
+  db:
