@@ -6,8 +6,8 @@ Publish transactions of government subsidized projects
 [Docker Compose](https://docs.docker.com/compose/install/)
 
 ## Run
-- Clone or download this project from GitHub:
-- In the `docker` directory create the files `secrets-db-name.txt`, `secrets-db-user.txt` and `secrets-db-password.txt` and add the database name, user and password (either new values if starting from scratch or existing if importing a database) on the first line of their corresponding file
+- Clone or download this project from GitHub
+- In the `docker` directory create the files `secrets-db-name.txt`, `secrets-db-user.txt` and `secrets-db-password.txt` and add the database name, user and password (either new values if starting from scratch or existing if importing a database) on the first line of the corresponding file
 - Copy `config.py.example` to `config.py` and edit it
    - Create a SECRET_KEY as per the instructions in the file
    - Specify email related information in order for the application to send emails

@@ -46,6 +46,8 @@ services:
   node:
     image: node:12.9.1
     working_dir: /opt/poen/assets
+    networks:
+      - internal
     volumes:
       - ../app:/opt/poen
     restart: always
