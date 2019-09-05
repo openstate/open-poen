@@ -25,6 +25,8 @@ services:
       - ../:/opt/poen
     networks:
       - internal
+    depends_on:
+      - "db"
     restart: always
   db:
     image: postgres:11.5
