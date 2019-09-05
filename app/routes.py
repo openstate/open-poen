@@ -81,13 +81,9 @@ def logout():
 )
 @login_required
 def dashboard():
-    user = User.query.filter_by(
-        gemeente_code=session['email']
-    ).first()
-
     return render_template(
         'dashboard.html',
-        user=user
+        user=current_user
     )
 
 
