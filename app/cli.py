@@ -7,12 +7,12 @@ import os
 
 # Database commands
 @app.cli.group()
-def db():
-    """Database related commands"""
+def database():
+    """Open Poen database related commands."""
     pass
 
 
-@db.command()
+@database.command()
 def show_all_users():
     """
     Show all users and their corresponding gemeenten
@@ -25,7 +25,7 @@ def show_all_users():
         )
 
 
-@db.command()
+@database.command()
 @click.argument('email')
 def add_admin_user(email):
     """
@@ -56,7 +56,7 @@ def add_admin_user(email):
     print("Added user as admin")
 
 
-@db.command()
+@database.command()
 @click.argument('email')
 def create_user_invite_link(email):
     """

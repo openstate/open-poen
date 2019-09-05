@@ -48,9 +48,11 @@ Development
 - Automatically build CSS/JS when a file changes (simply refresh the page in your browser after a change): `sudo docker exec poen_node_1 yarn watch`
 
 ## CLI
-To access the CLI of the app run `sudo docker exec -it poen_app_1 bash` and run `flask` and `flask db` to see the available commands. Here are some CLI commands:
+To access the CLI of the app run `sudo docker exec -it poen_app_1 bash` and run for example `flask` and `flask database` to see the available commands. Here are some CLI commands:
 
-- TODO
+Database migration commands. Use these after the database is in production and you need to change the database model.
+- After changing the model: `flask db migrate -m <message>`
+- Apply the new migration to the database: `flask db upgrade`
 
 ## To enter the database
    - `sudo docker exec -it poen_db_1 psql -U <DB_USER> <DB_NAME>` retrieve database user and name from `docker/secrets-db-user.txt` and `docker/secrets-db-name.txt`

@@ -11,6 +11,9 @@ DIR = '/home/projects/%s' % (GIT_REPO)
 # Container used to compile the assets
 NODE_CONTAINER = 'poen_node_1'
 
+# App container
+APP_CONTAINER = 'poen_app_1'
+
 
 @task
 def deploy(c):
@@ -38,6 +41,9 @@ def deploy(c):
             )
         )
     c.sudo('docker exec %s yarn prod' % (NODE_CONTAINER))
+
+    # Upgrade database
+    c.sudo('docker exec %s flask db upgrade' % (APP_CONTAINER))
 
     # Reload app
     c.run('bash -c "cd %s && touch uwsgi-touch-reload"' % (DIR))
