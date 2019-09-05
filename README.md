@@ -17,9 +17,9 @@ Publish transactions of government subsidized projects
    - `sudo docker-compose up -d`
    - Compile the assets, see the section below
    - Set up daily backups for the database
-      - To run manually use `sudo ./docker-entrypoint-initdb.d/backups/backup.sh`
+      - To run manually use `sudo docker exec poen_db_1 ./backup.sh`
       - To set a daily cronjob at 03:26
-         - `sudo crontab -e` and add the following line (change the path below to your `open-poen/docker` directory path)
+         - `sudo crontab -e` and add the following line
          - `26 3 * * * sudo docker exec poen_db_1 ./backup.sh`
       - The resulting SQL backup files are saved in `docker/docker-entrypoint-initdb.d/backups`
 - Development; Flask debug will be turned on which automatically reloads any changes made to Flask files so you don't have to restart the whole application manually
@@ -32,8 +32,8 @@ Publish transactions of government subsidized projects
 - Useful commands
    - Run the tests: `sudo docker exec -it poen_app_1 nosetests`
    - Remove and rebuild everything (NOTE: this also removes the database volume containing all transaction data (this is required if you want to load the .sql files from `docker/docker-entrypoint-initdb.d` again))
-      - Production: `docker-compose down --rmi all && docker volume rm poen_db && docker-compose up -d`
-      - Development: `docker-compose -f docker-compose.yml -f docker-compose-dev.yml down --rmi all && docker volume rm poen_db && docker-compose -f docker-compose.yml -f docker-compose-dev.yml up -d`
+      - Production: `sudo docker-compose down --rmi all && sudo docker volume rm poen_db && sudo docker-compose up -d`
+      - Development: `sudo docker-compose -f docker-compose.yml -f docker-compose-dev.yml down --rmi all && sudo docker volume rm poen_db && sudo docker-compose -f docker-compose.yml -f docker-compose-dev.yml up -d`
    - Reload Nginx: `sudo docker exec poen_nginx_1 nginx -s reload`
    - Reload uWSGI (only for production as development environment doesn't use uWSGI and automatically reloads changes): `touch uwsgi-touch-reload`
 
