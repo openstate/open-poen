@@ -1,5 +1,5 @@
 from app import app, db
-from app.models import User
+from app.models import User, Payment
 from app.email import send_invite
 from flask import url_for
 import click
@@ -21,8 +21,27 @@ def bunq():
     """Bunq related commands."""
     pass
 
+
+def transform_payment(payment):
+    payment_as_dict = json.loads(payment.to_json())
+    result = {}
+    for k,v in payment_as_dict.items():
+        # TODO: this is a bit ugly to weed out fields that we do not use ...
+        # (except allow_chat these are arrays)
+        if k in ['allow_chat', 'attachment', 'request_reference_split_the_bill']:
+            continue
+
+        if type(v) == dict:
+            for k2, v2 in v.items():
+                f = "%s_%s" % (k, k2,)
+                result[f] = v2
+        else:
+            result[k] = v
+    return result
+
+
 @bunq.command()
-def payments():
+def recent_payments():
     """Get recent payments from all cards."""
 
     # TODO: make configurable?
@@ -41,13 +60,17 @@ def payments():
 
     for p in all_payments:
         try:
-            payload = transform(p)
+            payload = transform_payment(p)
         except Exception as e:
             print("Transforming a bunq payment resulted in an exception:")
             print(e)
             payload = {}
         try:
-            store(payload)
+            pm = Payment.query.filter_by(id=payload['id']).first()
+            if not pm:
+                pm = Payment(**payload)
+                db.session.add(pm)
+                db.session.commit()
         except Exception as e:
             print("Saving a bunq payment resulted in an exception:")
             print(e)
@@ -57,6 +80,15 @@ def payments():
         ShareLib.print_all_user_alias(all_alias)
 
     bunq_api.update_context()
+
+
+@bunq.command()
+def show_all_payments():
+    """
+    Show all payments
+    """
+    for pm in Payment.query.all():
+        print(pm)
 
 # Database commands
 @app.cli.group()
