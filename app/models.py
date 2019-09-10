@@ -21,15 +21,24 @@ subproject_user = db.Table('subproject_user',
 )
 
 
+class DebitCard(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    iban = db.Column(db.Integer, db.ForeignKey('subproject.iban'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    card_id = db.Column(db.Integer)
+
+
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(120), index=True)
+    email = db.Column(db.String(120), index=True, unique=True)
     password_hash = db.Column(db.String(128))
     admin = db.Column(db.Boolean, default=False)
     first_name = db.Column(db.String(120), index=True)
     last_name = db.Column(db.String(120), index=True)
     is_active = db.Column(db.Boolean, default=True)
     biography = db.Column(db.String(1000), default=True)
+
+    debit_cards = db.relationship(DebitCard, backref='user', lazy='dynamic')
 
     def set_password(self, password):
         if len(password) < 12:
@@ -70,22 +79,23 @@ class User(UserMixin, db.Model):
 class Subproject(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     project_id = db.Column(db.Integer, db.ForeignKey('project.id'))
-    iban = db.Column(db.String(34), index=True)
-    name = db.Column(db.String(120), index=True)
+    iban = db.Column(db.String(34), index=True, unique=True)
+    name = db.Column(db.String(120), index=True, unique=True)
     description = db.Column(db.Text)
     hidden = db.Column(db.Boolean, default=False)
 
     users = db.relationship(User, secondary=subproject_user, backref='subprojects', lazy='dynamic')
+    debit_cards = db.relationship(DebitCard, backref='subproject', lazy='dynamic')
 
 
 class Project(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    iban = db.Column(db.String(34), index=True)
-    name = db.Column(db.String(120), index=True)
+    iban = db.Column(db.String(34), index=True, unique=True)
+    name = db.Column(db.String(120), index=True, unique=True)
     description = db.Column(db.Text)
     hidden = db.Column(db.Boolean, default=False)
 
-    subprojects = db.relationship('Subproject', backref='project', lazy='dynamic')
+    subprojects = db.relationship(Subproject, backref='project', lazy='dynamic')
     users = db.relationship(User, secondary=project_user, backref='projects', lazy='dynamic')
 
 
