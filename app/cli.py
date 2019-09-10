@@ -20,8 +20,10 @@ def show_all_users():
     """
     for user in User.query.all():
         print(
-            '"%s","%s"' % (
-                user.email
+            '"%s", "%s", "%s"' % (
+                user.email,
+                user.first_name,
+                user.last_name
             )
         )
 

@@ -63,6 +63,9 @@ def login():
         if user is None or not user.check_password(form.Wachtwoord.data):
             flash('Fout e-mailadres of wachtwoord')
             return(redirect(url_for('login')))
+        if not user.is_active:
+            flash('Deze gebruiker is niet meer actief')
+            return(redirect(url_for('login')))
         login_user(user)
         return redirect(url_for('dashboard'))
     return render_template('login.html', form=form)
