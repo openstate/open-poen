@@ -107,6 +107,13 @@ class Project(db.Model):
     users = db.relationship(User, secondary=project_user, backref='projects', lazy='dynamic')
 
 
+class UserStory(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200))
+    text = db.Column(db.String(200))
+    hidden = db.Column(db.Boolean, default=False)
+
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
