@@ -14,3 +14,4 @@ app/assets/node_modules/*
 app/.cache-loader/*
 
 config.py
+**/bunq-*.conf
