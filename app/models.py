@@ -21,6 +21,13 @@ subproject_user = db.Table('subproject_user',
 )
 
 
+class Funder(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    subproject_id = db.Column(db.Integer, db.ForeignKey('subproject.id'))
+    name = db.Column(db.String(120), index=True)
+    url = db.Column(db.String(2000))
+
+
 class DebitCard(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     iban = db.Column(db.Integer, db.ForeignKey('subproject.iban'))
@@ -86,6 +93,7 @@ class Subproject(db.Model):
 
     users = db.relationship(User, secondary=subproject_user, backref='subprojects', lazy='dynamic')
     debit_cards = db.relationship(DebitCard, backref='subproject', lazy='dynamic')
+    funders = db.relationship(Funder, backref='subproject', lazy='dynamic')
 
 
 class Project(db.Model):
