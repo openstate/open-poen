@@ -24,10 +24,18 @@ class TestDatabase(unittest.TestCase):
     def test_user_project_subproject(self):
         # Add data
         db.session.add(Project(name='testproject'))
-        db.session.add(Subproject(name='testsubproject1', iban="NL00BUNQ0123456789"))
-        db.session.add(Subproject(name='testsubproject2', iban="NL00BUNQ0123456780"))
-        db.session.add(User(first_name='testuser1', email='testuser1@example.com'))
-        db.session.add(User(first_name='testuser2', email='testuser2@example.com'))
+        db.session.add(
+            Subproject(name='testsubproject1', iban="NL00BUNQ0123456789")
+        )
+        db.session.add(
+            Subproject(name='testsubproject2', iban="NL00BUNQ0123456780")
+        )
+        db.session.add(
+            User(first_name='testuser1', email='testuser1@example.com')
+        )
+        db.session.add(
+            User(first_name='testuser2', email='testuser2@example.com')
+        )
         db.session.add(DebitCard(card_id=1))
         db.session.add(DebitCard(card_id=2))
 

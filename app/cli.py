@@ -27,15 +27,19 @@ def transform_payment(payment):
     payment_as_dict = json.loads(payment.to_json())
     result = {}
     for k, v in payment_as_dict.items():
-        # TODO: this is a bit ugly to weed out fields that we do not use ...
-        # (except allow_chat these are arrays)
+        # Skip these fields as we don't use them
         if k in ['allow_chat', 'attachment',
                  'request_reference_split_the_bill']:
             continue
 
+        # Rename the 'id' field
+        if k == 'id':
+            k = 'bank_payment_id'
+
+        # flatten dicts
         if type(v) == dict:
             for k2, v2 in v.items():
-                f = "%s_%s" % (k, k2,)
+                f = "%s_%s" % (k, k2)
                 result[f] = v2
         else:
             result[k] = v
@@ -53,8 +57,8 @@ def get_recent_payments():
     try:
         all_payments = bunq_api.get_all_payment(10)
     except Exception as e:
-        print("Getting bunq payments resulted in an exception:")
-        print(e)
+        app.logger.error("Getting bunq payments resulted in an exception:")
+        app.logger.error(e)
         all_payments = []
 
     new_payments = 0
@@ -62,22 +66,24 @@ def get_recent_payments():
         try:
             payload = transform_payment(payment)
         except Exception as e:
-            print("Transforming a bunq payment resulted in an exception:")
-            print(e)
+            app.logger.error("Transforming a bunq payment resulted in an exception:")
+            app.logger.error(e)
             payload = {}
         try:
-            payment = Payment.query.filter_by(id=payload['id']).first()
+            payment = Payment.query.filter_by(
+                bank_payment_id=payload['bank_payment_id']
+            ).first()
             if not payment:
                 payment = Payment(**payload)
                 db.session.add(payment)
                 db.session.commit()
                 new_payments += 1
         except Exception as e:
-            print("Saving a bunq payment resulted in an exception:")
-            print(e)
+            app.logger.error("Saving a bunq payment resulted in an exception:")
+            app.logger.error(e)
 
     bunq_api.update_context()
-    print('Newly retrieved payments: %s' % (new_payments))
+    app.logger.info('Newly retrieved payments: %s' % (new_payments))
 
 
 @bunq.command()
