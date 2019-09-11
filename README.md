@@ -50,7 +50,7 @@ Development
 ## CLI
 To access the CLI of the app run `sudo docker exec -it poen_app_1 bash` and run for example `flask` and `flask database` to see the available commands. Here are some CLI commands:
 
-### Database migration commands.
+### Database migration commands
 
 Use these after the database is in production and you need to change the database model.
 
@@ -59,8 +59,7 @@ Use these after the database is in production and you need to change the databas
 
 ### Bunq commands
 
-- `flask bunq recent-payments` gets the recents payments from the Bunq API. 
-- `flask bunq show-all-payments` shows the payments in the database (not very useful yet)
+- `flask bunq get-recent-payments` gets the recents payments from the Bunq API
 
 ## To enter the database
    - `sudo docker exec -it poen_db_1 psql -U <DB_USER> <DB_NAME>` retrieve database user and name from `docker/secrets-db-user.txt` and `docker/secrets-db-name.txt`

@@ -1,34 +1,36 @@
 from app import app, db
-from app.models import User, Payment
 from app.email import send_invite
+from app.models import User, Payment
 from flask import url_for
-import click
-import os
-import sys
+from os import urandom
 from os.path import abspath, join, dirname
 from pprint import pprint
+import click
 import json
+import sys
 
 sys.path.insert(0, abspath(join(dirname(__file__), '../tinker/tinker')))
 
+from bunq.sdk.context import ApiEnvironmentType
 from libs.bunq_lib import BunqLib
 from libs.share_lib import ShareLib
-from bunq.sdk.context import ApiEnvironmentType
 
-# bunq commands
+
+# Bunq commands
 @app.cli.group()
 def bunq():
-    """Bunq related commands."""
+    """Bunq related commands"""
     pass
 
 
 def transform_payment(payment):
     payment_as_dict = json.loads(payment.to_json())
     result = {}
-    for k,v in payment_as_dict.items():
+    for k, v in payment_as_dict.items():
         # TODO: this is a bit ugly to weed out fields that we do not use ...
         # (except allow_chat these are arrays)
-        if k in ['allow_chat', 'attachment', 'request_reference_split_the_bill']:
+        if k in ['allow_chat', 'attachment',
+                 'request_reference_split_the_bill']:
             continue
 
         if type(v) == dict:
@@ -41,12 +43,9 @@ def transform_payment(payment):
 
 
 @bunq.command()
-def recent_payments():
-    """Get recent payments from all cards."""
-
-    # TODO: make configurable?
-
-    #cls.environment_type = ApiEnvironmentType.PRODUCTION
+def get_recent_payments():
+    """Get recent payments from all cards"""
+    #environment_type = ApiEnvironmentType.PRODUCTION
     environment_type = ApiEnvironmentType.SANDBOX
 
     bunq_api = BunqLib(environment_type)
@@ -58,58 +57,62 @@ def recent_payments():
         print(e)
         all_payments = []
 
-    for p in all_payments:
+    new_payments = 0
+    for payment in all_payments:
         try:
-            payload = transform_payment(p)
+            payload = transform_payment(payment)
         except Exception as e:
             print("Transforming a bunq payment resulted in an exception:")
             print(e)
             payload = {}
         try:
-            pm = Payment.query.filter_by(id=payload['id']).first()
-            if not pm:
-                pm = Payment(**payload)
-                db.session.add(pm)
+            payment = Payment.query.filter_by(id=payload['id']).first()
+            if not payment:
+                payment = Payment(**payload)
+                db.session.add(payment)
                 db.session.commit()
+                new_payments += 1
         except Exception as e:
             print("Saving a bunq payment resulted in an exception:")
             print(e)
 
-    if environment_type is ApiEnvironmentType.SANDBOX:
-        all_alias = bunq_api.get_all_user_alias()
-        ShareLib.print_all_user_alias(all_alias)
-
     bunq_api.update_context()
+    print('Newly retrieved payments: %s' % (new_payments))
 
 
 @bunq.command()
-def show_all_payments():
-    """
-    Show all payments
-    """
-    for pm in Payment.query.all():
-        print(pm)
+def show_all_users():
+    """Show all Bunq users"""
+    environment_type = ApiEnvironmentType.SANDBOX
+    if environment_type is ApiEnvironmentType.SANDBOX:
+        bunq_api = BunqLib(environment_type)
+        all_alias = bunq_api.get_all_user_alias()
+        ShareLib.print_all_user_alias(all_alias)
+
 
 # Database commands
 @app.cli.group()
 def database():
-    """Open Poen database related commands."""
+    """Open Poen database related commands"""
     pass
 
 
 @database.command()
 def show_all_users():
     """
-    Show all users and their corresponding gemeenten
+    Show all Open Poen users
     """
     for user in User.query.all():
-        print(
-            '"%s", "%s", "%s"' % (
-                user.email,
-                user.first_name,
-                user.last_name
-            )
-        )
+        pprint(vars(user))
+
+
+@database.command()
+def show_all_payments():
+    """
+    Show all payments
+    """
+    for payment in Payment.query.all():
+        pprint(vars(payment))
 
 
 @database.command()
@@ -118,7 +121,7 @@ def add_admin_user(email):
     """
     Adds an admin user. This command will prompt for an email address.
     If it does not exist yet a user will be created and given admin
-    rights
+    rights.
     """
 
     # Check if a user already exists with this email address
@@ -131,7 +134,7 @@ def add_admin_user(email):
             email=email,
             admin=True
         )
-        user.set_password(os.urandom(24))
+        user.set_password(urandom(24))
         db.session.add(user)
         db.session.commit()
 
@@ -157,7 +160,7 @@ def add_user(email):
         user = User(
             email=email
         )
-        user.set_password(os.urandom(24))
+        user.set_password(urandom(24))
         db.session.add(user)
         db.session.commit()
 

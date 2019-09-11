@@ -108,6 +108,7 @@ class Project(db.Model):
 
 
 class Payment(db.Model):
+    # Example payment values. The '*' denotes fields we save.
     # {*'alias_name': 'Highchurch',
     #  *'alias_type': 'IBAN',
     #  *'alias_value': 'NL13BUNQ9900299981',
