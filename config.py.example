@@ -24,10 +24,6 @@ class Config(object):
     FORCE_HOST_FOR_REDIRECTS = 'openpoen.nl'
     USE_SESSION_FOR_NEXT = True
 
-    BUNQ_ENVIRONMENT_TYPE = ApiEnvironmentType.PRODUCTION
-    BUNQ_CLIENT_ID = ''
-    BUNQ_CLIENT_SECRET = ''
-
     BABEL_DEFAULT_LOCALE = 'nl'
 
     SQLALCHEMY_DATABASE_URI = 'postgresql://%s:%s@poen_db_1:5432/%s' % (
@@ -42,3 +38,7 @@ class Config(object):
     MAIL_PASSWORD = ''
     FROM = ''
     ADMINS = ['']
+
+    BUNQ_ENVIRONMENT_TYPE = ApiEnvironmentType.PRODUCTION
+    BUNQ_CLIENT_ID = ''
+    BUNQ_CLIENT_SECRET = ''

@@ -15,7 +15,7 @@
     <p>Er is al een Bunq account gekoppeld aan project <b>{{ owned_project['name'] }}</b><p>
     {% else %}
       <p>
-        <a href="https://oauth.sandbox.bunq.com/auth?response_type=code&client_id={{ bunq_client_id }}&redirect_uri=https://openpoen.nl/dashboard&state={{ owned_project.bunq_token }}" rel="noopener">Koppel een Bunq account aan project <b>{{ owned_project.name }}</b></a>
+      Koppel een Bunq account aan project <b>{{ owned_project.name }}</b>: <a href="https://oauth.sandbox.bunq.com/auth?response_type=code&client_id={{ bunq_client_id }}&redirect_uri=https://openpoen.nl/dashboard&state={{ owned_project.bunq_token }}" rel="noopener"><img class="bunq-connect-button" src="/static/dist/images/bunq_Connect_button_svg.svg"></a>
       </p>
     {% endif %}
   {% endfor %}
