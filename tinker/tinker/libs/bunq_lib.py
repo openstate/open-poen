@@ -28,6 +28,7 @@ class BunqLib(object):
                                                " user."
     _BUNQ_CONF_PRODUCTION = 'bunq-production.conf'
     _BUNQ_CONF_SANDBOX = 'bunq-sandbox.conf'
+    _BUNQ_CONF_CUSTOM = ''
 
     _MONETARY_ACCOUNT_STATUS_ACTIVE = 'ACTIVE'
 
@@ -43,19 +44,23 @@ class BunqLib(object):
 
     _ZERO_BALANCE = 0.0
 
-    def __init__(self, env):
+    def __init__(self, env, conf):
         """
         :type env: ApiEnvironmentType
         """
 
         self.user = None
         self.env = env
+        self.conf = conf
         self.setup_context()
         self.setup_current_user()
         self.__request_spending_money_if_needed()
 
     def setup_context(self, reset_config_if_needed=True):
-        if isfile(self.determine_bunq_conf_filename()):
+        if isfile(self.conf):
+            self._BUNQ_CONF_CUSTOM = self.conf
+            pass  # Config is already present
+        elif isfile(self.determine_bunq_conf_filename()):
             pass  # Config is already present
         elif self.env == ApiEnvironmentType.SANDBOX:
             sandbox_user = self.generate_new_sandbox_user()
@@ -78,7 +83,9 @@ class BunqLib(object):
                 raise forbidden_exception
 
     def determine_bunq_conf_filename(self):
-        if self.env == ApiEnvironmentType.PRODUCTION:
+        if self._BUNQ_CONF_CUSTOM:
+            return self._BUNQ_CONF_CUSTOM
+        elif self.env == ApiEnvironmentType.PRODUCTION:
             return self._BUNQ_CONF_PRODUCTION
         else:
             return self._BUNQ_CONF_SANDBOX

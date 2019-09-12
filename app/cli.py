@@ -11,10 +11,11 @@ import sys
 
 sys.path.insert(0, abspath(join(dirname(__file__), '../tinker/tinker')))
 
+from bunq.sdk.context import ApiEnvironmentType
 from libs.bunq_lib import BunqLib
 from libs.share_lib import ShareLib
 
-from app.util import create_bunq_api_config
+from app.util import create_bunq_api_config, get_bunq_api_config_filename
 
 
 # Bunq commands
@@ -51,9 +52,12 @@ def transform_payment(payment):
 
 
 @bunq.command()
-def get_recent_payments():
+@click.argument('project_id')
+def get_recent_payments(project_id):
     """Get recent payments from all cards"""
-    bunq_api = BunqLib(environment_type)
+    filename = get_bunq_api_config_filename(environment_type, project_id)
+    app.logger.debug(filename)
+    bunq_api = BunqLib(environment_type, conf=filename)
 
     try:
         all_payments = bunq_api.get_all_payment(10)

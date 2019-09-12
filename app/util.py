@@ -17,3 +17,11 @@ def create_bunq_api_config(bunq_access_token, project_id):
         environment, bunq_access_token, socket.gethostname()
     )
     api_context.save('%s-project-%s.conf' % (filename, project_id))
+
+
+def get_bunq_api_config_filename(environment_type, project_id):
+    filename_base = 'bunq-production'
+    if environment_type == ApiEnvironmentType.SANDBOX:
+        filename_base = 'bunq-sandbox'
+
+    return '%s-project-%s.conf' % (filename_base, project_id)
