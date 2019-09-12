@@ -22,6 +22,9 @@ Publish transactions of government subsidized projects
          - `sudo crontab -e` and add the following line
          - `26 3 * * * sudo docker exec poen_db_1 ./backup.sh`
       - The resulting SQL backup files are saved in `docker/docker-entrypoint-initdb.d/backups`
+   - Set up weekly renewal of Bunq API .conf files
+         - `sudo crontab -e` and add the following line
+         - `23 1 * * 0 sudo docker exec poen_app_1 flask bunq create-all-bunq-api-conf`
 - Development; Flask debug will be turned on which automatically reloads any changes made to Flask files so you don't have to restart the whole application manually
    - Make sure to copy the latest database backup from `docker/docker-entrypoint-initdb.d/backups` to `docker/docker-entrypoint-initdb.d` if you want to import it
    - `cd docker`

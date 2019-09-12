@@ -5,6 +5,7 @@ from app import app, db
 from app.forms import ResetPasswordRequestForm, ResetPasswordForm, LoginForm
 from app.email import send_password_reset_email
 from app.models import User, Project
+from app.util import create_bunq_api_config
 
 from bunq.sdk.context import ApiEnvironmentType
 
@@ -134,10 +135,14 @@ def dashboard():
 
                 # Add access token to the project in the database
                 if 'access_token' in response:
+                    bunq_access_token = response['access_token']
                     project = Project.query.filter_by(id=project_id).first()
                     project.set_bank_name(bank_name)
-                    project.set_bunq_access_token(response['access_token'])
+                    project.set_bunq_access_token(bunq_access_token)
                     db.session.commit()
+
+                    # Create Bunq API .conf file
+                    create_bunq_api_config(bunq_access_token, project.id)
                 else:
                     app.logger.error(
                         'Retrieval of Bunq access token failed. Bunq Error: '

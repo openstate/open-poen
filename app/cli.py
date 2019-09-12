@@ -1,6 +1,6 @@
 from app import app, db
 from app.email import send_invite
-from app.models import User, Payment
+from app.models import User, Payment, Project
 from flask import url_for
 from os import urandom
 from os.path import abspath, join, dirname
@@ -13,6 +13,8 @@ sys.path.insert(0, abspath(join(dirname(__file__), '../tinker/tinker')))
 
 from libs.bunq_lib import BunqLib
 from libs.share_lib import ShareLib
+
+from app.util import create_bunq_api_config
 
 
 # Bunq commands
@@ -85,6 +87,39 @@ def get_recent_payments():
 
     bunq_api.update_context()
     app.logger.info('Newly retrieved payments: %s' % (new_payments))
+
+
+@bunq.command()
+@click.argument('project_id')
+def create_bunq_api_conf(project_id):
+    """ Get/renew Bunq API .conf file for a specific project"""
+    p = Project.query.filter_by(id=project_id).first()
+    if not p:
+        app.logger.error('Project %s does not exist' % project_id)
+        return
+
+    if p.bunq_access_token:
+        create_bunq_api_config(p.bunq_access_token, p.id)
+        app.logger.info('Created Bunq API .conf file for project %s' % p.id)
+    else:
+        app.logger.error(
+            'No Bunq access token available for project %s' % p.id
+        )
+
+
+@bunq.command()
+def create_all_bunq_api_conf():
+    """ Get/renew Bunq API .conf files for a all projects"""
+    for p in Project.query.all():
+        if p.bunq_access_token:
+            create_bunq_api_config(p.bunq_access_token, p.id)
+            app.logger.info(
+                'Created Bunq API .conf file for project %s' % p.id
+            )
+        else:
+            app.logger.error(
+                'No Bunq access token available for project %s' % p.id
+            )
 
 
 @bunq.command()
