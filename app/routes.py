@@ -1,10 +1,16 @@
-from flask import render_template, redirect, url_for, flash, session
+from flask import render_template, redirect, url_for, flash, session, request
 from flask_login import login_required, login_user, logout_user, current_user
 
 from app import app, db
 from app.forms import ResetPasswordRequestForm, ResetPasswordForm, LoginForm
 from app.email import send_password_reset_email
-from app.models import User
+from app.models import User, Project
+
+from bunq.sdk.context import ApiEnvironmentType
+
+from time import time
+import jwt
+import requests
 
 
 # Add 'Cache-Control': 'private' header if users are logged in
@@ -84,9 +90,94 @@ def logout():
 )
 @login_required
 def dashboard():
+    # Process Bunq OAuth callback
+    authorization_code = ''
+    if request.args.get('state'):
+        token = request.args.get('state')
+
+        # Check if JWT token is valid and retrieve info
+        token_info = ''
+        try:
+            token_info = jwt.decode(
+                token,
+                app.config['SECRET_KEY'],
+                algorithms='HS256'
+            )
+        except:
+            app.logger.warn(
+                'Retrieved wrong token (used for retrieving Bunq '
+                'authorization code)'
+            )
+
+        if token_info:
+            user_id = token_info['user_id']
+            project_id = token_info['project_id']
+            bank_name = token_info['bank_name']
+
+            # If authorization code, retrieve access token from Bunq
+            authorization_code = request.args.get('code')
+            if authorization_code:
+                base_url = 'https://api.oauth.bunq.com'
+                if (app.config['BUNQ_ENVIRONMENT_TYPE'] ==
+                        ApiEnvironmentType.SANDBOX):
+                    base_url = 'https://api-oauth.sandbox.bunq.com'
+                response = requests.post(
+                    '%s/v1/token?grant_type=authorization_code&code=%s'
+                    '&redirect_uri=https://openpoen.nl/dashboard&client_id=%s'
+                    '&client_secret=%s' % (
+                        base_url,
+                        authorization_code,
+                        app.config['BUNQ_CLIENT_ID'],
+                        app.config['BUNQ_CLIENT_SECRET'],
+                    )
+                ).json()
+
+                # Add access token to the project in the database
+                if 'access_token' in response:
+                    project = Project.query.filter_by(id=project_id).first()
+                    project.set_bank_name(bank_name)
+                    project.set_bunq_access_token(response['access_token'])
+                    db.session.commit()
+                else:
+                    app.logger.error(
+                        'Retrieval of Bunq access token failed. Bunq Error: '
+                        '"%s". Bunq error description: "%s"' % (
+                            response['error'], response['error_description']
+                        )
+                    )
+
+    # Retrieve all the user's owned projects (if any); used to connect
+    # to a Bunq account
+    owned_projects = []
+    for owned_project in current_user.owned_projects:
+        bunq_token = jwt.encode(
+            {
+                'user_id': current_user.id,
+                'project_id': owned_project.id,
+                'bank_name': 'Bunq',
+                'exp': time() + 1800
+            },
+            app.config['SECRET_KEY'],
+            algorithm='HS256'
+        ).decode('utf-8')
+
+        already_authorized = False
+        if len(owned_project.bunq_access_token):
+            already_authorized = True
+
+        owned_projects.append(
+            {
+                'name': owned_project.name,
+                'already_authorized': already_authorized,
+                'bunq_token': bunq_token
+            }
+        )
+
     return render_template(
         'dashboard.html',
-        user=current_user
+        user=current_user,
+        owned_projects=owned_projects,
+        bunq_client_id=app.config['BUNQ_CLIENT_ID']
     )
 
 

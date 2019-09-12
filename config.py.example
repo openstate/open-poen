@@ -1,3 +1,4 @@
+from bunq.sdk.context import ApiEnvironmentType
 import os
 
 # On a new deployment (whether production or development) make
@@ -22,6 +23,10 @@ class Config(object):
     PREFERRED_URL_SCHEME = 'https'
     FORCE_HOST_FOR_REDIRECTS = 'openpoen.nl'
     USE_SESSION_FOR_NEXT = True
+
+    BUNQ_ENVIRONMENT_TYPE = ApiEnvironmentType.PRODUCTION
+    BUNQ_CLIENT_ID = ''
+    BUNQ_CLIENT_SECRET = ''
 
     BABEL_DEFAULT_LOCALE = 'nl'
 

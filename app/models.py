@@ -23,11 +23,113 @@ subproject_user = db.Table(
 )
 
 
-class Funder(db.Model):
+class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    subproject_id = db.Column(db.Integer, db.ForeignKey('subproject.id'))
-    name = db.Column(db.String(120), index=True)
-    url = db.Column(db.String(2000))
+    email = db.Column(db.String(120), index=True, unique=True)
+    password_hash = db.Column(db.String(128))
+    admin = db.Column(db.Boolean, default=False)
+    first_name = db.Column(db.String(120), index=True)
+    last_name = db.Column(db.String(120), index=True)
+    biography = db.Column(db.String(1000), default=True)
+    is_active = db.Column(db.Boolean, default=True)
+
+    debit_cards = db.relationship('DebitCard', backref='user', lazy='dynamic')
+    payments = db.relationship('Payment', backref='user', lazy='dynamic')
+    owned_projects = db.relationship(
+        'Project', backref='project_owner', lazy='dynamic'
+    )
+
+    def set_password(self, password):
+        if len(password) < 12:
+            raise RuntimeError(
+                'Attempted to set password with length less than 12 characters'
+            )
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+    def get_reset_password_token(self, expires_in=86400):
+        return jwt.encode(
+            {
+                'reset_password': self.id,
+                'exp': time() + expires_in
+            },
+            app.config['SECRET_KEY'],
+            algorithm='HS256'
+        ).decode('utf-8')
+
+    @staticmethod
+    def verify_reset_password_token(token):
+        try:
+            user_id = jwt.decode(
+                token,
+                app.config['SECRET_KEY'],
+                algorithms='HS256'
+            )['reset_password']
+        except:
+            return
+        return User.query.get(user_id)
+
+    def __repr__(self):
+        return '<User {}>'.format(self.email)
+
+
+class Project(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    project_owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    bank_name = db.Column(db.String(64), index=True)
+    bunq_access_token = db.Column(db.String(64))
+    iban = db.Column(db.String(34), index=True, unique=True)
+    name = db.Column(db.String(120), index=True, unique=True)
+    description = db.Column(db.Text)
+    hidden = db.Column(db.Boolean, default=False)
+
+    subprojects = db.relationship(
+        'Subproject',
+        backref='project',
+        lazy='dynamic'
+    )
+    users = db.relationship(
+        'User',
+        secondary=project_user,
+        backref='projects',
+        lazy='dynamic'
+    )
+
+    def set_bank_name(self, bank_name):
+        self.bank_name = bank_name
+
+    def set_bunq_access_token(self, access_token):
+        if len(access_token) == 64:
+            self.bunq_access_token = access_token
+        else:
+            app.logger.error(
+                'Did not save Bunq access token, its length is not 64'
+            )
+
+
+class Subproject(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    project_id = db.Column(db.Integer, db.ForeignKey('project.id'))
+    iban = db.Column(db.String(34), index=True, unique=True)
+    name = db.Column(db.String(120), index=True, unique=True)
+    description = db.Column(db.Text)
+    hidden = db.Column(db.Boolean, default=False)
+
+    users = db.relationship(
+        'User',
+        secondary=subproject_user,
+        backref='subprojects',
+        lazy='dynamic'
+    )
+    debit_cards = db.relationship(
+        'DebitCard',
+        backref='subproject',
+        lazy='dynamic'
+    )
+    funders = db.relationship('Funder', backref='subproject', lazy='dynamic')
+    payments = db.relationship('Payment', backref='subproject', lazy='dynamic')
 
 
 class DebitCard(db.Model):
@@ -87,96 +189,11 @@ class Payment(db.Model):
     hidden = db.Column(db.Boolean, default=False)
 
 
-class User(UserMixin, db.Model):
+class Funder(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String(120), index=True, unique=True)
-    password_hash = db.Column(db.String(128))
-    admin = db.Column(db.Boolean, default=False)
-    first_name = db.Column(db.String(120), index=True)
-    last_name = db.Column(db.String(120), index=True)
-    biography = db.Column(db.String(1000), default=True)
-    is_active = db.Column(db.Boolean, default=True)
-
-    debit_cards = db.relationship(DebitCard, backref='user', lazy='dynamic')
-    payments = db.relationship(Payment, backref='user', lazy='dynamic')
-
-    def set_password(self, password):
-        if len(password) < 12:
-            raise RuntimeError(
-                'Attempted to set password with length less than 12 characters'
-            )
-        self.password_hash = generate_password_hash(password)
-
-    def check_password(self, password):
-        return check_password_hash(self.password_hash, password)
-
-    def get_reset_password_token(self, expires_in=86400):
-        return jwt.encode(
-            {
-                'reset_password': self.id,
-                'exp': time() + expires_in
-            },
-            app.config['SECRET_KEY'],
-            algorithm='HS256'
-        ).decode('utf-8')
-
-    @staticmethod
-    def verify_reset_password_token(token):
-        try:
-            user_id = jwt.decode(
-                token,
-                app.config['SECRET_KEY'],
-                algorithms='HS256'
-            )['reset_password']
-        except:
-            return
-        return User.query.get(user_id)
-
-    def __repr__(self):
-        return '<User {}>'.format(self.email)
-
-
-class Subproject(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    project_id = db.Column(db.Integer, db.ForeignKey('project.id'))
-    iban = db.Column(db.String(34), index=True, unique=True)
-    name = db.Column(db.String(120), index=True, unique=True)
-    description = db.Column(db.Text)
-    hidden = db.Column(db.Boolean, default=False)
-
-    users = db.relationship(
-        User,
-        secondary=subproject_user,
-        backref='subprojects',
-        lazy='dynamic'
-    )
-    debit_cards = db.relationship(
-        DebitCard,
-        backref='subproject',
-        lazy='dynamic'
-    )
-    funders = db.relationship(Funder, backref='subproject', lazy='dynamic')
-    payments = db.relationship(Payment, backref='subproject', lazy='dynamic')
-
-
-class Project(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    iban = db.Column(db.String(34), index=True, unique=True)
-    name = db.Column(db.String(120), index=True, unique=True)
-    description = db.Column(db.Text)
-    hidden = db.Column(db.Boolean, default=False)
-
-    subprojects = db.relationship(
-        Subproject,
-        backref='project',
-        lazy='dynamic'
-    )
-    users = db.relationship(
-        User,
-        secondary=project_user,
-        backref='projects',
-        lazy='dynamic'
-    )
+    subproject_id = db.Column(db.Integer, db.ForeignKey('subproject.id'))
+    name = db.Column(db.String(120), index=True)
+    url = db.Column(db.String(2000))
 
 
 class UserStory(db.Model):

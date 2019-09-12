@@ -11,12 +11,14 @@ import sys
 
 sys.path.insert(0, abspath(join(dirname(__file__), '../tinker/tinker')))
 
-from bunq.sdk.context import ApiEnvironmentType
 from libs.bunq_lib import BunqLib
 from libs.share_lib import ShareLib
 
 
 # Bunq commands
+environment_type = app.config['BUNQ_ENVIRONMENT_TYPE']
+
+
 @app.cli.group()
 def bunq():
     """Bunq related commands"""
@@ -49,9 +51,6 @@ def transform_payment(payment):
 @bunq.command()
 def get_recent_payments():
     """Get recent payments from all cards"""
-    #environment_type = ApiEnvironmentType.PRODUCTION
-    environment_type = ApiEnvironmentType.SANDBOX
-
     bunq_api = BunqLib(environment_type)
 
     try:
@@ -66,7 +65,9 @@ def get_recent_payments():
         try:
             payload = transform_payment(payment)
         except Exception as e:
-            app.logger.error("Transforming a bunq payment resulted in an exception:")
+            app.logger.error(
+                "Transforming a bunq payment resulted in an exception:"
+            )
             app.logger.error(e)
             payload = {}
         try:
@@ -87,9 +88,10 @@ def get_recent_payments():
 
 
 @bunq.command()
-def show_all_users():
-    """Show all Bunq users"""
-    environment_type = ApiEnvironmentType.SANDBOX
+def show_sandbox_users():
+    """Show Bunq sandbox users; useful during development to log in to the Bunq
+    app
+    """
     if environment_type is ApiEnvironmentType.SANDBOX:
         bunq_api = BunqLib(environment_type)
         all_alias = bunq_api.get_all_user_alias()
