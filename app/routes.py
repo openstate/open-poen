@@ -167,7 +167,7 @@ def dashboard():
         ).decode('utf-8')
 
         already_authorized = False
-        if len(owned_project.bunq_access_token):
+        if owned_project.bunq_access_token and len(owned_project.bunq_access_token):
             already_authorized = True
 
         owned_projects.append(

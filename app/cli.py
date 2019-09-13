@@ -5,13 +5,16 @@ from flask import url_for
 from os import urandom
 from os.path import abspath, join, dirname
 from pprint import pprint
+from time import sleep
 import click
 import json
 import sys
 
 sys.path.insert(0, abspath(join(dirname(__file__), '../tinker/tinker')))
 
+from bunq.sdk.client import Pagination
 from bunq.sdk.context import ApiEnvironmentType
+from bunq.sdk.model.generated import endpoint
 from libs.bunq_lib import BunqLib
 from libs.share_lib import ShareLib
 
@@ -54,43 +57,85 @@ def transform_payment(payment):
 @bunq.command()
 @click.argument('project_id')
 def get_recent_payments(project_id):
-    """Get recent payments from all cards"""
+    """Get recent payments from all IBANs belonging to one Bunq account"""
     filename = get_bunq_api_config_filename(environment_type, project_id)
-    app.logger.debug(filename)
     bunq_api = BunqLib(environment_type, conf=filename)
 
-    try:
-        all_payments = bunq_api.get_all_payment(10)
-    except Exception as e:
-        app.logger.error("Getting bunq payments resulted in an exception:")
-        app.logger.error(e)
-        all_payments = []
+    # Loop over all monetary accounts (i.e., all IBANs belonging to one
+    # Bunq account)
+    monetary_accounts = bunq_api.get_all_monetary_account_active()
+    for monetary_account in monetary_accounts:
+        new_payments_count = 0
+        new_payments = True
+        payments = None
+        # Use a while loop because of pagination; stop when we find a
+        # payment that already exists in our database or if no new
+        # payments are found or in case of an error
+        while new_payments:
+            # Retrieve payments from Bunq
+            try:
+                if payments:
+                    params = payments.pagination.url_params_previous_page
+                else:
+                    params = {'count': 10}
 
-    new_payments = 0
-    for payment in all_payments:
-        try:
-            payload = transform_payment(payment)
-        except Exception as e:
-            app.logger.error(
-                "Transforming a bunq payment resulted in an exception:"
+                # Bunq allows max 3 requests per 3 seconds
+                sleep(1)
+                payments = endpoint.Payment.list(
+                    monetary_account_id=monetary_account._id_,
+                    params=params
+                )
+            except Exception as e:
+                app.logger.error("Getting Bunq payments resulted in an exception:")
+                app.logger.error(e)
+                new_payments = False
+                continue
+
+            if not payments.value:
+                new_payments = False
+                continue
+
+            # Save payments to database
+            for full_payment in payments.value:
+                try:
+                    payment = transform_payment(full_payment)
+                except Exception as e:
+                    app.logger.error(
+                        "Transforming a Bunq payment resulted in an exception:"
+                    )
+                    app.logger.error(e)
+                    new_payments = False
+                    continue
+                try:
+                    existing_payment = Payment.query.filter_by(
+                        bank_payment_id=payment['bank_payment_id']
+                    ).first()
+
+                    if existing_payment:
+                        new_payments = False
+                    else:
+                        p = Payment(**payment)
+                        db.session.add(p)
+                        db.session.commit()
+                        new_payments_count += 1
+                except Exception as e:
+                    app.logger.error("Saving a Bunq payment resulted in an exception:")
+                    app.logger.error(e)
+                    new_payments = False
+                    continue
+
+        # Log the number of retrieved payments
+        iban = ''
+        iban_name = ''
+        for alias in monetary_account._alias:
+            if alias._type_ == 'IBAN':
+                iban = alias._value
+                iban_name = alias._name
+        app.logger.info(
+            'Project %s: retrieved %s payments for %s (%s)' % (
+                project_id, new_payments_count, iban, iban_name
             )
-            app.logger.error(e)
-            payload = {}
-        try:
-            payment = Payment.query.filter_by(
-                bank_payment_id=payload['bank_payment_id']
-            ).first()
-            if not payment:
-                payment = Payment(**payload)
-                db.session.add(payment)
-                db.session.commit()
-                new_payments += 1
-        except Exception as e:
-            app.logger.error("Saving a bunq payment resulted in an exception:")
-            app.logger.error(e)
-
-    bunq_api.update_context()
-    app.logger.info('Newly retrieved payments: %s' % (new_payments))
+        )
 
 
 @bunq.command()
