@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block head %}
+  <title>Open Poen</title>
   <meta property="og:title" content="Open Poen" />
   {{ super() }}
 {% endblock %}
@@ -7,6 +8,23 @@
 {% block content %}
   <div class="row">
     <div class="col-12">
-      TODO
+      <p>Totaal uitgegeven: {{ total_spent_str }}</p>
+      <p>{{ project_data|length }} buurtprojecten</p>
+      <p>Totaal toegekend: {{ total_awarded_str }}</p>
+
+      <b>Projecten</b>
+      {% for project_name, project in project_data.items() %}
+        <p><a href="{{ url_for('project', pid=project.id) }}">{{ project_name }}</a></p>
+        <p>resterend: {{ project.left_str }}</p>
+        <p>uitgegeven: {{ project.spent_str }}</p>
+        <p>totaal: {{ project.awarded_str }}</p>
+        <p>percentage: {{ project.percentage_spent_str }}</p>
+      {% endfor %}
+
+      <b>de mensen over open poen</b>
+      {% for user_story in user_stories %}
+        <p>{{ user_story.name }}</p>
+        <p>{{ user_story.title }}</p>
+      {% endfor %}
   </div>
 {% endblock %}

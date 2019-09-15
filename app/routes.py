@@ -4,8 +4,9 @@ from flask_login import login_required, login_user, logout_user, current_user
 from app import app, db
 from app.forms import ResetPasswordRequestForm, ResetPasswordForm, LoginForm
 from app.email import send_password_reset_email
-from app.models import User, Project
+from app.models import User, Project, Subproject, Payment, UserStory
 from app.util import create_bunq_api_config
+from babel.numbers import format_currency, format_percent
 
 from bunq.sdk.context import ApiEnvironmentType
 
@@ -23,10 +24,114 @@ def after_request_callback(response):
     return response
 
 
+def calculate_amounts(project_ids=[]):
+    """
+    :type project_ids: list
+    """
+    # Calculate amounts awarded and spent
+    # total_awarded = all current project balances
+    #               + abs(all spent project amounts)
+    #               - all amounts received from own subprojects (in the
+    #                 case the didn't spend all their money and gave it
+    #                 back)
+    # total_spent = abs(all spend subproject amounts)
+    #             - all amounts paid back by suprojects to their project
+    total_awarded = 0
+    total_spent = 0
+    # Data about the individual projects
+    project_data = {}
+
+    # Select all projects if none are given
+    if not project_ids:
+        projects = Project.query.all()
+    else:
+        projects = Project.query.filter(Project.id.in_(project_ids)).all()
+
+    for project in projects:
+        subproject_ibans = [s.iban for s in project.subprojects]
+        project_awarded = 0
+        if len(list(project.payments)) > 0:
+            project_awarded = project.payments[0].balance_after_mutation_value
+            for payment in project.payments:
+                if payment.amount_value > 0:
+                    # Don't count incoming transactions coming from our own
+                    # (subproject) IBANs
+                    if payment.counterparty_alias_value in subproject_ibans:
+                        project_awarded -= payment.amount_value
+                else:
+                    project_awarded += abs(payment.amount_value)
+        total_awarded += project_awarded
+        project_data[project.name] = {
+            'id': project.id,
+            'awarded': project_awarded,
+            'awarded_str': format_currency(project_awarded, 'EUR'),
+            'spent': 0
+        }
+
+    # Select all subprojects if none are given
+    if not project_ids:
+        subprojects = Subproject.query.all()
+    else:
+        subprojects = Subproject.query.filter(
+            Subproject.project_id.in_(project_ids)
+        ).all()
+
+    for subproject in subprojects:
+        subproject_spent = 0
+        for payment in subproject.payments:
+            if payment.amount_value < 0:
+                if (not payment.counterparty_alias_value ==
+                        subproject.project.iban):
+                    subproject_spent += abs(payment.amount_value)
+        total_spent += subproject_spent
+        project_data[subproject.project.name]['spent'] += subproject_spent
+        if project_data[subproject.project.name]['awarded'] == 0:
+            project_data[subproject.project.name]['percentage_spent_str'] = (
+                format_percent(0)
+            )
+        else:
+            project_data[subproject.project.name]['percentage_spent_str'] = (
+                format_percent(
+                    subproject_spent / project_data[
+                        subproject.project.name
+                    ]['awarded']
+                )
+            )
+
+    for key in project_data.keys():
+        project_data[key]['spent_str'] = format_currency(
+            project_data[key]['spent'], 'EUR'
+        )
+        project_data[key]['left_str'] = format_currency(
+            project_data[key]['awarded'] - project_data[key]['spent'], 'EUR'
+        )
+
+    return total_awarded, total_spent, project_data
+
+
 @app.route("/")
 def index():
+    total_awarded, total_spent, project_data = calculate_amounts()
+
     return render_template(
-        'index.html'
+        'index.html',
+        total_awarded_str=format_currency(total_awarded, 'EUR'),
+        total_spent_str=format_currency(total_spent, 'EUR'),
+        project_data=project_data,
+        user_stories=UserStory.query.all()
+    )
+
+
+@app.route("/project/<pid>")
+def project(pid):
+    project = Project.query.get(pid)
+
+    _, _, project_data = calculate_amounts([pid])
+
+    return render_template(
+        'project.html',
+        project=project,
+        project_data=project_data
     )
 
 
@@ -167,7 +272,8 @@ def dashboard():
         ).decode('utf-8')
 
         already_authorized = False
-        if owned_project.bunq_access_token and len(owned_project.bunq_access_token):
+        if (owned_project.bunq_access_token and
+                len(owned_project.bunq_access_token)):
             already_authorized = True
 
         owned_projects.append(

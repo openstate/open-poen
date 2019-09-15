@@ -96,6 +96,13 @@ class Project(db.Model):
         backref='projects',
         lazy='dynamic'
     )
+    funders = db.relationship('Funder', backref='project', lazy='dynamic')
+    payments = db.relationship(
+        'Payment',
+        backref='project',
+        lazy='dynamic',
+        order_by='Payment.bank_payment_id.desc()'
+    )
 
     def set_bank_name(self, bank_name):
         self.bank_name = bank_name
@@ -128,7 +135,6 @@ class Subproject(db.Model):
         backref='subproject',
         lazy='dynamic'
     )
-    funders = db.relationship('Funder', backref='subproject', lazy='dynamic')
     payments = db.relationship('Payment', backref='subproject', lazy='dynamic')
 
 
@@ -142,6 +148,7 @@ class DebitCard(db.Model):
 class Payment(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     subproject_id = db.Column(db.Integer, db.ForeignKey('subproject.id'))
+    project_id = db.Column(db.Integer, db.ForeignKey('project.id'))
 
     # Fields coming from the bank
     # Some example payment values:
@@ -191,13 +198,14 @@ class Payment(db.Model):
 
 class Funder(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    subproject_id = db.Column(db.Integer, db.ForeignKey('subproject.id'))
+    project_id = db.Column(db.Integer, db.ForeignKey('project.id'))
     name = db.Column(db.String(120), index=True)
     url = db.Column(db.String(2000))
 
 
 class UserStory(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(240), index=True)
     title = db.Column(db.String(200))
     text = db.Column(db.String(200))
     hidden = db.Column(db.Boolean, default=False)

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block head %}
+  <title>Open Poen - {{ project.name }}</title>
+  <meta property="og:title" content="Open Poen - {{ project.name }}" />
+  {{ super() }}
+{% endblock %}
+
+{% block content %}
+  <div>
+    > Dashboard
+  </div>
+
+  <h1 class="title-pad">{{ project.name }}</h1>
+
+  {% for project_name, project in project_data.items() %}
+    <p><a href="{{ url_for('project', pid=project.id) }}">{{ project_name }}</a></p>
+    <p>resterend: {{ project.left_str }}</p>
+    <p>uitgegeven: {{ project.spent_str }}</p>
+    <p>totaal: {{ project.awarded_str }}</p>
+    <p>percentage: {{ project.percentage_spent_str }}</p>
+  {% endfor %}
+
+  <table>
+    <tr>
+      <th>waarvoor?</th>
+      <th>bedrag €</th>
+      <th>ontvanger</th>
+      <th>open spender</th>
+      <th>omschrijving</th>
+      <th>datum</th>
+      <th>media</th>
+      <th>info</th>
+      <th>details</th>
+    </tr>
+    {{ project.subprojects.payments }}
+    {% for subproject in project.subprojects %}
+      {% for payment in subproject.payments %}
+        <tr>
+          <td>{{ subproject.name }}</td>
+          <td>{{ payment.amount_value }}</td>
+          <td>{{ payment.counterparty_alias_name }}</td>
+          <td>{{ payment.alias_name }}</td>
+          <td>TODO</td>
+          <td>{{ payment.created.strftime('%Y-%m-%d') }}</td>
+          <td>TODO</td>
+          <td>TODO</td>
+          <td>TODO</td>
+        </tr>
+      {% endfor %}
+    {% endfor %}
+  </table>
+{% endblock %}

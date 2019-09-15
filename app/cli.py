@@ -1,6 +1,6 @@
 from app import app, db
 from app.email import send_invite
-from app.models import User, Payment, Project
+from app.models import User, Payment, Project, Subproject
 from flask import url_for
 from os import urandom
 from os.path import abspath, join, dirname
@@ -56,8 +56,8 @@ def transform_payment(payment):
 
 @bunq.command()
 @click.argument('project_id')
-def get_recent_payments(project_id):
-    """Get recent payments from all IBANs belonging to one Bunq account"""
+def get_new_payments(project_id):
+    """Get new payments from all IBANs belonging to one Bunq account"""
     filename = get_bunq_api_config_filename(environment_type, project_id)
     bunq_api = BunqLib(environment_type, conf=filename)
 
@@ -74,7 +74,7 @@ def get_recent_payments(project_id):
         while new_payments:
             # Retrieve payments from Bunq
             try:
-                if payments:
+                if payments and payments.pagination.has_previous_page:
                     params = payments.pagination.url_params_previous_page
                 else:
                     params = {'count': 10}
@@ -86,7 +86,9 @@ def get_recent_payments(project_id):
                     params=params
                 )
             except Exception as e:
-                app.logger.error("Getting Bunq payments resulted in an exception:")
+                app.logger.error(
+                    "Getting Bunq payments resulted in an exception:"
+                )
                 app.logger.error(e)
                 new_payments = False
                 continue
@@ -114,12 +116,26 @@ def get_recent_payments(project_id):
                     if existing_payment:
                         new_payments = False
                     else:
+                        project = Project.query.filter_by(
+                            iban=payment['alias_value']
+                        ).first()
+                        if project:
+                            payment['project_id'] = project.id
+
+                        subproject = Subproject.query.filter_by(
+                            iban=payment['alias_value']
+                        ).first()
+                        if subproject:
+                            payment['subproject_id'] = subproject.id
+
                         p = Payment(**payment)
                         db.session.add(p)
                         db.session.commit()
                         new_payments_count += 1
                 except Exception as e:
-                    app.logger.error("Saving a Bunq payment resulted in an exception:")
+                    app.logger.error(
+                        "Saving a Bunq payment resulted in an exception:"
+                    )
                     app.logger.error(e)
                     new_payments = False
                     continue
