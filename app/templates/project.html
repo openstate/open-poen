@@ -25,7 +25,7 @@
       <th>waarvoor?</th>
       <th>bedrag €</th>
       <th>ontvanger</th>
-      <th>open spender</th>
+      <th>initiatiefnemer</th>
       <th>omschrijving</th>
       <th>datum</th>
       <th>media</th>
@@ -40,7 +40,11 @@
           <td>{{ payment.amount_value }}</td>
           <td>{{ payment.counterparty_alias_name }}</td>
           <td>{{ payment.alias_name }}</td>
-          <td>TODO</td>
+          {% if payment.short_user_description %}
+            <td>{{ payment.short_user_description }}</td>
+          {% else %}
+            <td><i>nog niet toegevoegd</i></td>
+          {% endif %}
           <td>{{ payment.created.strftime('%Y-%m-%d') }}</td>
           <td>TODO</td>
           <td>TODO</td>
