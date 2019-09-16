@@ -14,7 +14,7 @@
 
       <b>Projecten</b>
       {% for project_name, project in project_data.items() %}
-        <p><a href="{{ url_for('project', pid=project.id) }}">{{ project_name }}</a></p>
+        <p><a href="{{ url_for('project', project_id=project.id) }}">{{ project_name }}</a></p>
         <p>resterend: {{ project.left_str }}</p>
         <p>uitgegeven: {{ project.spent_str }}</p>
         <p>totaal: {{ project.awarded_str }}</p>

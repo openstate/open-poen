@@ -7,13 +7,13 @@
 
 {% block content %}
   <div>
-    > Dashboard
+    <a href="/">Home</a> > {{ project.name }}
   </div>
 
   <h1 class="title-pad">{{ project.name }}</h1>
 
   {% for project_name, project in project_data.items() %}
-    <p><a href="{{ url_for('project', pid=project.id) }}">{{ project_name }}</a></p>
+    <p>{{ project_name }}</p>
     <p>resterend: {{ project.left_str }}</p>
     <p>uitgegeven: {{ project.spent_str }}</p>
     <p>totaal: {{ project.awarded_str }}</p>
@@ -32,11 +32,10 @@
       <th>info</th>
       <th>details</th>
     </tr>
-    {{ project.subprojects.payments }}
     {% for subproject in project.subprojects %}
       {% for payment in subproject.payments|sort(attribute='created', reverse=true) %}
         <tr>
-          <td>{{ subproject.name }}</td>
+          <td><a href="{{ url_for('subproject', project_id=project.id, subproject_id=subproject.id) }}">{{ subproject.name }}</a></td>
           <td>{{ payment.amount_value }}</td>
           <td>{{ payment.counterparty_alias_name }}</td>
           <td>{{ payment.alias_name }}</td>

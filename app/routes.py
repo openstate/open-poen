@@ -47,15 +47,18 @@ def calculate_amounts(project_ids=[]):
     else:
         projects = Project.query.filter(Project.id.in_(project_ids)).all()
 
+    # Calculate amounts awarded
     for project in projects:
         subproject_ibans = [s.iban for s in project.subprojects]
         project_awarded = 0
         if len(list(project.payments)) > 0:
             project_awarded = project.payments[0].balance_after_mutation_value
             for payment in project.payments:
+                # Don't add incoming payments (as they are already
+                # reflected in the current balance), but do actively
+                # subtract incoming payments from our own subproject
+                # IBANs
                 if payment.amount_value > 0:
-                    # Don't count incoming transactions coming from our own
-                    # (subproject) IBANs
                     if payment.counterparty_alias_value in subproject_ibans:
                         project_awarded -= payment.amount_value
                 else:
@@ -68,6 +71,7 @@ def calculate_amounts(project_ids=[]):
             'spent': 0
         }
 
+    # Calculate amounts spent
     # Select all subprojects if none are given
     if not project_ids:
         subprojects = Subproject.query.all()
@@ -109,6 +113,66 @@ def calculate_amounts(project_ids=[]):
     return total_awarded, total_spent, project_data
 
 
+def calculate_subproject_amounts(subproject_id):
+    """
+    :type subproject_ids: list
+    """
+    # Data about the subproject
+    subproject_data = {}
+
+    subproject = Subproject.query.get(subproject_id)
+
+    # Calculate amounts awarded
+    subproject_awarded = 0
+    if len(list(subproject.payments)) > 0:
+        subproject_awarded = subproject.payments[0].balance_after_mutation_value
+        for payment in subproject.payments:
+            # Don't add incoming payments (as they are already
+            # reflected in the current balance)
+            if payment.amount_value > 0:
+                continue
+            else:
+                subproject_awarded += abs(payment.amount_value)
+    subproject_data[subproject.name] = {
+        'id': subproject.id,
+        'awarded': subproject_awarded,
+        'awarded_str': format_currency(subproject_awarded, 'EUR'),
+        'spent': 0
+    }
+
+    # Calculate amounts spent
+    subproject_spent = 0
+    for payment in subproject.payments:
+        if payment.amount_value < 0:
+            # Don't add payments back the project IBAN
+            if (not payment.counterparty_alias_value ==
+                    subproject.project.iban):
+                subproject_spent += abs(payment.amount_value)
+    subproject_data[subproject.name]['spent'] += subproject_spent
+    if subproject_data[subproject.name]['awarded'] == 0:
+        subproject_data[subproject.name]['percentage_spent_str'] = (
+            format_percent(0)
+        )
+    else:
+        subproject_data[subproject.name]['percentage_spent_str'] = (
+            format_percent(
+                subproject_spent / subproject_data[
+                    subproject.name
+                ]['awarded']
+            )
+        )
+
+    for key in subproject_data.keys():
+        subproject_data[key]['spent_str'] = format_currency(
+            subproject_data[key]['spent'], 'EUR'
+        )
+        subproject_data[key]['left_str'] = format_currency(
+            subproject_data[key]['awarded'] - subproject_data[key]['spent'], 'EUR'
+        )
+
+    return subproject_data
+
+
 @app.route("/")
 def index():
     total_awarded, total_spent, project_data = calculate_amounts()
@@ -122,21 +186,39 @@ def index():
     )
 
 
-@app.route("/project/<pid>")
-def project(pid):
-    project = Project.query.get(pid)
+@app.route("/project/<project_id>")
+def project(project_id):
+    project = Project.query.get(project_id)
 
     if not project:
         return render_template(
             '404.html'
         )
 
-    _, _, project_data = calculate_amounts([pid])
+    _, _, project_data = calculate_amounts([project_id])
 
     return render_template(
         'project.html',
         project=project,
         project_data=project_data
+    )
+
+
+@app.route("/project/<project_id>/subproject/<subproject_id>")
+def subproject(project_id, subproject_id):
+    subproject = Subproject.query.get(subproject_id)
+
+    if not subproject:
+        return render_template(
+            '404.html'
+        )
+
+    subproject_data = calculate_subproject_amounts(subproject_id)
+
+    return render_template(
+        'subproject.html',
+        subproject=subproject,
+        subproject_data=subproject_data
     )
 
 

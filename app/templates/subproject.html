@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block head %}
+  <title>Open Poen - {{ subproject.name }}</title>
+  <meta property="og:title" content="Open Poen - {{ subproject.name }}" />
+  {{ super() }}
+{% endblock %}
+
+{% block content %}
+  <div>
+    <a href="/">Home</a> > <a href="{{ url_for('project', project_id=subproject.project.id) }}">{{ subproject.project.name }}</a> > {{ subproject.name }}
+  </div>
+
+  <h1 class="title-pad">{{ subproject.name }}</h1>
+
+  {% for subproject_name, subproject in subproject_data.items() %}
+    <p>{{ subproject_name }}</p>
+    <p>resterend: {{ subproject.left_str }}</p>
+    <p>uitgegeven: {{ subproject.spent_str }}</p>
+    <p>totaal: {{ subproject.awarded_str }}</p>
+    <p>percentage: {{ subproject.percentage_spent_str }}</p>
+  {% endfor %}
+
+  <table>
+    <tr>
+      <th>waarvoor?</th>
+      <th>bedrag €</th>
+      <th>ontvanger</th>
+      <th>initiatiefnemer</th>
+      <th>omschrijving</th>
+      <th>datum</th>
+      <th>media</th>
+      <th>info</th>
+      <th>details</th>
+    </tr>
+    {% for payment in subproject.payments|sort(attribute='created', reverse=true) %}
+      <tr>
+        <td>{{ subproject.name }}</td>
+        <td>{{ payment.amount_value }}</td>
+        <td>{{ payment.counterparty_alias_name }}</td>
+        <td>{{ payment.alias_name }}</td>
+        {% if payment.short_user_description %}
+          <td>{{ payment.short_user_description }}</td>
+        {% else %}
+          <td><i>nog niet toegevoegd</i></td>
+        {% endif %}
+        <td>{{ payment.created.strftime('%Y-%m-%d') }}</td>
+        <td>TODO</td>
+        <td>TODO</td>
+        <td>TODO</td>
+      </tr>
+    {% endfor %}
+  </table>
+{% endblock %}
