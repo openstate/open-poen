@@ -126,6 +126,11 @@ def index():
 def project(pid):
     project = Project.query.get(pid)
 
+    if not project:
+        return render_template(
+            '404.html'
+        )
+
     _, _, project_data = calculate_amounts([pid])
 
     return render_template(

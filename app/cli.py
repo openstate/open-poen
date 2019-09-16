@@ -74,7 +74,7 @@ def get_new_payments(project_id):
         while new_payments:
             # Retrieve payments from Bunq
             try:
-                if payments and payments.pagination.has_previous_page:
+                if payments:
                     params = payments.pagination.url_params_previous_page
                 else:
                     params = {'count': 10}
@@ -139,6 +139,9 @@ def get_new_payments(project_id):
                     app.logger.error(e)
                     new_payments = False
                     continue
+
+            if not payments.pagination.has_previous_page():
+                new_payments = False
 
         # Log the number of retrieved payments
         iban = ''

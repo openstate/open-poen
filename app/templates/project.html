@@ -34,7 +34,7 @@
     </tr>
     {{ project.subprojects.payments }}
     {% for subproject in project.subprojects %}
-      {% for payment in subproject.payments %}
+      {% for payment in subproject.payments|sort(attribute='created', reverse=true) %}
         <tr>
           <td>{{ subproject.name }}</td>
           <td>{{ payment.amount_value }}</td>
