@@ -35,9 +35,6 @@ class User(UserMixin, db.Model):
 
     debit_cards = db.relationship('DebitCard', backref='user', lazy='dynamic')
     payments = db.relationship('Payment', backref='user', lazy='dynamic')
-    owned_projects = db.relationship(
-        'Project', backref='project_owner', lazy='dynamic'
-    )
 
     def set_password(self, password):
         if len(password) < 12:
@@ -77,7 +74,6 @@ class User(UserMixin, db.Model):
 
 class Project(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    project_owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     bank_name = db.Column(db.String(64), index=True)
     bunq_access_token = db.Column(db.String(64))
     iban = db.Column(db.String(34), index=True, unique=True)

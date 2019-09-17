@@ -10,8 +10,6 @@
     <a href="/">Home</a> > <a href="{{ url_for('project', project_id=subproject.project.id) }}">{{ subproject.project.name }}</a> > {{ subproject.name }}
   </div>
 
-  <h1 class="title-pad">{{ subproject.name }}</h1>
-
   {% for subproject_name, subproject in subproject_data.items() %}
     <p>{{ subproject_name }}</p>
     <p>resterend: {{ subproject.left_str }}</p>

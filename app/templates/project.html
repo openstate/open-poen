@@ -10,7 +10,10 @@
     <a href="/">Home</a> > {{ project.name }}
   </div>
 
-  <h1 class="title-pad">{{ project.name }}</h1>
+  ter beschikking door:
+  {% for funder in project.funders %}
+    <a href="{{ funder.url }}" target="_blank" rel="noopener">{{ funder.name }}</a>
+  {% endfor %}
 
   {% for project_name, project in project_data.items() %}
     <p>{{ project_name }}</p>

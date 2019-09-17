@@ -2,11 +2,12 @@ from flask import render_template, redirect, url_for, flash, session, request
 from flask_login import login_required, login_user, logout_user, current_user
 
 from app import app, db
-from app.forms import ResetPasswordRequestForm, ResetPasswordForm, LoginForm
+from app.forms import ResetPasswordRequestForm, ResetPasswordForm, LoginForm, ProjectForm
 from app.email import send_password_reset_email
 from app.models import User, Project, Subproject, Payment, UserStory
 from app.util import create_bunq_api_config
 from babel.numbers import format_currency, format_percent
+from sqlalchemy.exc import IntegrityError
 
 from bunq.sdk.context import ApiEnvironmentType
 
@@ -283,7 +284,37 @@ def logout():
 )
 @login_required
 def dashboard():
+    new_project_form = ProjectForm()
+    if new_project_form.validate_on_submit():
+        project_data = {}
+        for f in new_project_form:
+            if (f.type != 'SubmitField' and f.type != 'CSRFTokenField'):
+                project_data[f.name] = f.data
+        try:
+            project = Project(**project_data)
+            db.session.add(project)
+            db.session.commit()
+            flash(
+                '<span class="text-red">Project "%s" is toegevoegd</span>' % (
+                    project_data['name']
+                )
+            )
+        except IntegrityError:
+            db.session().rollback()
+            flash(
+                '<span class="text-red">Project toevoegen mislukt: naam "%s" '
+                'bestaat al, kies een andere naam<span>' % (
+                    project_data['name']
+                )
+            )
+
     # Process Bunq OAuth callback
+    base_url_auth = 'https://oauth.bunq.com'
+    base_url_token = 'https://api.oauth.bunq.com'
+    if (app.config['BUNQ_ENVIRONMENT_TYPE'] ==
+            ApiEnvironmentType.SANDBOX):
+        base_url_auth = 'https://oauth.sandbox.bunq.com'
+        base_url_token = 'https://api-oauth.sandbox.bunq.com'
     authorization_code = ''
     if request.args.get('state'):
         token = request.args.get('state')
@@ -310,15 +341,11 @@ def dashboard():
             # If authorization code, retrieve access token from Bunq
             authorization_code = request.args.get('code')
             if authorization_code:
-                base_url = 'https://api.oauth.bunq.com'
-                if (app.config['BUNQ_ENVIRONMENT_TYPE'] ==
-                        ApiEnvironmentType.SANDBOX):
-                    base_url = 'https://api-oauth.sandbox.bunq.com'
                 response = requests.post(
                     '%s/v1/token?grant_type=authorization_code&code=%s'
                     '&redirect_uri=https://openpoen.nl/dashboard&client_id=%s'
                     '&client_secret=%s' % (
-                        base_url,
+                        base_url_token,
                         authorization_code,
                         app.config['BUNQ_CLIENT_ID'],
                         app.config['BUNQ_CLIENT_SECRET'],
@@ -343,14 +370,19 @@ def dashboard():
                         )
                     )
 
-    # Retrieve all the user's owned projects (if any); used to connect
-    # to a Bunq account
-    owned_projects = []
-    for owned_project in current_user.owned_projects:
+    # Retrieve all the user's projects (if any); used to connect to a
+    # Bunq account
+    project_data = []
+    if current_user.admin:
+        projects = Project.query.all()
+    else:
+        projects = current_user.projects
+
+    for project in projects:
         bunq_token = jwt.encode(
             {
                 'user_id': current_user.id,
-                'project_id': owned_project.id,
+                'project_id': project.id,
                 'bank_name': 'Bunq',
                 'exp': time() + 1800
             },
@@ -359,23 +391,28 @@ def dashboard():
         ).decode('utf-8')
 
         already_authorized = False
-        if (owned_project.bunq_access_token and
-                len(owned_project.bunq_access_token)):
+        if (project.bunq_access_token and
+                len(project.bunq_access_token)):
             already_authorized = True
 
-        owned_projects.append(
+        _, _, amounts = calculate_amounts([project.id])
+
+        project_data.append(
             {
-                'name': owned_project.name,
+                'name': project.name,
                 'already_authorized': already_authorized,
-                'bunq_token': bunq_token
+                'bunq_token': bunq_token,
+                'amounts': amounts
             }
         )
 
     return render_template(
         'dashboard.html',
         user=current_user,
-        owned_projects=owned_projects,
-        bunq_client_id=app.config['BUNQ_CLIENT_ID']
+        projects=project_data,
+        bunq_client_id=app.config['BUNQ_CLIENT_ID'],
+        base_url_auth=base_url_auth,
+        new_project_form=new_project_form
     )
 
 
