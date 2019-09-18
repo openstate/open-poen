@@ -75,8 +75,8 @@
       </div>
     {% endif %}
 
-    {% if projects %}
-      {% for project in projects %}
+    {% if project_data %}
+      {% for project in project_data %}
         <div class="col-12 col-md-4">
           <div class="bg-lightgreen">
             <p><b><a href="{{ url_for('project', project_id=project.id) }}">{{ project.name }}</a></b></p>
@@ -95,7 +95,7 @@
               <p><i>Er is een {{project['bank_name']}} account gekoppeld aan dit project, maar er is nog geen IBAN geselecteerd. Bewerk dit project en selecteer de IBAN die bij dit project hoort.</i></p>
               {% else %}
                 <p>
-                Koppel een Bunq account aan project <b>{{ project.name }}</b>: <a href="{{ base_url_auth }}/auth?response_type=code&client_id={{ bunq_client_id }}&redirect_uri=https://openpoen.nl/dashboard&state={{ project.bunq_token }}" rel="noopener"><img class="bunq-connect-button" src="/static/dist/images/bunq_Connect_button_svg.svg"></a>
+                Koppel een Bunq account aan project <b>{{ project.name }}</b>: <a href="{{ base_url_auth }}/auth?response_type=code&client_id={{ bunq_client_id }}&redirect_uri=https://openpoen.nl/&state={{ project.bunq_token }}" rel="noopener"><img class="bunq-connect-button" src="/static/dist/images/bunq_Connect_button_svg.svg"></a>
                 </p>
               {% endif %}
 
