@@ -8,8 +8,14 @@ import jwt
 # Association table between Project and User
 project_user = db.Table(
     'project_user',
-    db.Column('project_id', db.Integer, db.ForeignKey('project.id', ondelete='CASCADE')),
-    db.Column('user_id', db.Integer, db.ForeignKey('user.id', ondelete='CASCADE')),
+    db.Column(
+        'project_id', db.Integer, db.ForeignKey(
+            'project.id', ondelete='CASCADE'
+        )
+    ),
+    db.Column(
+        'user_id', db.Integer, db.ForeignKey('user.id', ondelete='CASCADE')
+    ),
     db.PrimaryKeyConstraint('project_id', 'user_id')
 )
 
@@ -17,8 +23,14 @@ project_user = db.Table(
 # Association table between Subproject and User
 subproject_user = db.Table(
     'subproject_user',
-    db.Column('subproject_id', db.Integer, db.ForeignKey('subproject.id', ondelete='CASCADE')),
-    db.Column('user_id', db.Integer, db.ForeignKey('user.id', ondelete='CASCADE')),
+    db.Column(
+        'subproject_id', db.Integer, db.ForeignKey(
+            'subproject.id', ondelete='CASCADE'
+        )
+    ),
+    db.Column(
+        'user_id', db.Integer, db.ForeignKey('user.id', ondelete='CASCADE')
+    ),
     db.PrimaryKeyConstraint('subproject_id', 'user_id')
 )
 
@@ -121,7 +133,9 @@ class Project(db.Model):
 
 class Subproject(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    project_id = db.Column(db.Integer, db.ForeignKey('project.id', ondelete='CASCADE'))
+    project_id = db.Column(
+        db.Integer, db.ForeignKey('project.id', ondelete='CASCADE')
+    )
     iban = db.Column(db.String(34), index=True, unique=True)
     iban_name = db.Column(db.String(120), index=True, unique=True)
     name = db.Column(db.String(120), index=True, unique=True)
@@ -151,8 +165,12 @@ class DebitCard(db.Model):
 
 class Payment(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    subproject_id = db.Column(db.Integer, db.ForeignKey('subproject.id', ondelete='CASCADE'))
-    project_id = db.Column(db.Integer, db.ForeignKey('project.id', ondelete='CASCADE'))
+    subproject_id = db.Column(
+        db.Integer, db.ForeignKey('subproject.id', ondelete='CASCADE')
+    )
+    project_id = db.Column(
+        db.Integer, db.ForeignKey('project.id', ondelete='CASCADE')
+    )
 
     # Fields coming from the bank
     # Some example payment values:
@@ -202,7 +220,9 @@ class Payment(db.Model):
 
 class Funder(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    project_id = db.Column(db.Integer, db.ForeignKey('project.id', ondelete='CASCADE'))
+    project_id = db.Column(
+        db.Integer, db.ForeignKey('project.id', ondelete='CASCADE')
+    )
     name = db.Column(db.String(120), index=True)
     url = db.Column(db.String(2000))
 

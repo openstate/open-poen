@@ -89,7 +89,9 @@ def calculate_subproject_amounts(subproject_id):
     # Calculate amounts awarded
     subproject_awarded = 0
     if len(list(subproject.payments)) > 0:
-        subproject_awarded = subproject.payments[0].balance_after_mutation_value
+        subproject_awarded = (
+            subproject.payments[0].balance_after_mutation_value
+        )
         for payment in subproject.payments:
             # Don't add incoming payments (as they are already
             # reflected in the current balance)
@@ -222,28 +224,33 @@ def index():
                         db.session.commit()
 
                         # Create Bunq API .conf file
-                        util.create_bunq_api_config(bunq_access_token, project.id)
+                        util.create_bunq_api_config(
+                            bunq_access_token, project.id
+                        )
 
                         flash(
                             '<span class="text-green">Bunq account succesvol '
-                            'gekoppeld aan project "%s". De transacties worden nu '
-                            'op de achtergrond binnengehaald. Bewerk het nieuwe '
-                            'project om aan te geven welk IBAN bij het project '
-                            'hoort. Maak nieuwe subprojecten aan en koppel ook '
-                            'daar de IBANs die daarbij horen.</span>' % (
+                            'gekoppeld aan project "%s". De transacties '
+                            'worden nu op de achtergrond binnengehaald. '
+                            'Bewerk het nieuwe project om aan te geven welk '
+                            'IBAN bij het project hoort. Maak nieuwe '
+                            'subprojecten aan en koppel ook daar de IBANs die '
+                            'daarbij horen.</span>' % (
                                 project.name
                             )
                         )
                     else:
                         flash(
                             '<span class="text-red">Bunq account koppelen aan '
-                            'het project is mislukt. Probeer het later nog een '
-                            'keer of neem contact op met de info@openpoen.nl.'
+                            'het project is mislukt. Probeer het later nog '
+                            'een keer of neem contact op met de '
+                            'info@openpoen.nl.'
                         )
                         app.logger.error(
-                            'Retrieval of Bunq access token failed. Bunq Error: '
-                            '"%s". Bunq error description: "%s"' % (
-                                response['error'], response['error_description']
+                            'Retrieval of Bunq access token failed. Bunq '
+                            'Error: "%s". Bunq error description: "%s"' % (
+                                response['error'],
+                                response['error_description']
                             )
                         )
 
@@ -255,7 +262,7 @@ def index():
 
     # Remove project
     if project_form.remove.data:
-        Project.query.filter(Project.id==project_form.id.data).delete()
+        Project.query.filter(Project.id == project_form.id.data).delete()
         db.session.commit()
         flash(
             '<span class="text-green">Project "%s" is verwijderd</span>' % (
@@ -270,7 +277,9 @@ def index():
     # values as used when the form was generated for this project. I
     # thought this should happen automatically.
     if request.method == 'POST' and project_form.id.data:
-        select_ibans = util.get_all_monetary_account_active_ibans(project_form.id.data)
+        select_ibans = util.get_all_monetary_account_active_ibans(
+            project_form.id.data
+        )
         project_form.iban.choices = [('', '')] + [(x, x) for x in select_ibans]
     if project_form.validate_on_submit():
         new_project_data = {}
@@ -281,7 +290,9 @@ def index():
                     new_iban_name = ''
                     app.logger.debug(f.data)
                     if not f.data == 'None':
-                        new_iban, new_iban_name = f.data.split(' - ', maxsplit=1)
+                        new_iban, new_iban_name = f.data.split(
+                            ' - ', maxsplit=1
+                        )
                     new_project_data['iban'] = new_iban
                     new_project_data['iban_name'] = new_iban_name
                 else:
@@ -297,7 +308,9 @@ def index():
                 if project.iban != new_project_data['iban']:
                     for payment in project.payments:
                         payment.project_id = None
-                    Payment.query.filter_by(alias_value=new_project_data['iban']).update({'project_id': project.id})
+                    Payment.query.filter_by(
+                        alias_value=new_project_data['iban']
+                    ).update({'project_id': project.id})
                 projects.update(new_project_data)
                 db.session.commit()
                 flash(
@@ -335,13 +348,14 @@ def index():
     # Retrieve data for each project
     project_data = []
     for project in Project.query.all():
-        if project.hidden and (not current_user.is_authenticated or not current_user.admin or not project.has_user(current_user.id)):
+        if project.hidden and (not current_user.is_authenticated
+                               or not current_user.admin
+                               or not project.has_user(current_user.id)):
             continue
 
         already_authorized = False
         bunq_token = ''
         form = ''
-
 
         project_owner = False
         if current_user.is_authenticated and (
@@ -379,7 +393,9 @@ def index():
             # If a bunq account is available, allow the user to select
             # an IBAN
             if project.bunq_access_token:
-                select_ibans = util.get_all_monetary_account_active_ibans(project.id)
+                select_ibans = util.get_all_monetary_account_active_ibans(
+                    project.id
+                )
                 form.iban.choices = [('', '')] + [(x, x) for x in select_ibans]
                 # Set default selected value
                 form.iban.data = '%s - %s' % (project.iban, project.iban_name)
@@ -440,10 +456,11 @@ def project(project_id):
 
         # Remove project
         if project_form.remove.data:
-            Project.query.filter(Project.id==project_form.id.data).delete()
+            Project.query.filter(Project.id == project_form.id.data).delete()
             db.session.commit()
             flash(
-                '<span class="text-green">Project "%s" is verwijderd</span>' % (
+                '<span class="text-green">Project "%s" is '
+                'verwijderd</span>' % (
                     project_form.name.data
                 )
             )
@@ -452,10 +469,15 @@ def project(project_id):
 
         # Save or update project
         # Somehow we need to repopulate the iban.choices with the same
-        # values as used when the form was generated for this project. I thought this should happen automatically.
+        # values as used when the form was generated for this project.
+        # I thought this should happen automatically.
         if request.method == 'POST' and project_form.id.data:
-            select_ibans = util.get_all_monetary_account_active_ibans(project_form.id.data)
-            project_form.iban.choices = [('', '')] + [(x, x) for x in select_ibans]
+            select_ibans = util.get_all_monetary_account_active_ibans(
+                project_form.id.data
+            )
+            project_form.iban.choices = [('', '')] + [
+                (x, x) for x in select_ibans
+            ]
         if project_form.validate_on_submit():
             new_project_data = {}
             for f in project_form:
@@ -464,7 +486,9 @@ def project(project_id):
                         new_iban = ''
                         new_iban_name = ''
                         if f.data:
-                            new_iban, new_iban_name = f.data.split(' - ', maxsplit=1)
+                            new_iban, new_iban_name = f.data.split(
+                                ' - ', maxsplit=1
+                            )
                         new_project_data['iban'] = new_iban
                         new_project_data['iban_name'] = new_iban_name
                     else:
@@ -479,7 +503,9 @@ def project(project_id):
                     if project.iban != new_project_data['iban']:
                         for payment in project.payments:
                             payment.project_id = None
-                        Payment.query.filter_by(alias_value=new_project_data['iban']).update({'project_id': project.id})
+                        Payment.query.filter_by(
+                            alias_value=new_project_data['iban']
+                        ).update({'project_id': project.id})
                     projects.update(new_project_data)
                     db.session.commit()
                     flash(
@@ -505,8 +531,8 @@ def project(project_id):
             except IntegrityError:
                 db.session().rollback()
                 flash(
-                    '<span class="text-red">Project toevoegen mislukt: naam "%s" '
-                    'bestaat al, kies een andere naam<span>' % (
+                    '<span class="text-red">Project toevoegen mislukt: naam '
+                    '"%s" bestaat al, kies een andere naam<span>' % (
                         new_project_data['name']
                     )
                 )
@@ -586,10 +612,15 @@ def login():
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         if user is None or not user.check_password(form.Wachtwoord.data):
-            flash('<span class="text-red">Fout e-mailadres of wachtwoord</span>')
+            flash(
+                '<span class="text-red">Fout e-mailadres of wachtwoord</span>'
+            )
             return(redirect(url_for('login')))
         if not user.is_active:
-            flash('<span class="text-red">Deze gebruiker is niet meer actief</span>')
+            flash(
+                '<span class="text-red">Deze gebruiker is niet meer '
+                'actief</span>'
+            )
             return(redirect(url_for('login')))
         login_user(user)
         return redirect(url_for('index'))

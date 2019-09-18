@@ -70,3 +70,25 @@ class ProjectForm(FlaskForm):
             'class': 'btn btn-danger'
         }
     )
+
+
+class SubprojectForm(FlaskForm):
+    name = StringField('Naam', validators=[DataRequired()])
+    description = StringField('Beschrijving', validators=[DataRequired()])
+    hidden = BooleanField('Verbergen')
+    iban = SelectField('IBAN', validators=[Optional()], choices=[])
+    id = IntegerField(widget=HiddenInput())
+
+    submit = SubmitField(
+        'Opslaan',
+        render_kw={
+            'class': 'btn btn-info'
+        }
+    )
+
+    remove = SubmitField(
+        'Verwijderen',
+        render_kw={
+            'class': 'btn btn-danger'
+        }
+    )
