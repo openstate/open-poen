@@ -6,17 +6,21 @@
 {% endblock %}
 
 {% block content %}
-  <div>
+  <div class="text-center">
     <a href="/">Home</a> > <a href="{{ url_for('project', project_id=subproject.project.id) }}">{{ subproject.project.name }}</a> > {{ subproject.name }}
   </div>
 
-  <p>{{ subproject.name }}</p>
-  <p>resterend: {{ amounts['left_str'] }}</p>
-  <p>uitgegeven: {{ amounts['spent_str'] }}</p>
-  <p>totaal: {{ amounts['awarded_str'] }}</p>
-  <p>percentage: {{ amounts['percentage_spent_str'] }}</p>
+  <div class="row">
+    <div class="col-12 col-md-4 offset-md-4 text-center">
+      <p><b>{{ subproject.name }}</b></p>
+      <p>resterend: {{ amounts['left_str'] }}</p>
+      <p>uitgegeven: {{ amounts['spent_str'] }}</p>
+      <p>totaal: {{ amounts['awarded_str'] }}</p>
+      <p>percentage: {{ amounts['percentage_spent_str'] }}</p>
+    </div>
+  </div>
 
-  <table>
+  <table class="table">
     <tr>
       <th>waarvoor?</th>
       <th>bedrag €</th>

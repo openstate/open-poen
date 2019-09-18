@@ -286,9 +286,8 @@ def index():
         for f in project_form:
             if (f.type != 'SubmitField' and f.type != 'CSRFTokenField'):
                 if (f.name == 'iban'):
-                    new_iban = ''
-                    new_iban_name = ''
-                    app.logger.debug(f.data)
+                    new_iban = None
+                    new_iban_name = None
                     if not f.data == 'None':
                         new_iban, new_iban_name = f.data.split(
                             ' - ', maxsplit=1
@@ -434,125 +433,92 @@ def index():
     )
 
 
-@app.route("/project/<project_id>")
+@app.route("/project/<project_id>", methods=['GET', 'POST'])
 def project(project_id):
     project = Project.query.get(project_id)
-
-    project_owner = False
-    if current_user.is_authenticated and (
-        current_user.admin or project.has_user(current_user.id)
-    ):
-        project_owner = True
 
     if not project:
         return render_template(
             '404.html'
         )
 
-    subproject_form = ''
-    if project_owner:
-        # Process filled in project form
-        subproject_form = SubprojectForm()
+    # Process filled in subproject form
+    subproject_form = SubprojectForm()
 
-        # Remove project
-        if project_form.remove.data:
-            Project.query.filter(Project.id == project_form.id.data).delete()
+    # Save subproject
+    # Somehow we need to repopulate the iban.choices with the same
+    # values as used when the form was generated for this
+    # subproject. I thought this should happen automatically.
+    if request.method == 'POST' and subproject_form.name.data:
+        select_ibans = util.get_all_monetary_account_active_ibans(
+            project.id
+        )
+        subproject_form.iban.choices = [('', '')] + [
+            (x, x) for x in select_ibans
+        ]
+    if subproject_form.validate_on_submit():
+        new_subproject_data = {}
+        for f in subproject_form:
+            if (f.type != 'SubmitField' and f.type != 'CSRFTokenField'):
+                if (f.name == 'iban'):
+                    new_iban = None
+                    new_iban_name = None
+                    if f.data:
+                        new_iban, new_iban_name = f.data.split(
+                            ' - ', maxsplit=1
+                        )
+                    new_subproject_data['iban'] = new_iban
+                    new_subproject_data['iban_name'] = new_iban_name
+                else:
+                    new_subproject_data[f.name] = f.data
+        try:
+            # Save a new subproject
+            # If the IBAN changes, then link the correct payments to
+            # this subproject
+            subproject = Subproject(**new_subproject_data)
+            Payment.query.filter_by(
+                alias_value=new_subproject_data['iban']
+            ).update({'subproject_id': subproject.id})
+            db.session.add(subproject)
             db.session.commit()
             flash(
-                '<span class="text-green">Project "%s" is '
-                'verwijderd</span>' % (
-                    project_form.name.data
+                '<span class="text-green">Subproject "%s" is '
+                'toegevoegd</span>' % (
+                    new_subproject_data['name']
                 )
             )
-            # redirect back to clear form data
-            return redirect(url_for('index'))
+        except IntegrityError:
+            db.session().rollback()
+            flash(
+                '<span class="text-red">Subproject toevoegen mislukt: naam '
+                '"%s" en/of IBAN "%s" bestaan al, kies een andere '
+                'naam<span>' % (
+                    new_subproject_data['name'], new_subproject_data['iban']
+                )
+            )
+        # redirect back to clear form data
+        return redirect(url_for('project', project_id=project_id))
 
-        # Save or update project
-        # Somehow we need to repopulate the iban.choices with the same
-        # values as used when the form was generated for this project.
-        # I thought this should happen automatically.
-        if request.method == 'POST' and project_form.id.data:
-            select_ibans = util.get_all_monetary_account_active_ibans(
-                project_form.id.data
-            )
-            project_form.iban.choices = [('', '')] + [
-                (x, x) for x in select_ibans
-            ]
-        if project_form.validate_on_submit():
-            new_project_data = {}
-            for f in project_form:
-                if (f.type != 'SubmitField' and f.type != 'CSRFTokenField'):
-                    if (f.name == 'iban'):
-                        new_iban = ''
-                        new_iban_name = ''
-                        if f.data:
-                            new_iban, new_iban_name = f.data.split(
-                                ' - ', maxsplit=1
-                            )
-                        new_project_data['iban'] = new_iban
-                        new_project_data['iban_name'] = new_iban_name
-                    else:
-                        new_project_data[f.name] = f.data
-            try:
-                # Update if the project already exists
-                projects = Project.query.filter_by(id=project_form.id.data)
-                if len(projects.all()):
-                    # If the IBAN changes, then link the correct payments
-                    # to this project
-                    project = projects.first()
-                    if project.iban != new_project_data['iban']:
-                        for payment in project.payments:
-                            payment.project_id = None
-                        Payment.query.filter_by(
-                            alias_value=new_project_data['iban']
-                        ).update({'project_id': project.id})
-                    projects.update(new_project_data)
-                    db.session.commit()
-                    flash(
-                        '<span class="text-green">Project "%s" is '
-                        'bijgewerkt</span>' % (
-                            new_project_data['name']
-                        )
-                    )
-                # Otherwise, save a new project
-                else:
-                    # IBAN can't be set during initial creation of a new
-                    # project so remove it
-                    new_project_data.pop('iban')
-                    project = Project(**new_project_data)
-                    db.session.add(project)
-                    db.session.commit()
-                    flash(
-                        '<span class="text-green">Project "%s" is '
-                        'toegevoegd</span>' % (
-                            new_project_data['name']
-                        )
-                    )
-            except IntegrityError:
-                db.session().rollback()
-                flash(
-                    '<span class="text-red">Project toevoegen mislukt: naam '
-                    '"%s" bestaat al, kies een andere naam<span>' % (
-                        new_project_data['name']
-                    )
-                )
-            # redirect back to clear form data
-            return redirect(url_for('index'))
+    # Populate the the new subproject form with its project's ID
+    subproject_form = SubprojectForm(**{
+        'project_id': project.id
+    })
 
     # If a bunq account is available, allow the user to select
     # an IBAN
     if project.bunq_access_token:
         select_ibans = util.get_all_monetary_account_active_ibans(project.id)
-        form.iban.choices = [('', '')] + [(x, x) for x in select_ibans]
-        # Set default selected value
-        form.iban.data = '%s - %s' % (project.iban, project.iban_name)
+        subproject_form.iban.choices = [('', '')] + [
+            (x, x) for x in select_ibans
+        ]
 
     amounts = calculate_project_amounts(project_id)
 
     return render_template(
         'project.html',
         project=project,
-        amounts=amounts
+        amounts=amounts,
+        subproject_form=subproject_form
     )
 
 
