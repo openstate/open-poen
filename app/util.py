@@ -24,8 +24,7 @@ def create_bunq_api_config(bunq_access_token, project_id):
 
     api_context = ApiContext(
         environment, bunq_access_token, socket.gethostname()
-    )
-    api_context.save('%s-project-%s.conf' % (filename, project_id))
+    ).save('%s-project-%s.conf' % (filename, project_id))
 
 
 def get_bunq_api_config_filename(environment_type, project_id):
@@ -43,7 +42,7 @@ def get_all_monetary_account_active(project_id):
     return bunq_api.get_all_monetary_account_active()
 
 
-def get_all_monetary_account_active_ideals(project_id):
+def get_all_monetary_account_active_ibans(project_id):
     ibans = []
     for monetary_account in get_all_monetary_account_active(project_id):
         for alias in monetary_account._alias:

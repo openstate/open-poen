@@ -1,6 +1,6 @@
 from app import app
 from flask_wtf import FlaskForm
-from wtforms.validators import DataRequired, Email, EqualTo, Length
+from wtforms.validators import DataRequired, Email, EqualTo, Length, Optional
 from wtforms.widgets import HiddenInput
 from wtforms import (
     StringField, IntegerField, BooleanField, PasswordField, SubmitField,
@@ -54,7 +54,7 @@ class ProjectForm(FlaskForm):
     name = StringField('Naam', validators=[DataRequired()])
     description = StringField('Beschrijving', validators=[DataRequired()])
     hidden = BooleanField('Verbergen')
-    iban = SelectField('IBAN', choices=[])
+    iban = SelectField('IBAN', validators=[Optional()], choices=[])
     id = IntegerField(widget=HiddenInput())
 
     submit = SubmitField(

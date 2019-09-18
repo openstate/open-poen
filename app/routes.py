@@ -366,6 +366,8 @@ def dashboard():
                             response['error'], response['error_description']
                         )
                     )
+        # redirect back to clear form data
+        return redirect(url_for('dashboard'))
 
     # Process filled in project form
     project_form = ProjectForm()
@@ -385,8 +387,8 @@ def dashboard():
     # Save or update project
     # Somehow we need to repopulate the iban.choices with the same
     # values as used when the form was generated for this project. I thought this should happen automatically.
-    if request.method == 'POST':
-        select_ibans = util.get_all_monetary_account_active_ideals(project_form.id.data)
+    if request.method == 'POST' and project_form.id.data:
+        select_ibans = util.get_all_monetary_account_active_ibans(project_form.id.data)
         project_form.iban.choices = [('', '')] + [(x, x) for x in select_ibans]
     if project_form.validate_on_submit():
         new_project_data = {}
@@ -395,9 +397,16 @@ def dashboard():
                 new_project_data[f.name] = f.data
         try:
             # Update if the project already exists
-            project = Project.query.filter_by(id=project_form.id.data)
-            if len(project.all()):
-                project.update(new_project_data)
+            projects = Project.query.filter_by(id=project_form.id.data)
+            if len(projects.all()):
+                # If the IBAN changes, then link the correct payments
+                # to this project
+                project = projects.first()
+                if project.iban != new_project_data['iban']:
+                    for payment in project.payments:
+                        payment.project_id = None
+                    Payment.query.filter_by(alias_value=new_project_data['iban']).update({'project_id': project.id})
+                projects.update(new_project_data)
                 db.session.commit()
                 flash(
                     '<span class="text-green">Project "%s" is '
@@ -407,6 +416,9 @@ def dashboard():
                 )
             # Otherwise, save a new project
             else:
+                # IBAN can't be set during initial creation of a new
+                # project so remove it
+                new_project_data.pop('iban')
                 project = Project(**new_project_data)
                 db.session.add(project)
                 db.session.commit()
@@ -463,10 +475,11 @@ def dashboard():
             'id': project.id
         })
 
-        select_ibans = util.get_all_monetary_account_active_ideals(project.id)
-        form.iban.choices = [('', '')] + [(x, x) for x in select_ibans]
-        # Set default selected value
-        form.iban.data = project.iban
+        if project.bunq_access_token:
+            select_ibans = util.get_all_monetary_account_active_ibans(project.id)
+            form.iban.choices = [('', '')] + [(x, x) for x in select_ibans]
+            # Set default selected value
+            form.iban.data = project.iban
 
         # Retrieve the amounts for this project
         _, _, amounts = calculate_amounts([project.id])
