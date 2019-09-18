@@ -62,7 +62,7 @@ Use these after the database is in production and you need to change the databas
 
 ### Bunq commands
 
-- `flask bunq get-recent-payments` gets the recents payments from the Bunq API
+- `flask bunq get_new_payments_all` gets all payments from all IBANs belonging to all projects
 
 ## To enter the database
    - `sudo docker exec -it poen_db_1 psql -U <DB_USER> <DB_NAME>` retrieve database user and name from `docker/secrets-db-user.txt` and `docker/secrets-db-name.txt`

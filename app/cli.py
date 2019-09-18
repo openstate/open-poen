@@ -32,9 +32,16 @@ def bunq():
 
 @bunq.command()
 @click.argument('project_id')
-def get_new_payments(project_id):
+def get_new_payments_project(project_id):
     """Get new payments from all IBANs belonging to one Bunq account"""
     util.get_new_payments(project_id)
+
+
+@bunq.command()
+def get_new_payments_all():
+    """Get all payments from all IBANs belonging to all projects"""
+    for project in Project.query.all():
+        util.get_new_payments(project.id)
 
 
 @bunq.command()
