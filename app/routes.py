@@ -13,6 +13,7 @@ from bunq.sdk.context import ApiEnvironmentType
 
 from time import time
 import jwt
+import re
 import requests
 
 
@@ -394,7 +395,15 @@ def dashboard():
         new_project_data = {}
         for f in project_form:
             if (f.type != 'SubmitField' and f.type != 'CSRFTokenField'):
-                new_project_data[f.name] = f.data
+                if (f.name == 'iban'):
+                    new_iban = ''
+                    new_iban_name = ''
+                    if f.data:
+                        new_iban, new_iban_name = f.data.split(' - ', maxsplit=1)
+                    new_project_data['iban'] = new_iban
+                    new_project_data['iban_name'] = new_iban_name
+                else:
+                    new_project_data[f.name] = f.data
         try:
             # Update if the project already exists
             projects = Project.query.filter_by(id=project_form.id.data)
@@ -479,7 +488,7 @@ def dashboard():
             select_ibans = util.get_all_monetary_account_active_ibans(project.id)
             form.iban.choices = [('', '')] + [(x, x) for x in select_ibans]
             # Set default selected value
-            form.iban.data = project.iban
+            form.iban.data = '%s - %s' % (project.iban, project.iban_name)
 
         # Retrieve the amounts for this project
         _, _, amounts = calculate_amounts([project.id])
@@ -492,6 +501,7 @@ def dashboard():
                 'already_authorized': already_authorized,
                 'bunq_token': bunq_token,
                 'iban': project.iban,
+                'iban_name': project.iban_name,
                 'bank_name': project.bank_name,
                 'amounts': amounts,
                 'form': form

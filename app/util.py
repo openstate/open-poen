@@ -45,9 +45,10 @@ def get_all_monetary_account_active(project_id):
 def get_all_monetary_account_active_ibans(project_id):
     ibans = []
     for monetary_account in get_all_monetary_account_active(project_id):
+        app.logger.debug(vars(monetary_account))
         for alias in monetary_account._alias:
             if alias._type_ == 'IBAN':
-                ibans.append('%s' % (alias._value))
+                ibans.append('%s - %s' % (alias._value, monetary_account._description))
 
     return ibans
 

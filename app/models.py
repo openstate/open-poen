@@ -117,6 +117,7 @@ class Subproject(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     project_id = db.Column(db.Integer, db.ForeignKey('project.id', ondelete='SET NULL'))
     iban = db.Column(db.String(34), index=True, unique=True)
+    iban_name = db.Column(db.String(120), index=True, unique=True)
     name = db.Column(db.String(120), index=True, unique=True)
     description = db.Column(db.Text)
     hidden = db.Column(db.Boolean, default=False)
