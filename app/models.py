@@ -112,6 +112,12 @@ class Project(db.Model):
                 'Did not save Bunq access token, its length is not 64'
             )
 
+    # Returns true if the project is linked to the given user_id
+    def has_user(self, user_id):
+        return self.users.filter(
+            project_user.c.user_id == user_id
+        ).count() > 0
+
 
 class Subproject(db.Model):
     id = db.Column(db.Integer, primary_key=True)

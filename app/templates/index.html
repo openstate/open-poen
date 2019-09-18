@@ -6,26 +6,189 @@
 {% endblock %}
 
 {% block content %}
+  <div>
+    > Home
+  </div>
+
+  {% if user.is_authenticated %}
+    <h1>Hi {{ user.first_name }}</h1>
+  {% endif %}
+
   <div class="row">
     <div class="col-12">
       <p>Totaal uitgegeven: {{ total_spent_str }}</p>
       <p>{{ project_data|length }} buurtprojecten</p>
       <p>Totaal toegekend: {{ total_awarded_str }}</p>
-
-      <b>Projecten</b>
-      {% for project_name, project in project_data.items() %}
-        <p><a href="{{ url_for('project', project_id=project.id) }}">{{ project_name }}</a></p>
-        <p>resterend: {{ project.left_str }}</p>
-        <p>uitgegeven: {{ project.spent_str }}</p>
-        <p>totaal: {{ project.awarded_str }}</p>
-        <p>percentage: {{ project.percentage_spent_str }}</p>
-      {% endfor %}
-
-      <b>de mensen over open poen</b>
-      {% for user_story in user_stories %}
-        <p>{{ user_story.name }}</p>
-        <p>{{ user_story.title }}</p>
-      {% endfor %}
     </div>
   </div>
+
+  <hr>
+  <br>
+
+  <div class="row">
+    {% if user.admin %}
+      <div class="col-12 col-md-4">
+        <div class="bg-lightgreen">
+          <!-- Button trigger modal -->
+          <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#project-toevoegen">
+            Project toevoegen
+          </button>
+
+          <!-- Modal -->
+          <div class="modal fade" id="project-toevoegen" tabindex="-1" role="dialog" aria-labelledby="projectToevoegenLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <form method="POST" action="">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="projectToevoegenLabel">Project Toevoegen</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <div>
+                      {{ project_form.csrf_token }}
+
+                      {% for f in project_form %}
+                        {% if f.widget.input_type != 'hidden' and f.widget.input_type != 'submit' and f.label.text != 'IBAN' %}
+                          <div>
+                            {{ f.label }}
+                            <br>
+                            {{ f }}
+                            {% for error in f.errors %}
+                              <span style="color: red;">- {{ error }}</span>
+                            {% endfor %}
+                          </div>
+                        {% endif %}
+                      {% endfor %}
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    {{ project_form.submit }}
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endif %}
+
+    {% if projects %}
+      {% for project in projects %}
+        <div class="col-12 col-md-4">
+          <div class="bg-lightgreen">
+            {% for project_name, project_amounts in project['amounts'].items() %}
+              <p><b><a href="{{ url_for('project', project_id=project.id) }}">{{ project_name }}</a></b></p>
+              {% if project.hidden %}
+                <p><i>Dit project is verborgen en dus niet te zien door het publiek</i><p>
+              {% endif %}
+              <p>resterend: {{ project_amounts.left_str }}</p>
+              <p>uitgegeven: {{ project_amounts.spent_str }}</p>
+              <p>totaal: {{ project_amounts.awarded_str }}</p>
+              <p>percentage: {{ project_amounts.percentage_spent_str }}</p>
+            {% endfor %}
+
+            {% if project.project_owner %}
+              {% if project['already_authorized'] and project['iban'] %}
+              <p>Rekening {{ project['iban'] }} -  {{ project['iban_name'] }} ({{ project['bank_name'] }}) is gekoppeld aan dit project<p>
+              {% elif project['already_authorized'] and not project['iban'] %}
+              <p><i>Er is een {{project['bank_name']}} account gekoppeld aan dit project, maar er is nog geen IBAN geselecteerd. Bewerk dit project en selecteer de IBAN die bij dit project hoort.</i></p>
+              {% else %}
+                <p>
+                Koppel een Bunq account aan project <b>{{ project.name }}</b>: <a href="{{ base_url_auth }}/auth?response_type=code&client_id={{ bunq_client_id }}&redirect_uri=https://openpoen.nl/dashboard&state={{ project.bunq_token }}" rel="noopener"><img class="bunq-connect-button" src="/static/dist/images/bunq_Connect_button_svg.svg"></a>
+                </p>
+              {% endif %}
+
+              <!-- Button trigger modal -->
+              <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#project-bewerken-{{ project['id'] }}">
+                Project bewerken
+              </button>
+
+              <!-- Modal -->
+              <div class="modal fade" id="project-bewerken-{{ project['id'] }}" tabindex="-1" role="dialog" aria-labelledby="projectbewerkenLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <form method="POST" action="">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="projectBewerkenLabel">Project Bewerken</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                      </div>
+                      <div class="modal-body">
+                        <div>
+                          {{ project['form'].csrf_token }}
+
+                          {% for f in project['form'] %}
+                            {% if f.widget.input_type != 'hidden' and f.widget.input_type != 'submit' %}
+                              <div>
+                                {{ f.label }}
+                                <br>
+                                {{ f }}
+                                {% for error in f.errors %}
+                                  <span style="color: red;">- {{ error }}</span>
+                                {% endfor %}
+                              </div>
+                            {% endif %}
+                          {% endfor %}
+                          {{ project['form'].id }}
+                        </div>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuleren</button>
+                        <!-- Button trigger modal -->
+                        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#project-verwijder-{{ project['id'] }}">
+                          Verwijderen
+                        </button>
+
+                        <!-- Modal -->
+                        <div class="modal fade" id="project-verwijder-{{ project['id'] }}" tabindex="-1" role="dialog" aria-labelledby="projectVerwijderLabel" aria-hidden="true">
+                          <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                              <form method="POST" action="">
+                                <div class="modal-header">
+                                  <h5 class="modal-title" id="projectVerwijderLabel">Project Verwijderen</h5>
+                                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                  </button>
+                                </div>
+                                <div class="modal-body">
+                                  <div>
+                                    <p>Weet u zeker dat u project "<b>{{ project['name'] }}</b>" wilt verwijderen? Hiermee worden alle transacties van de bijbehorende bankrekening en de door de gebruikers toegevoegde beschrijvingen en plaatjes uit de database van Open Poen verwijderd! Ook worden alle subprojecten die onder dit project vallen verwijderd! Als u een project niet wilt tonen aan het publiek kunt u het project ook 'verbergen' in plaats van verwijderen.</p>
+                                  </div>
+                                </div>
+                                <div class="modal-footer">
+                                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuleren</button>
+                                  {{ project['form'].remove }}
+                                </div>
+                              </form>
+                            </div>
+                          </div>
+                        </div>
+
+                        {{ project['form'].submit }}
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    {% endif %}
+  </div>
+
+  {% if user_stories %}
+    <br>
+    <hr>
+    <br>
+    <b>de mensen over open poen</b>
+    {% for user_story in user_stories %}
+      <p>{{ user_story.name }}</p>
+      <p>{{ user_story.title }}</p>
+    {% endfor %}
+  {% endif %}
 {% endblock %}
