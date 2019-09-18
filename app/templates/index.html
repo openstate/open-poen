@@ -79,16 +79,14 @@
       {% for project in projects %}
         <div class="col-12 col-md-4">
           <div class="bg-lightgreen">
-            {% for project_name, project_amounts in project['amounts'].items() %}
-              <p><b><a href="{{ url_for('project', project_id=project.id) }}">{{ project_name }}</a></b></p>
-              {% if project.hidden %}
-                <p><i>Dit project is verborgen en dus niet te zien door het publiek</i><p>
-              {% endif %}
-              <p>resterend: {{ project_amounts.left_str }}</p>
-              <p>uitgegeven: {{ project_amounts.spent_str }}</p>
-              <p>totaal: {{ project_amounts.awarded_str }}</p>
-              <p>percentage: {{ project_amounts.percentage_spent_str }}</p>
-            {% endfor %}
+            <p><b><a href="{{ url_for('project', project_id=project.id) }}">{{ project.name }}</a></b></p>
+            {% if project.hidden %}
+              <p><i>Dit project is verborgen en dus niet te zien door het publiek</i><p>
+            {% endif %}
+            <p>resterend: {{ project.amounts.left_str }}</p>
+            <p>uitgegeven: {{ project.amounts.spent_str }}</p>
+            <p>totaal: {{ project.amounts.awarded_str }}</p>
+            <p>percentage: {{ project.amounts.percentage_spent_str }}</p>
 
             {% if project.project_owner %}
               {% if project['already_authorized'] and project['iban'] %}

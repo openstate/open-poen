@@ -15,13 +15,11 @@
     <a href="{{ funder.url }}" target="_blank" rel="noopener">{{ funder.name }}</a>
   {% endfor %}
 
-  {% for project_name, project in project_data.items() %}
-    <p>{{ project_name }}</p>
-    <p>resterend: {{ project.left_str }}</p>
-    <p>uitgegeven: {{ project.spent_str }}</p>
-    <p>totaal: {{ project.awarded_str }}</p>
-    <p>percentage: {{ project.percentage_spent_str }}</p>
-  {% endfor %}
+  <p>{{ project.name }}</p>
+  <p>resterend: {{ amounts['left_str'] }}</p>
+  <p>uitgegeven: {{ amounts['spent_str'] }}</p>
+  <p>totaal: {{ amounts['awarded_str'] }}</p>
+  <p>percentage: {{ amounts['percentage_spent_str'] }}</p>
 
   <table>
     <tr>

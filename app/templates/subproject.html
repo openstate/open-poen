@@ -10,13 +10,11 @@
     <a href="/">Home</a> > <a href="{{ url_for('project', project_id=subproject.project.id) }}">{{ subproject.project.name }}</a> > {{ subproject.name }}
   </div>
 
-  {% for subproject_name, subproject in subproject_data.items() %}
-    <p>{{ subproject_name }}</p>
-    <p>resterend: {{ subproject.left_str }}</p>
-    <p>uitgegeven: {{ subproject.spent_str }}</p>
-    <p>totaal: {{ subproject.awarded_str }}</p>
-    <p>percentage: {{ subproject.percentage_spent_str }}</p>
-  {% endfor %}
+  <p>{{ subproject.name }}</p>
+  <p>resterend: {{ amounts['left_str'] }}</p>
+  <p>uitgegeven: {{ amounts['spent_str'] }}</p>
+  <p>totaal: {{ amounts['awarded_str'] }}</p>
+  <p>percentage: {{ amounts['percentage_spent_str'] }}</p>
 
   <table>
     <tr>

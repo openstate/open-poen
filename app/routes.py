@@ -26,62 +26,33 @@ def after_request_callback(response):
     return response
 
 
-def calculate_amounts(project_ids=[]):
-    """
-    :type project_ids: list
-    """
-    # Calculate amounts awarded and spent
-    # total_awarded = all current project balances
-    #               + abs(all spent project amounts)
-    #               - all amounts received from own subprojects (in the
-    #                 case the didn't spend all their money and gave it
-    #                 back)
-    # total_spent = abs(all spend subproject amounts)
-    #             - all amounts paid back by suprojects to their project
-    total_awarded = 0
-    total_spent = 0
-    # Data about the individual projects
-    project_data = {}
-
-    # Select all projects if none are given
-    if not project_ids:
-        projects = Project.query.all()
-    else:
-        projects = Project.query.filter(Project.id.in_(project_ids)).all()
+def calculate_project_amounts(project_id):
+    project = Project.query.get(project_id)
 
     # Calculate amounts awarded
-    for project in projects:
-        subproject_ibans = [s.iban for s in project.subprojects]
-        project_awarded = 0
-        if len(list(project.payments)) > 0:
-            project_awarded = project.payments[0].balance_after_mutation_value
-            for payment in project.payments:
-                # Don't add incoming payments (as they are already
-                # reflected in the current balance), but do actively
-                # subtract incoming payments from our own subproject
-                # IBANs
-                if payment.amount_value > 0:
-                    if payment.counterparty_alias_value in subproject_ibans:
-                        project_awarded -= payment.amount_value
-                else:
-                    project_awarded += abs(payment.amount_value)
-        total_awarded += project_awarded
-        project_data[project.name] = {
-            'id': project.id,
-            'awarded': project_awarded,
-            'awarded_str': format_currency(project_awarded, 'EUR'),
-            'spent': 0
-        }
+    subproject_ibans = [s.iban for s in project.subprojects]
+    project_awarded = 0
+    if len(list(project.payments)) > 0:
+        project_awarded = project.payments[0].balance_after_mutation_value
+        for payment in project.payments:
+            # Don't add incoming payments (as they are already
+            # reflected in the current balance), but do actively
+            # subtract incoming payments from our own subproject
+            # IBANs
+            if payment.amount_value > 0:
+                if payment.counterparty_alias_value in subproject_ibans:
+                    project_awarded -= payment.amount_value
+            else:
+                project_awarded += abs(payment.amount_value)
+    amounts = {
+        'id': project.id,
+        'awarded': project_awarded,
+        'awarded_str': format_currency(project_awarded, 'EUR'),
+        'spent': 0
+    }
 
     # Calculate amounts spent
-    # Select all subprojects if none are given
-    if not project_ids:
-        subprojects = Subproject.query.all()
-    else:
-        subprojects = Subproject.query.filter(
-            Subproject.project_id.in_(project_ids)
-        ).all()
-
+    subprojects = Subproject.query.filter_by(project_id=project_id).all()
     for subproject in subprojects:
         subproject_spent = 0
         for payment in subproject.payments:
@@ -89,39 +60,27 @@ def calculate_amounts(project_ids=[]):
                 if (not payment.counterparty_alias_value ==
                         subproject.project.iban):
                     subproject_spent += abs(payment.amount_value)
-        total_spent += subproject_spent
-        project_data[subproject.project.name]['spent'] += subproject_spent
-        if project_data[subproject.project.name]['awarded'] == 0:
-            project_data[subproject.project.name]['percentage_spent_str'] = (
+        amounts['spent'] += subproject_spent
+        if amounts['awarded'] == 0:
+            amounts['percentage_spent_str'] = (
                 format_percent(0)
             )
         else:
-            project_data[subproject.project.name]['percentage_spent_str'] = (
+            amounts['percentage_spent_str'] = (
                 format_percent(
-                    subproject_spent / project_data[
-                        subproject.project.name
-                    ]['awarded']
+                    subproject_spent / amounts['awarded']
                 )
             )
 
-    for key in project_data.keys():
-        project_data[key]['spent_str'] = format_currency(
-            project_data[key]['spent'], 'EUR'
-        )
-        project_data[key]['left_str'] = format_currency(
-            project_data[key]['awarded'] - project_data[key]['spent'], 'EUR'
-        )
+    amounts['spent_str'] = format_currency(amounts['spent'], 'EUR')
+    amounts['left_str'] = format_currency(
+        amounts['awarded'] - amounts['spent'], 'EUR'
+    )
 
-    return total_awarded, total_spent, project_data
+    return amounts
 
 
 def calculate_subproject_amounts(subproject_id):
-    """
-    :type subproject_ids: list
-    """
-    # Data about the subproject
-    subproject_data = {}
-
     subproject = Subproject.query.get(subproject_id)
 
     # Calculate amounts awarded
@@ -135,7 +94,7 @@ def calculate_subproject_amounts(subproject_id):
                 continue
             else:
                 subproject_awarded += abs(payment.amount_value)
-    subproject_data[subproject.name] = {
+    amounts = {
         'id': subproject.id,
         'awarded': subproject_awarded,
         'awarded_str': format_currency(subproject_awarded, 'EUR'),
@@ -150,29 +109,45 @@ def calculate_subproject_amounts(subproject_id):
             if (not payment.counterparty_alias_value ==
                     subproject.project.iban):
                 subproject_spent += abs(payment.amount_value)
-    subproject_data[subproject.name]['spent'] += subproject_spent
-    if subproject_data[subproject.name]['awarded'] == 0:
-        subproject_data[subproject.name]['percentage_spent_str'] = (
+    amounts['spent'] += subproject_spent
+    if amounts['awarded'] == 0:
+        amounts['percentage_spent_str'] = (
             format_percent(0)
         )
     else:
-        subproject_data[subproject.name]['percentage_spent_str'] = (
+        amounts['percentage_spent_str'] = (
             format_percent(
-                subproject_spent / subproject_data[
-                    subproject.name
-                ]['awarded']
+                subproject_spent / amounts['awarded']
             )
         )
 
-    for key in subproject_data.keys():
-        subproject_data[key]['spent_str'] = format_currency(
-            subproject_data[key]['spent'], 'EUR'
-        )
-        subproject_data[key]['left_str'] = format_currency(
-            subproject_data[key]['awarded'] - subproject_data[key]['spent'], 'EUR'
-        )
+    amounts['spent_str'] = format_currency(
+        amounts['spent'], 'EUR'
+    )
+    amounts['left_str'] = format_currency(
+        amounts['awarded'] - amounts['spent'], 'EUR'
+    )
 
-    return subproject_data
+    return amounts
+
+
+def calculate_total_amounts():
+    # Calculate amounts awarded and spent
+    # total_awarded = all current project balances
+    #               + abs(all spent project amounts)
+    #               - all amounts received from own subprojects (in the
+    #                 case the didn't spend all their money and gave it
+    #                 back)
+    # total_spent = abs(all spend subproject amounts)
+    #             - all amounts paid back by suprojects to their project
+    total_awarded = 0
+    total_spent = 0
+    for project in Project.query.all():
+        amounts = calculate_project_amounts(project.id)
+        total_awarded += amounts['awarded']
+        total_spent += amounts['spent']
+
+    return total_awarded, total_spent
 
 
 @app.route("/", methods=['GET', 'POST'])
@@ -393,7 +368,7 @@ def index():
                 form.iban.data = '%s - %s' % (project.iban, project.iban_name)
 
         # Retrieve the amounts for this project
-        total_awarded, total_spent, amounts = calculate_amounts([project.id])
+        amounts = calculate_project_amounts(project.id)
 
         project_data.append(
             {
@@ -406,17 +381,19 @@ def index():
                 'iban': project.iban,
                 'iban_name': project.iban_name,
                 'bank_name': project.bank_name,
-                'total_awarded_str': format_currency(total_awarded, 'EUR'),
-                'total_spent_str': format_currency(total_spent, 'EUR'),
                 'amounts': amounts,
                 'form': form
             }
         )
 
+    total_awarded, total_spent = calculate_total_amounts()
+
     return render_template(
         'index.html',
         user=current_user,
         projects=project_data,
+        total_awarded_str=format_currency(total_awarded, 'EUR'),
+        total_spent_str=format_currency(total_spent, 'EUR'),
         project_form=project_form,
         user_stories=UserStory.query.all(),
         bunq_client_id=app.config['BUNQ_CLIENT_ID'],
@@ -433,12 +410,12 @@ def project(project_id):
             '404.html'
         )
 
-    _, _, project_data = calculate_amounts([project_id])
+    amounts = calculate_project_amounts(project_id)
 
     return render_template(
         'project.html',
         project=project,
-        project_data=project_data
+        amounts=amounts
     )
 
 
@@ -451,12 +428,12 @@ def subproject(project_id, subproject_id):
             '404.html'
         )
 
-    subproject_data = calculate_subproject_amounts(subproject_id)
+    amounts = calculate_subproject_amounts(subproject_id)
 
     return render_template(
         'subproject.html',
         subproject=subproject,
-        subproject_data=subproject_data
+        amounts=amounts
     )
 
 
