@@ -1,7 +1,11 @@
 from app import app
 from flask_wtf import FlaskForm
 from wtforms.validators import DataRequired, Email, EqualTo, Length
-from wtforms import StringField, PasswordField, SubmitField, BooleanField
+from wtforms.widgets import HiddenInput
+from wtforms import (
+    StringField, IntegerField, BooleanField, PasswordField, SubmitField,
+    SelectField
+)
 
 
 class ResetPasswordRequestForm(FlaskForm):
@@ -50,9 +54,19 @@ class ProjectForm(FlaskForm):
     name = StringField('Naam', validators=[DataRequired()])
     description = StringField('Beschrijving', validators=[DataRequired()])
     hidden = BooleanField('Verbergen')
+    iban = SelectField('IBAN', choices=[])
+    id = IntegerField(widget=HiddenInput())
+
     submit = SubmitField(
         'Opslaan',
         render_kw={
             'class': 'btn btn-info'
+        }
+    )
+
+    remove = SubmitField(
+        'Verwijderen',
+        render_kw={
+            'class': 'btn btn-danger'
         }
     )

@@ -5,7 +5,7 @@ from app import app, db
 from app.forms import ResetPasswordRequestForm, ResetPasswordForm, LoginForm, ProjectForm
 from app.email import send_password_reset_email
 from app.models import User, Project, Subproject, Payment, UserStory
-from app.util import create_bunq_api_config
+from app import util
 from babel.numbers import format_currency, format_percent
 from sqlalchemy.exc import IntegrityError
 
@@ -284,30 +284,6 @@ def logout():
 )
 @login_required
 def dashboard():
-    new_project_form = ProjectForm()
-    if new_project_form.validate_on_submit():
-        project_data = {}
-        for f in new_project_form:
-            if (f.type != 'SubmitField' and f.type != 'CSRFTokenField'):
-                project_data[f.name] = f.data
-        try:
-            project = Project(**project_data)
-            db.session.add(project)
-            db.session.commit()
-            flash(
-                '<span class="text-red">Project "%s" is toegevoegd</span>' % (
-                    project_data['name']
-                )
-            )
-        except IntegrityError:
-            db.session().rollback()
-            flash(
-                '<span class="text-red">Project toevoegen mislukt: naam "%s" '
-                'bestaat al, kies een andere naam<span>' % (
-                    project_data['name']
-                )
-            )
-
     # Process Bunq OAuth callback
     base_url_auth = 'https://oauth.bunq.com'
     base_url_token = 'https://api.oauth.bunq.com'
@@ -328,6 +304,11 @@ def dashboard():
                 algorithms='HS256'
             )
         except:
+            flash(
+                '<span class="text-red">Bunq account koppelen aan het project '
+                ' is mislukt. Probeer het later nog een keer of neem contact '
+                'op met de info@openpoen.nl.'
+            )
             app.logger.warn(
                 'Retrieved wrong token (used for retrieving Bunq '
                 'authorization code)'
@@ -361,8 +342,24 @@ def dashboard():
                     db.session.commit()
 
                     # Create Bunq API .conf file
-                    create_bunq_api_config(bunq_access_token, project.id)
+                    util.create_bunq_api_config(bunq_access_token, project.id)
+
+                    flash(
+                        '<span class="text-green">Bunq account succesvol '
+                        'gekoppeld aan project "%s". De transacties worden nu '
+                        'op de achtergrond binnengehaald. Bewerk het nieuwe '
+                        'project om aan te geven welk IBAN bij het project '
+                        'hoort. Maak nieuwe subprojecten aan en koppel ook '
+                        'daar de IBANs die daarbij horen.</span>' % (
+                            project.name
+                        )
+                    )
                 else:
+                    flash(
+                        '<span class="text-red">Bunq account koppelen aan '
+                        'het project is mislukt. Probeer het later nog een '
+                        'keer of neem contact op met de info@openpoen.nl.'
+                    )
                     app.logger.error(
                         'Retrieval of Bunq access token failed. Bunq Error: '
                         '"%s". Bunq error description: "%s"' % (
@@ -370,8 +367,68 @@ def dashboard():
                         )
                     )
 
+    # Process filled in project form
+    project_form = ProjectForm()
+
+    # Remove project
+    if project_form.remove.data:
+        Project.query.filter(Project.id==project_form.id.data).delete()
+        db.session.commit()
+        flash(
+            '<span class="text-green">Project "%s" is verwijderd</span>' % (
+                project_form.name.data
+            )
+        )
+        # redirect back to clear form data
+        return redirect(url_for('dashboard'))
+
+    # Save or update project
+    # Somehow we need to repopulate the iban.choices with the same
+    # values as used when the form was generated for this project. I thought this should happen automatically.
+    if request.method == 'POST':
+        select_ibans = util.get_all_monetary_account_active_ideals(project_form.id.data)
+        project_form.iban.choices = [('', '')] + [(x, x) for x in select_ibans]
+    if project_form.validate_on_submit():
+        new_project_data = {}
+        for f in project_form:
+            if (f.type != 'SubmitField' and f.type != 'CSRFTokenField'):
+                new_project_data[f.name] = f.data
+        try:
+            # Update if the project already exists
+            project = Project.query.filter_by(id=project_form.id.data)
+            if len(project.all()):
+                project.update(new_project_data)
+                db.session.commit()
+                flash(
+                    '<span class="text-green">Project "%s" is '
+                    'bijgewerkt</span>' % (
+                        new_project_data['name']
+                    )
+                )
+            # Otherwise, save a new project
+            else:
+                project = Project(**new_project_data)
+                db.session.add(project)
+                db.session.commit()
+                flash(
+                    '<span class="text-green">Project "%s" is '
+                    'toegevoegd</span>' % (
+                        new_project_data['name']
+                    )
+                )
+        except IntegrityError:
+            db.session().rollback()
+            flash(
+                '<span class="text-red">Project toevoegen mislukt: naam "%s" '
+                'bestaat al, kies een andere naam<span>' % (
+                    new_project_data['name']
+                )
+            )
+        # redirect back to clear form data
+        return redirect(url_for('dashboard'))
+
     # Retrieve all the user's projects (if any); used to connect to a
-    # Bunq account
+    # Bunq account and to edit a project
     project_data = []
     if current_user.admin:
         projects = Project.query.all()
@@ -379,30 +436,52 @@ def dashboard():
         projects = current_user.projects
 
     for project in projects:
-        bunq_token = jwt.encode(
-            {
-                'user_id': current_user.id,
-                'project_id': project.id,
-                'bank_name': 'Bunq',
-                'exp': time() + 1800
-            },
-            app.config['SECRET_KEY'],
-            algorithm='HS256'
-        ).decode('utf-8')
-
+        # Only generate a Bunq JWT token if there is no Bunq account
+        # linked to this project
+        bunq_token = ''
         already_authorized = False
         if (project.bunq_access_token and
                 len(project.bunq_access_token)):
             already_authorized = True
+        else:
+            bunq_token = jwt.encode(
+                {
+                    'user_id': current_user.id,
+                    'project_id': project.id,
+                    'bank_name': 'Bunq',
+                    'exp': time() + 1800
+                },
+                app.config['SECRET_KEY'],
+                algorithm='HS256'
+            ).decode('utf-8')
 
+        # Populate the project's form which allows the user to edit it
+        form = ProjectForm(**{
+            'name': project.name,
+            'description': project.description,
+            'hidden': project.hidden,
+            'id': project.id
+        })
+
+        select_ibans = util.get_all_monetary_account_active_ideals(project.id)
+        form.iban.choices = [('', '')] + [(x, x) for x in select_ibans]
+        # Set default selected value
+        form.iban.data = project.iban
+
+        # Retrieve the amounts for this project
         _, _, amounts = calculate_amounts([project.id])
 
         project_data.append(
             {
+                'id': project.id,
                 'name': project.name,
+                'hidden': project.hidden,
                 'already_authorized': already_authorized,
                 'bunq_token': bunq_token,
-                'amounts': amounts
+                'iban': project.iban,
+                'bank_name': project.bank_name,
+                'amounts': amounts,
+                'form': form
             }
         )
 
@@ -412,7 +491,7 @@ def dashboard():
         projects=project_data,
         bunq_client_id=app.config['BUNQ_CLIENT_ID'],
         base_url_auth=base_url_auth,
-        new_project_form=new_project_form
+        project_form=project_form
     )
 
 

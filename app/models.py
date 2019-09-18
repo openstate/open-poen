@@ -77,6 +77,7 @@ class Project(db.Model):
     bank_name = db.Column(db.String(64), index=True)
     bunq_access_token = db.Column(db.String(64))
     iban = db.Column(db.String(34), index=True, unique=True)
+    iban_name = db.Column(db.String(120), index=True, unique=True)
     name = db.Column(db.String(120), index=True, unique=True)
     description = db.Column(db.Text)
     hidden = db.Column(db.Boolean, default=False)
