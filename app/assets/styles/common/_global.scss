@@ -1,5 +1,92 @@
 body {
   font-family: $font-family-lexend;
+  font-size: 13px;
+  line-height: 21px;
+}
+
+.p-details {
+  line-height: 16px;
+}
+
+h1 {
+  font-size: 26px;
+  line-height: 26px;
+}
+
+h2 {
+  font-size: 21px;
+  line-height: 21px;
+}
+
+h3 {
+  font-size: 16px;
+  line-height: 21px;
+}
+
+.h3-details {
+  font-size: 16px;
+  line-height: 21px;
+  letter-spacing: 16px;
+  text-transform: uppercase;
+}
+
+h4 {
+  font-family: $font-family-dosis;
+  font-size: 80px;
+  line-height: 80px;
+}
+
+h5 {
+  font-family: $font-family-dosis;
+  font-size: 50px;
+  line-height: 50px;
+}
+
+h6 {
+  font-size: 45px;
+  line-height: 45px;
+}
+
+@media (max-width: 767px) {
+  body {
+    font-size: 11px;
+    line-height: 18px;
+  }
+
+  h1 {
+    font-size: 16px;
+    line-height: 16px;
+  }
+
+  h2 {
+    font-size: 13px;
+    line-height: 13px;
+  }
+
+  h3 {
+    font-size: 15px;
+    line-height: 20px;
+  }
+
+  .h3-details {
+    font-size: 10px;
+    line-height: 10px;
+  }
+
+  h4 {
+    font-size: 30px;
+    line-height: 30px;
+  }
+
+  h5 {
+    font-size: 30px;
+    line-height: 30px;
+  }
+
+  h6 {
+    font-size: 16px;
+    line-height: 16px;
+  }
 }
 
 .lead-text {
