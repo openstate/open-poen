@@ -18,6 +18,9 @@ mix.js('scripts/main.js', '../static/dist/scripts/');
 
 mix.sass('styles/main.scss', '../static/dist/styles/')
 
+mix.copy('node_modules/@openfonts/lexend-deca_latin/files/', '../static/dist/styles/files/');
+mix.copy('node_modules/@openfonts/dosis_latin/files/', '../static/dist/styles/files/');
+
 mix.imagemin('images/*');
 
 mix.autoload({

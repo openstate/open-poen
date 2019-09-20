@@ -28,7 +28,7 @@
   <div class="row">
     {% if user.admin %}
       <div class="col-12 col-md-4">
-        <div class="bg-lightgreen">
+        <div class="bg-green-light">
           <!-- Button trigger modal -->
           <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#project-toevoegen">
             Project toevoegen
@@ -78,7 +78,7 @@
     {% if project_data %}
       {% for project in project_data %}
         <div class="col-12 col-md-4">
-          <div class="bg-lightgreen">
+          <div class="bg-green-light">
             <p><b><a href="{{ url_for('project', project_id=project.id) }}">{{ project.name }}</a></b></p>
             {% if project.hidden %}
               <p><i>Dit project is verborgen en dus niet te zien door het publiek</i><p>

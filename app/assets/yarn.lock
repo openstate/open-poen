@@ -701,6 +701,16 @@
   resolved "https://registry.yarnpkg.com/@nodelib/fs.stat/-/fs.stat-1.1.3.tgz#2b5a3ab3f918cca48a8c754c08168e3f03eba61b"
   integrity sha512-shAmDyaQC4H92APFoIaVDHCx5bStIocgvbwQyxPRrbUY20V1EYTbSDchWbuwlMG3V17cprZhA6+78JfB+3DTPw==
 
+"@openfonts/dosis_latin@^0.0.11":
+  version "0.0.11"
+  resolved "https://registry.yarnpkg.com/@openfonts/dosis_latin/-/dosis_latin-0.0.11.tgz#87dff014babe9f48f1fea8fbec6145ecd058472c"
+  integrity sha512-gTHnZ/3/YqBLxVgSTLQELck64d963gRAG/tEKq1LRyrea6uGbRweb7zug0TlT0y/nVSfEKjnEULGxTTyDU37bA==
+
+"@openfonts/lexend-deca_latin@0.0.11":
+  version "0.0.11"
+  resolved "https://registry.yarnpkg.com/@openfonts/lexend-deca_latin/-/lexend-deca_latin-0.0.11.tgz#7b62b145f212c04a7472fa3cf88edbc97eaae298"
+  integrity sha512-KnLjqunojmNK6nJLFsGpbAM16KN+2Nm3nmsRzn5AnhgVgK3lPyK8AdFEAw9FhqIUPQKkpxOcOrWuOdHukq8XaA==
+
 "@sindresorhus/is@^0.7.0":
   version "0.7.0"
   resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-0.7.0.tgz#9a06f4f137ee84d7df0460c1fdb1135ffa6c50fd"
