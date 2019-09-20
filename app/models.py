@@ -166,10 +166,10 @@ class DebitCard(db.Model):
 class Payment(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     subproject_id = db.Column(
-        db.Integer, db.ForeignKey('subproject.id', ondelete='CASCADE')
+        db.Integer, db.ForeignKey('subproject.id', ondelete='SET NULL')
     )
     project_id = db.Column(
-        db.Integer, db.ForeignKey('project.id', ondelete='CASCADE')
+        db.Integer, db.ForeignKey('project.id', ondelete='SET NULL')
     )
 
     # Fields coming from the bank
