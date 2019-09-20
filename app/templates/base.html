@@ -34,42 +34,36 @@
 
   <header>
     <nav class="navbar navbar-fixed-top">
-      <div class="container">
-        <div class="navbar-header">
-          <a class="navbar-brand visible-xs-inline img-responsive" href="/">
-            <img src="/static/dist/images/logo.png" alt="Open Poen logo">
-          </a>
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-            <span class="sr-only">Toggle navigation</span>
-            Menu
-          </button>
-        </div>
-        <div id="navbar" class="collapse navbar-collapse">
-          <ul class="nav navbar-nav navbar-right">
-            <li class="active"><a href="{{ url_for('index') }}">Home</a></li>
-            {% if current_user.is_authenticated %}
-              <li><a href="{{ url_for('logout') }}">Uitloggen</a></li>
-            {% else %}
-              <li><a href="{{ url_for('login') }}">Inloggen</a></li>
-            {% endif %}
-          </ul>
-        </div>
-      </div>
+      <a class="navbar-brand mx-auto" href="/">
+        <img class="logo img-fluid" src="/static/dist/images/Open-Poen-Logo.svg" alt="Open Poen logo">
+      </a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Open of sluit navigatiemenu">
+        <h3 class="d-inline">menu </h3><i class="my-bottom fas fa-bars"></i>
+      </button>
     </nav>
+    <div id="navbar" class="collapse navbar-collapse">
+      <ul class="nav navbar-nav navbar-right">
+        <li class="active"><a href="{{ url_for('index') }}">Home</a></li>
+        {% if current_user.is_authenticated %}
+          <li><a href="{{ url_for('logout') }}">Uitloggen</a></li>
+        {% else %}
+          <li><a href="{{ url_for('login') }}">Inloggen</a></li>
+        {% endif %}
+      </ul>
+    </div>
 
     <div class="lead">
       <div class="container">
         <div class="row header">
           <div class="col-sm-3 header-logo hidden-xs">
             <a href="/">
-              <img class="img-responsive" src="/static/dist/images/logo.png" alt="Open Poen logo">
+              <img class="img-fluid" src="/static/dist/images/logo.png" alt="Open Poen logo">
             </a>
           </div>
           <div class="col-xs-12 col-sm-9">
             <p class="lead-text">ZÓ WORDT ONS GELD BESTEED</p>
           </div>
         </div>
-      </div>
     </div>
   </header>
 

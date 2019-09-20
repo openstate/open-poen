@@ -1,0 +1,19 @@
+.navbar {
+  height: 120px;
+  padding: 0 100px 0 100px;
+
+  .logo {
+    height: 60px;
+  }
+
+  .navbar-toggler {
+    background-color: $grey-blue;
+    padding: 10px 44px;
+    border-radius: 20px;
+  }
+
+  .fa-bars {
+    width: 10px;
+    padding-top: 7px;
+  }
+}

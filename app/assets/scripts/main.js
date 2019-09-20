@@ -10,7 +10,7 @@ import home from './routes/home';
 // Import the needed Font Awesome functionality
 import { config, library, dom } from '@fortawesome/fontawesome-svg-core';
 // Import required icons
-import { faArrowRight } from '@fortawesome/free-solid-svg-icons';
+import { faArrowRight, faBars } from '@fortawesome/free-solid-svg-icons';
 import { faEnvelope } from '@fortawesome/free-regular-svg-icons';
 import { faGithub } from '@fortawesome/free-brands-svg-icons';
 
@@ -18,7 +18,7 @@ import { faGithub } from '@fortawesome/free-brands-svg-icons';
 config.searchPseudoElements=true;
 
 // Add the imported icons to the library
-library.add(faArrowRight, faEnvelope, faGithub);
+library.add(faArrowRight, faEnvelope, faGithub, faBars);
 
 // Tell FontAwesome to watch the DOM and add the SVGs when it detects icon markup
 dom.watch();

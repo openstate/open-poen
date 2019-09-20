@@ -1,5 +1,4 @@
 @import "common/variables";
-@import '~bootstrap/dist/css/bootstrap.css';
 
 /**
  * Import npm dependencies
@@ -8,6 +7,7 @@
  * @see https://github.com/webpack-contrib/sass-loader#imports
  */
 // @import "~some-node-module";
+@import '~bootstrap/dist/css/bootstrap.css';
 @import "~@openfonts/lexend-deca_latin/index.css";
 @import "~@openfonts/dosis_latin/index.css";
 
