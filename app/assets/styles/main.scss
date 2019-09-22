@@ -7,7 +7,27 @@
  * @see https://github.com/webpack-contrib/sass-loader#imports
  */
 // @import "~some-node-module";
-@import '~bootstrap/dist/css/bootstrap.css';
+@import "~bootstrap/scss/_functions.scss";
+@import "~bootstrap/scss/_variables.scss";
+/* set the overriding variables */
+$grid-breakpoints: (
+  xs: 0,
+  sm: 576px,
+  md: 768px,
+  lg: 992px,
+  xl: 1200px,
+  xxl: 1440px
+);
+
+$container-max-widths: (
+  xs: 0,
+  sm: 576px,
+  md: 768px,
+  lg: 992px,
+  xl: 1200px,
+  xxl: 1440px
+);
+@import 'bootstrap';
 @import "~@openfonts/lexend-deca_latin/index.css";
 @import "~@openfonts/dosis_latin/index.css";
 
@@ -19,4 +39,5 @@
 @import "layouts/dashboard";
 @import "layouts/footer";
 @import "layouts/header";
+@import "layouts/index";
 @import "layouts/pages";

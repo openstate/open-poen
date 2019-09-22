@@ -3,6 +3,10 @@ body {
   font-size: 13px;
   line-height: 21px;
   color: $blue-dark;
+
+  article {
+    background-color: white;
+  }
 }
 
 .p-details {

@@ -30,10 +30,13 @@
   <![endif]-->
   {% endblock %}
 </head>
-<body>
-
-  <header>
+<body class="bg-grey">
+  <header class="bg-white">
     <nav class="navbar navbar-fixed-top">
+      {% if current_user.is_authenticated %}
+        <h1>{{ current_user.first_name }} {{ current_user.last_name }}</h1>
+      {% endif %}
+
       <a class="navbar-brand abs-center-x" href="/">
         <img class="logo img-fluid" src="/static/dist/images/Open-Poen-Logo.svg" alt="Open Poen logo">
       </a>
