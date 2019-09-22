@@ -469,7 +469,7 @@ def project(project_id):
                 if (f.name == 'iban'):
                     new_iban = None
                     new_iban_name = None
-                    if f.data:
+                    if not f.data == '':
                         new_iban, new_iban_name = f.data.split(
                             ' - ', maxsplit=1
                         )
@@ -480,14 +480,16 @@ def project(project_id):
 
         try:
             # Save a new subproject
-            # If the IBAN changes, then link the correct payments to
-            # this subproject
             subproject = Subproject(**new_subproject_data)
-            Payment.query.filter_by(
-                alias_value=new_subproject_data['iban']
-            ).update({'subproject_id': subproject.id})
             db.session.add(subproject)
             db.session.commit()
+
+            # If IBAN, link the correct payments to this subproject
+            if new_subproject_data['iban'] != None:
+                Payment.query.filter_by(
+                    alias_value=new_subproject_data['iban']
+                ).update({'subproject_id': subproject.id})
+                db.session.commit()
             flash(
                 '<span class="text-green">Subproject "%s" is '
                 'toegevoegd</span>' % (
@@ -580,7 +582,7 @@ def subproject(project_id, subproject_id):
                 if (f.name == 'iban'):
                     new_iban = None
                     new_iban_name = None
-                    if not f.data == 'None':
+                    if not f.data == '':
                         new_iban, new_iban_name = f.data.split(
                             ' - ', maxsplit=1
                         )
