@@ -277,10 +277,14 @@ def index():
     # values as used when the form was generated for this project. I
     # thought this should happen automatically.
     if request.method == 'POST' and project_form.name.data:
-        select_ibans = util.get_all_monetary_account_active_ibans(
-            project_form.id.data
-        )
-        project_form.iban.choices = [('', '')] + [(x, x) for x in select_ibans]
+        projects = Project.query.filter_by(id=project_form.id.data)
+        if len(projects.all()):
+            select_ibans = util.get_all_monetary_account_active_ibans(
+                project_form.id.data
+            )
+            project_form.iban.choices = [('', '')] + [
+                (x, x) for x in select_ibans
+            ]
     if project_form.validate_on_submit():
         new_project_data = {}
         for f in project_form:
@@ -299,7 +303,6 @@ def index():
 
         try:
             # Update if the project already exists
-            projects = Project.query.filter_by(id=project_form.id.data)
             if len(projects.all()):
                 # If the IBAN changes, then link the correct payments
                 # to this project
