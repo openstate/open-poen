@@ -1,3 +1,34 @@
 .lead-logo-index {  
   max-height: 330px;
 }
+
+.bunq-connect-button {
+  width: 200px;
+}
+
+.border-r {
+  border-right: 1px solid $blue-dark;
+}
+
+.border-l {
+  border-left: 1px solid $blue-dark;
+}
+
+.index-hr-top {
+  margin-top: 26px;
+  margin-bottom: 54px;
+}
+
+a.index-project-link {
+  color: $blue-dark;
+
+  &:hover {
+    text-decoration: none;
+  }
+}
+
+.index-project {
+  padding: 33px 20px;
+  border-radius: 35px;
+  height: 326px;
+}

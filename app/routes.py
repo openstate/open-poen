@@ -50,7 +50,7 @@ def calculate_project_amounts(project_id):
     amounts = {
         'id': project.id,
         'awarded': project_awarded,
-        'awarded_str': format_currency(project_awarded, 'EUR'),
+        'awarded_str': util.format_currency(project_awarded),
         'spent': 0
     }
 
@@ -75,9 +75,9 @@ def calculate_project_amounts(project_id):
                 )
             )
 
-    amounts['spent_str'] = format_currency(amounts['spent'], 'EUR')
-    amounts['left_str'] = format_currency(
-        amounts['awarded'] - amounts['spent'], 'EUR'
+    amounts['spent_str'] = util.format_currency(amounts['spent'])
+    amounts['left_str'] = util.format_currency(
+        amounts['awarded'] - amounts['spent']
     )
 
     return amounts
@@ -429,8 +429,8 @@ def index():
         'index.html',
         user=current_user,
         project_data=project_data,
-        total_awarded_str=format_currency(total_awarded, 'EUR'),
-        total_spent_str=format_currency(total_spent, 'EUR'),
+        total_awarded_str=util.human_format(total_awarded),
+        total_spent_str=util.human_format(total_spent),
         project_form=project_form,
         user_stories=UserStory.query.all(),
         bunq_client_id=app.config['BUNQ_CLIENT_ID'],

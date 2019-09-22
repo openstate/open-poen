@@ -171,3 +171,17 @@ def get_new_payments(project_id):
                 project_id, new_payments_count, iban, iban_name
             )
         )
+
+def human_format(num):
+    magnitude = 0
+    while abs(num) >= 1000:
+        magnitude += 1
+        num /= 1000.0
+
+    if magnitude > 0:
+        return '%.1f%s' % (num, ['', 'K', 'M'][magnitude])
+    else:
+        return round(num)
+
+def format_currency(num):
+    return f'€ {round(num):,}'
