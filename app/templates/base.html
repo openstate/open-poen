@@ -34,40 +34,38 @@
 
   <header>
     <nav class="navbar navbar-fixed-top">
-      <a class="navbar-brand mx-auto" href="/">
+      <a class="navbar-brand abs-center-x" href="/">
         <img class="logo img-fluid" src="/static/dist/images/Open-Poen-Logo.svg" alt="Open Poen logo">
       </a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Open of sluit navigatiemenu">
+
+      <button class="navbar-toggler ml-auto" type="button" data-toggle="collapse" data-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Open of sluit navigatiemenu">
         <h3 class="d-inline">menu </h3><i class="my-bottom fas fa-bars"></i>
       </button>
     </nav>
-    <div id="navbar" class="collapse navbar-collapse">
-      <ul class="nav navbar-nav navbar-right">
-        <li class="active"><a href="{{ url_for('index') }}">Home</a></li>
-        {% if current_user.is_authenticated %}
-          <li><a href="{{ url_for('logout') }}">Uitloggen</a></li>
-        {% else %}
-          <li><a href="{{ url_for('login') }}">Inloggen</a></li>
-        {% endif %}
-      </ul>
-    </div>
 
-    <div class="lead">
-      <div class="container">
-        <div class="row header">
-          <div class="col-sm-3 header-logo hidden-xs">
-            <a href="/">
-              <img class="img-fluid" src="/static/dist/images/logo.png" alt="Open Poen logo">
-            </a>
-          </div>
-          <div class="col-xs-12 col-sm-9">
-            <p class="lead-text">ZÓ WORDT ONS GELD BESTEED</p>
-          </div>
-        </div>
+    <div id="navbar" class="collapse navbar-collapse">
+      {% if current_user.is_authenticated %}
+        {% set login = ('logout', 'Uitloggen') %}
+      {% else %}
+        {% set login = ('login', 'Inloggen') %}
+      {% endif %}
+
+      {% set menu = [
+          ('index', 'Home')
+      ] %}
+      {{ menu.append(login)|default("", True) }}
+
+      <ul class="navbar-nav">
+        {% for page, name in menu %}
+          <li {% if page == active_page %} class="nav-item active"{% endif%}>
+            <a class="nav-link" href="{{ url_for(page) }}">{{ name }}{% if page == active_page %}<span class="sr-only">(huidige pagina)</span>{% endif %}</a>
+          </li>
+        {% endfor %}
+      </ul>
     </div>
   </header>
 
-  <article>
+  <article class="bg-grey">
   {% include 'flashed-messages.html' %}
     <div class="container">
       {% block content %}

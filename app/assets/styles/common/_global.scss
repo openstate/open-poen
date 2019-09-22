@@ -2,6 +2,7 @@ body {
   font-family: $font-family-lexend;
   font-size: 13px;
   line-height: 21px;
+  color: $blue-dark;
 }
 
 .p-details {
@@ -94,14 +95,40 @@ h6 {
   color: blue;
 }
 
+.text-blue-dark {
+  color: $blue-dark;
+}
+
+.text-blue {
+  color: $blue;
+}
+
 .text-red {
-  color: red;
+  color: $red;
 }
 
 .text-green {
-  color: green;
+  color: $green;
+}
+
+.bg-white {
+  background-color: white;
 }
 
 .bg-green-light {
   background-color: $green-light;
+}
+
+.bg-grey {
+  background-color: $grey;
+}
+
+.bg-grey-light {
+  background-color: $grey-light;
+}
+
+.abs-center-x {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
 }

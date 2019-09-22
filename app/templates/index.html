@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% set active_page = "index" %}
 {% block head %}
   <title>Open Poen</title>
   <meta property="og:title" content="Open Poen" />
@@ -6,6 +7,19 @@
 {% endblock %}
 
 {% block content %}
+  <div class="container-fluid lead bg-grey-light">
+    <div class="row header">
+      <div class="col-12 col-md-7 header-logo">
+        <img class="img-fluid" src="/static/dist/images/Open-Poen-Logo-2.svg" alt="Open Poen logo">
+      </div>
+      <div class="col-12 col-md-5 my-auto">
+        <h5>ZÓ <span class="text-red">WORDT ONS</span> <span class="text-blue">GELD BESTEED</span></h5>
+        <br>
+        <button class="btn poen-button bg-white"><h2>bekijk hoe het werkt ></h2></button>
+      </div>
+    </div>
+  </div>
+
   <div>
     > Home
   </div>
