@@ -21,10 +21,31 @@
 
 a.index-project-link {
   color: $blue-dark;
+
+  h1 {
+    margin-bottom: 40px;
+  }
 }
 
 .index-project {
   padding: 33px 20px;
   border-radius: 35px;
-  height: 326px;
+  min-height: 326px;
+  margin-bottom: 13px;
+}
+
+.totaal {
+  margin-top: 40px;
+  margin-bottom: 40px;
+}
+
+@media (max-width: 767px) {
+  .index-project {
+    min-height: 246px;
+  }
+
+  .index-hr-top {
+    margin-top: 13px;
+    margin-bottom: 13px;
+  }
 }

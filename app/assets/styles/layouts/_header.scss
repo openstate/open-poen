@@ -1,6 +1,6 @@
 .navbar {
   height: 120px;
-  padding: 0 100px 0 100px;
+  padding: 0 100px;
 
   .logo {
     height: 59px;
@@ -15,5 +15,16 @@
   .fa-bars {
     width: 10px;
     padding-top: 7px;
+  }
+}
+
+@media (max-width: 767px) {
+  .navbar {
+    height: 74px;
+    padding: 0;
+
+    .navbar-toggler {
+      padding: 5px 9px;
+    }
   }
 }

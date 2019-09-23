@@ -2,3 +2,9 @@
   height: 35px;
   margin-bottom: 120px;
 }
+
+@media (max-width: 991px) {
+  .logo-footer {
+    margin-top: 70px;
+  }
+}

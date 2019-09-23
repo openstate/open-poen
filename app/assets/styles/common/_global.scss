@@ -16,11 +16,13 @@ body {
 h1 {
   font-size: 26px;
   line-height: 26px;
+  margin: 0;
 }
 
 h2 {
   font-size: 21px;
   line-height: 21px;
+  margin: 0;
 }
 
 h3 {
@@ -40,59 +42,20 @@ h4 {
   font-family: $font-family-dosis;
   font-size: 80px;
   line-height: 80px;
+  margin: 0;
 }
 
 h5 {
   font-family: $font-family-dosis;
   font-size: 50px;
   line-height: 50px;
+  margin: 0;
 }
 
 h6 {
   font-size: 45px;
   line-height: 45px;
-}
-
-@media (max-width: 767px) {
-  body {
-    font-size: 11px;
-    line-height: 18px;
-  }
-
-  h1 {
-    font-size: 16px;
-    line-height: 16px;
-  }
-
-  h2 {
-    font-size: 13px;
-    line-height: 13px;
-  }
-
-  h3 {
-    font-size: 15px;
-    line-height: 20px;
-  }
-
-  .h3-details {
-    font-size: 10px;
-    line-height: 10px;
-  }
-
-  h4 {
-    font-size: 30px;
-    line-height: 30px;
-  }
-
-  h5 {
-    font-size: 30px;
-    line-height: 30px;
-  }
-
-  h6 {
-    font-size: 16px;
-    line-height: 16px;
-  }
+  margin: 0;
 }
 
 hr {
@@ -158,4 +121,75 @@ hr {
   border-radius: 70px;
   top: -100px;
   padding: 26px 54px;
+}
+
+@media (max-width: 1199px) {
+  .lead {
+    height: 420px;
+  }
+}
+
+@media (max-width: 991px) {
+  .content {
+    border-radius: 13px;
+    top: 0;
+    padding: 20px 13px;
+  }
+
+  .lead {
+    height: 280px;
+  }
+}
+
+@media (max-width: 767px) {
+  body {
+    font-size: 11px;
+    line-height: 18px;
+  }
+
+  h1 {
+    font-size: 16px;
+    line-height: 16px;
+  }
+
+  h2 {
+    font-size: 13px;
+    line-height: 13px;
+  }
+
+  h3 {
+    font-size: 15px;
+    line-height: 20px;
+  }
+
+  .h3-details {
+    font-size: 10px;
+    line-height: 10px;
+  }
+
+  h4 {
+    font-size: 30px;
+    line-height: 30px;
+  }
+
+  h5 {
+    font-size: 30px;
+    line-height: 30px;
+  }
+
+  h6 {
+    font-size: 16px;
+    line-height: 16px;
+  }
+
+  .lead {
+    height: 330px;
+    padding-top: 20px;
+    border-bottom-left-radius: 70px;
+    border-bottom-right-radius: 70px;
+  }
+
+  .lead-logo-index {
+    height: 170px;
+  }
 }

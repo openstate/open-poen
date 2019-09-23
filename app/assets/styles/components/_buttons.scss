@@ -3,3 +3,9 @@
   padding: 20px 30px;
   color: $blue-dark;
 }
+
+@media (max-width: 767px) {
+  .poen-button {
+    padding: 10px 30px;
+  }
+}
