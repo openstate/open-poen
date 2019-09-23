@@ -40,10 +40,11 @@ def deploy(c):
                 NODE_CONTAINER
             )
         )
+    c.sudo('docker exec %s yarn' % (NODE_CONTAINER))
     c.sudo('docker exec %s yarn prod' % (NODE_CONTAINER))
 
     # Upgrade database
-    c.sudo('docker exec %s flask db upgrade' % (APP_CONTAINER))
+    #c.sudo('docker exec %s flask db upgrade' % (APP_CONTAINER))
 
     # Reload app
     c.run('bash -c "cd %s && touch uwsgi-touch-reload"' % (DIR))
