@@ -292,7 +292,10 @@ def index():
                 if (f.name == 'iban'):
                     new_iban = None
                     new_iban_name = None
-                    if not f.data == '':
+                    # New projects f.data is 'None', editing an existing
+                    # project with an IBAN to have no IBAN will make
+                    # f.data be ''
+                    if not f.data == '' and f.data != 'None':
                         new_iban, new_iban_name = f.data.split(
                             ' - ', maxsplit=1
                         )
