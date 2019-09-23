@@ -123,6 +123,16 @@ hr {
   padding: 26px 54px;
 }
 
+.flashed-messages {
+  padding: 0;
+  border: 2px solid $blue;
+  background-color: white;
+
+  ul {
+    margin-top: 16px;
+  }
+}
+
 @media (max-width: 1199px) {
   .lead {
     height: 420px;
