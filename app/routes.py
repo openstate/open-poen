@@ -292,7 +292,7 @@ def index():
                 if (f.name == 'iban'):
                     new_iban = None
                     new_iban_name = None
-                    if not f.data == 'None':
+                    if not f.data == '':
                         new_iban, new_iban_name = f.data.split(
                             ' - ', maxsplit=1
                         )
