@@ -172,6 +172,7 @@ def get_new_payments(project_id):
             )
         )
 
+
 def human_format(num):
     magnitude = 0
     while abs(num) >= 1000:
@@ -182,6 +183,7 @@ def human_format(num):
         return '%.1f%s' % (num, ['', 'K', 'M'][magnitude])
     else:
         return round(num)
+
 
 def format_currency(num):
     return f'€ {round(num):,}'

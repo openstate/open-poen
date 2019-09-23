@@ -488,7 +488,7 @@ def project(project_id):
             db.session.commit()
 
             # If IBAN, link the correct payments to this subproject
-            if new_subproject_data['iban'] != None:
+            if new_subproject_data['iban'] is not None:
                 Payment.query.filter_by(
                     alias_value=new_subproject_data['iban']
                 ).update({'subproject_id': subproject.id})
