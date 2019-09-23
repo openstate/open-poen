@@ -7,10 +7,17 @@ from logging.handlers import SMTPHandler, RotatingFileHandler
 from config import Config
 from flask import Flask
 from flask_babel import Babel
-from flask_sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy as _BaseSQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_mail import Mail
+
+
+class SQLAlchemy(_BaseSQLAlchemy):
+    def apply_pool_defaults(self, app, options):
+        super(SQLAlchemy, self).apply_pool_defaults(self, app, options)
+        options["pool_pre_ping"] = True
+
 
 app = Flask(__name__)
 app.config.from_object(Config)
