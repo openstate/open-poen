@@ -368,23 +368,22 @@ def index():
             project_owner = True
 
         if project_owner:
-            # Only generate a Bunq JWT token if there is no Bunq account
-            # linked to this project
-            bunq_token = ''
             if (project.bunq_access_token and
                     len(project.bunq_access_token)):
                 already_authorized = True
-            else:
-                bunq_token = jwt.encode(
-                    {
-                        'user_id': current_user.id,
-                        'project_id': project.id,
-                        'bank_name': 'Bunq',
-                        'exp': time() + 1800
-                    },
-                    app.config['SECRET_KEY'],
-                    algorithm='HS256'
-                ).decode('utf-8')
+
+            # Always generate a token as the user can connect to Bunq
+            # again in order to allow access to new IBANs
+            bunq_token = jwt.encode(
+                {
+                    'user_id': current_user.id,
+                    'project_id': project.id,
+                    'bank_name': 'Bunq',
+                    'exp': time() + 1800
+                },
+                app.config['SECRET_KEY'],
+                algorithm='HS256'
+            ).decode('utf-8')
 
             # Populate the project's form which allows the user to edit
             # it

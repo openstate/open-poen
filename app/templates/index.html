@@ -175,6 +175,8 @@
                                         </div>
                                       {% endif %}
                                     {% endfor %}
+                                    Heeft u nieuwe IBANs toegevoegd aan dit project en kunt u deze hierboven nog niet selecteren? Koppel dit project dan opnieuw aan de Bunq account om zo toestemming tot de nieuwe IBANs te krijgen.
+                                    <a href="{{ base_url_auth }}/auth?response_type=code&client_id={{ bunq_client_id }}&redirect_uri=https://openpoen.nl/&state={{ project.bunq_token }}" rel="noopener"><img class="bunq-connect-button" src="{{ url_for('static', filename='images/bunq_Connect_button_svg.svg') }}"></a>
                                     {{ project['form'].id }}
                                   </div>
                                 </div>
