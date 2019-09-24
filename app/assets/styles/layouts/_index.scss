@@ -1,4 +1,11 @@
-.lead-logo-index {  
+.index-lead {
+  height: 510px;
+  padding-top: 60px;
+  border-bottom-left-radius: 115px;
+  border-bottom-right-radius: 115px;
+}
+
+.index-lead-logo {
   max-height: 330px;
 }
 
@@ -19,14 +26,6 @@
   margin-bottom: 54px;
 }
 
-a.index-project-link {
-  color: $blue-dark;
-
-  h1 {
-    margin-bottom: 40px;
-  }
-}
-
 .index-project {
   padding: 33px 20px;
   border-radius: 35px;
@@ -39,7 +38,26 @@ a.index-project-link {
   margin-bottom: 40px;
 }
 
+@media (max-width: 1199px) {
+  .index-lead {
+    height: 420px;
+  }
+}
+
+@media (max-width: 991px) {
+  .index-lead {
+    height: 280px;
+  }
+}
+
 @media (max-width: 767px) {
+  .index-lead {
+    height: 330px;
+    padding-top: 20px;
+    border-bottom-left-radius: 70px;
+    border-bottom-right-radius: 70px;
+  }
+
   .index-project {
     min-height: 246px;
   }
@@ -47,5 +65,9 @@ a.index-project-link {
   .index-hr-top {
     margin-top: 13px;
     margin-bottom: 13px;
+  }
+
+  .index-lead-logo {
+    height: 170px;
   }
 }

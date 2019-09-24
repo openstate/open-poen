@@ -11,10 +11,10 @@
 {% endblock %}
 
 {% block content %}
-  <div class="container lead bg-grey-light">
-    <div class="row header">
+  <div class="container index-lead bg-grey-light">
+    <div class="row">
       <div class="col-12 col-md-6 header-logo text-center">
-        <img class="lead-logo-index img-fluid" src="{{ url_for('static', filename='images/Open-Poen-Logo-2.svg') }}" alt="Open Poen logo">
+        <img class="index-lead-logo-index img-fluid" src="{{ url_for('static', filename='images/Open-Poen-Logo-2.svg') }}" alt="Open Poen logo">
       </div>
       <div class="col-12 col-md-6 my-auto text-center text-md-left">
         <h5>ZÓ <span class="text-red">WORDT ONS</span> <span class="text-blue">GELD BESTEED</span></h5>
@@ -29,7 +29,7 @@
       <div class="col-12 col-lg-10 offset-lg-1 content bg-white">
         <div class="row">
           <div class="col-4 border-r">
-            <h4>{{ total_spent_str }}</h3>
+            <h4>€ {{ total_spent_str }}</h3>
             <h2>totaal uitgegeven</h2>
           </div>
           <div class="col-4 text-center">
@@ -41,7 +41,7 @@
             {% endif %}
           </div>
           <div class="col-4 text-right border-l">
-            <h4 class="text-blue-light">{{ total_awarded_str }}</h4>
+            <h4 class="text-blue-light">€ {{ total_awarded_str }}</h4>
             <h2>totaal toegekend</h2>
           </div>
 
@@ -105,15 +105,17 @@
 
           {% if project_data %}
             {% for project in project_data %}
-              {% if not project.hidden or (project.hidden and user.admin) %}
+              {% if True %}
                 <div class="col-12 col-md-6 col-xxl-4">
                   <div class="index-project bg-green-light">
                     {% if project.hidden %}
                       <p><i>Dit project is verborgen en dus niet te zien door het publiek</i><p>
                     {% endif %}
-                    <a class="index-project-link" href="{{ url_for('project', project_id=project.id) }}">
-                      <h1 class="text-center">{{ project.name }}</h1>
-                    </a>
+                    <div class="amounts-card-title">
+                      <a href="{{ url_for('project', project_id=project.id) }}">
+                        <h1 class="text-center">{{ project.name }}</h1>
+                      </a>
+                    </div>
                     <div class="row">
                       <div class="col-4 text-right">
                         <h3 class="text-blue">resterend</h3>

@@ -352,20 +352,18 @@ def index():
     # Retrieve data for each project
     project_data = []
     for project in Project.query.all():
-        if project.hidden and (not current_user.is_authenticated
-                               or not current_user.admin
-                               or not project.has_user(current_user.id)):
-            continue
-
-        already_authorized = False
-        bunq_token = ''
-        form = ''
-
         project_owner = False
         if current_user.is_authenticated and (
             current_user.admin or project.has_user(current_user.id)
         ):
             project_owner = True
+
+        if project.hidden and not project_owner:
+            continue
+
+        already_authorized = False
+        bunq_token = ''
+        form = ''
 
         if project_owner:
             if (project.bunq_access_token and
@@ -446,6 +444,17 @@ def project(project_id):
             '404.html'
         )
 
+    project_owner = False
+    if current_user.is_authenticated and (
+        current_user.admin or project.has_user(current_user.id)
+    ):
+        project_owner = True
+
+    if project.hidden and not project_owner:
+        return render_template(
+            '404.html'
+        )
+
     # Process filled in subproject form
     subproject_form = SubprojectForm()
 
@@ -519,7 +528,8 @@ def project(project_id):
         'project.html',
         project=project,
         amounts=amounts,
-        subproject_form=subproject_form
+        subproject_form=subproject_form,
+        project_owner=project_owner
     )
 
 
@@ -530,6 +540,17 @@ def subproject(project_id, subproject_id):
     subproject = Subproject.query.get(subproject_id)
 
     if not subproject:
+        return render_template(
+            '404.html'
+        )
+
+    project_owner = False
+    if current_user.is_authenticated and (
+        current_user.admin or subproject.project.has_user(current_user.id)
+    ):
+        project_owner = True
+
+    if subproject.hidden and not project_owner:
         return render_template(
             '404.html'
         )
@@ -643,8 +664,9 @@ def subproject(project_id, subproject_id):
     return render_template(
         'subproject.html',
         subproject=subproject,
+        amounts=amounts,
         subproject_form=subproject_form,
-        amounts=amounts
+        project_owner=project_owner
     )
 
 
