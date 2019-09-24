@@ -5,7 +5,7 @@ import socket
 import sys
 
 from app import app, db
-from app.models import Payment, Project, Subproject
+from app.models import Payment, Project, Subproject, IBAN
 
 from bunq.sdk.context import ApiContext
 from bunq.sdk.context import ApiEnvironmentType
@@ -43,15 +43,22 @@ def get_all_monetary_account_active(project_id):
 
 
 def get_all_monetary_account_active_ibans(project_id):
-    ibans = []
+    # Remove any already existing IBANs for this project
+    IBAN.query.filter_by(project_id=project_id).delete()
+
+    new_ibans_count = 0
     for monetary_account in get_all_monetary_account_active(project_id):
         for alias in monetary_account._alias:
             if alias._type_ == 'IBAN':
-                ibans.append(
-                    '%s - %s' % (alias._value, monetary_account._description)
+                new_iban = IBAN(
+                    project_id=project_id,
+                    iban=alias._value,
+                    iban_name=monetary_account._description
                 )
-
-    return ibans
+                db.session.add(new_iban)
+                new_ibans_count += 1
+    db.session.commit()
+    return new_ibans_count
 
 
 def _transform_payment(payment):

@@ -106,6 +106,7 @@ class Project(db.Model):
         lazy='dynamic'
     )
     funders = db.relationship('Funder', backref='project', lazy='dynamic')
+    ibans = db.relationship('IBAN', backref='project', lazy='dynamic')
     payments = db.relationship(
         'Payment',
         backref='project',
@@ -123,6 +124,14 @@ class Project(db.Model):
             app.logger.error(
                 'Did not save Bunq access token, its length is not 64'
             )
+
+    # Create select option to be shown in a dropdown menu
+    def make_select_options(self):
+        select_options = [('', '')]
+        for iban in self.ibans:
+            option = '%s - %s' % (iban.iban, iban.iban_name)
+            select_options.append((option, option))
+        return select_options
 
     # Returns true if the project is linked to the given user_id
     def has_user(self, user_id):
@@ -225,6 +234,15 @@ class Funder(db.Model):
     )
     name = db.Column(db.String(120), index=True)
     url = db.Column(db.String(2000))
+
+
+class IBAN(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    project_id = db.Column(
+        db.Integer, db.ForeignKey('project.id', ondelete='CASCADE')
+    )
+    iban = db.Column(db.String(34), index=True)
+    iban_name = db.Column(db.String(120), index=True)
 
 
 class UserStory(db.Model):

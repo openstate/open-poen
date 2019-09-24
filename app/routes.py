@@ -7,7 +7,7 @@ from app.forms import (
     SubprojectForm
 )
 from app.email import send_password_reset_email
-from app.models import User, Project, Subproject, Payment, UserStory
+from app.models import User, Project, Subproject, Payment, UserStory, IBAN
 from app import util
 from babel.numbers import format_currency, format_percent
 from sqlalchemy.exc import IntegrityError
@@ -228,6 +228,8 @@ def index():
                             bunq_access_token, project.id
                         )
 
+                        util.get_all_monetary_account_active_ibans(project.id)
+
                         flash(
                             '<span class="text-green">Bunq account succesvol '
                             'gekoppeld aan project "%s". De transacties '
@@ -279,12 +281,7 @@ def index():
     if request.method == 'POST' and project_form.name.data:
         projects = Project.query.filter_by(id=project_form.id.data)
         if len(projects.all()):
-            select_ibans = util.get_all_monetary_account_active_ibans(
-                project_form.id.data
-            )
-            project_form.iban.choices = [('', '')] + [
-                (x, x) for x in select_ibans
-            ]
+            project_form.iban.choices = projects.first().make_select_options()
     if project_form.validate_on_submit():
         new_project_data = {}
         for f in project_form:
@@ -401,10 +398,7 @@ def index():
             # If a bunq account is available, allow the user to select
             # an IBAN
             if project.bunq_access_token:
-                select_ibans = util.get_all_monetary_account_active_ibans(
-                    project.id
-                )
-                form.iban.choices = [('', '')] + [(x, x) for x in select_ibans]
+                form.iban.choices = project.make_select_options()
                 # Set default selected value
                 form.iban.data = '%s - %s' % (
                     project.iban, project.iban_name
@@ -461,12 +455,7 @@ def project(project_id):
     # values as used when the form was generated for this
     # subproject. I thought this should happen automatically.
     if request.method == 'POST' and subproject_form.name.data:
-        select_ibans = util.get_all_monetary_account_active_ibans(
-            project.id
-        )
-        subproject_form.iban.choices = [('', '')] + [
-            (x, x) for x in select_ibans
-        ]
+        subproject_form.iban.choices = project.make_select_options()
     if subproject_form.validate_on_submit():
         # Get data from the form
         new_subproject_data = {}
@@ -523,10 +512,7 @@ def project(project_id):
     # If a bunq account is available, allow the user to select
     # an IBAN
     if project.bunq_access_token:
-        select_ibans = util.get_all_monetary_account_active_ibans(project.id)
-        subproject_form.iban.choices = [('', '')] + [
-            (x, x) for x in select_ibans
-        ]
+        subproject_form.iban.choices = project.make_select_options()
 
     amounts = calculate_project_amounts(project_id)
 
@@ -574,12 +560,7 @@ def subproject(project_id, subproject_id):
     # values as used when the form was generated for this subproject. I
     # thought this should happen automatically.
     if request.method == 'POST' and subproject_form.name.data:
-        select_ibans = util.get_all_monetary_account_active_ibans(
-            subproject.project_id
-        )
-        subproject_form.iban.choices = [('', '')] + [
-            (x, x) for x in select_ibans
-        ]
+        subproject_form.iban.choices = subproject.project.make_select_options()
     if subproject_form.validate_on_submit():
         # Get data from the form
         new_subproject_data = {}
@@ -652,12 +633,7 @@ def subproject(project_id, subproject_id):
     # If a bunq account is available, allow the user to select
     # an IBAN
     if subproject.project.bunq_access_token:
-        select_ibans = util.get_all_monetary_account_active_ibans(
-            subproject.project.id
-        )
-        subproject_form.iban.choices = [('', '')] + [
-            (x, x) for x in select_ibans
-        ]
+        subproject_form.iban.choices = subproject.project.make_select_options()
         # Set default selected value
         subproject_form.iban.data = '%s - %s' % (
             subproject.iban, subproject.iban_name

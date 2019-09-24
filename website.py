@@ -1,6 +1,6 @@
 from app import app, db, cli
 from app.models import (
-    User, Project, Subproject, DebitCard, Funder, Payment, UserStory
+    User, Project, Subproject, DebitCard, Funder, Payment, UserStory, IBAN
 )
 
 
@@ -14,5 +14,6 @@ def make_shell_context():
         'DebitCard': DebitCard,
         'Funder': Funder,
         'Payment': Payment,
+        'IBAN': IBAN,
         'UserStory': UserStory
     }

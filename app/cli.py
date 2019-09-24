@@ -45,6 +45,20 @@ def get_new_payments_all():
 
 
 @bunq.command()
+def get_new_ibans_all():
+    """Get all IBANs from all bank accounts belonging to all projects"""
+    for project in Project.query.all():
+        new_ibans_count = util.get_all_monetary_account_active_ibans(
+            project.id
+        )
+        print(
+            'Retrieved %s IBANs for project "%s"' % (
+                new_ibans_count, project.name
+            )
+        )
+
+
+@bunq.command()
 @click.argument('project_id')
 def create_bunq_api_conf(project_id):
     """ Get/renew Bunq API .conf file for a specific project"""
