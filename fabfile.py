@@ -14,12 +14,15 @@ NODE_CONTAINER = 'poen_node_1'
 # App container
 APP_CONTAINER = 'poen_app_1'
 
+# Server name
+SERVER = 'Oxygen'
+
 
 @task
 def deploy(c):
-    sudo_pass = getpass.getpass("What's your sudo password?")
+    sudo_pass = getpass.getpass("Enter your sudo password on %s: " % SERVER)
     config = Config(overrides={'sudo': {'password': sudo_pass}})
-    c = Connection('Oxygen', config=config)
+    c = Connection(SERVER, config=config)
 
     # Pull from GitHub
     c.run(
