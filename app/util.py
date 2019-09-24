@@ -45,6 +45,7 @@ def get_all_monetary_account_active(project_id):
 def get_all_monetary_account_active_ibans(project_id):
     # Remove any already existing IBANs for this project
     IBAN.query.filter_by(project_id=project_id).delete()
+    db.session.commit()
 
     new_ibans_count = 0
     for monetary_account in get_all_monetary_account_active(project_id):
