@@ -32,4 +32,4 @@ const routes = new Router({
 });
 
 // Load events
-jQuery(document).ready(() => routes.loadEvents());
+$(document).ready(() => routes.loadEvents());
