@@ -6,122 +6,155 @@
 {% endblock %}
 
 {% block content %}
-  <div class="text-center">
-    <a href="/">Home</a> > <a href="{{ url_for('project', project_id=subproject.project.id) }}">{{ subproject.project.name }}</a> > {{ subproject.name }}
-  </div>
+  <div class="container project-lead bg-blue-light">
+    <div class="text-center poen-breadcrumb">
+      <a href="/">Home</a> > <a href="{{ url_for('project', project_id=subproject.project.id) }}">{{ subproject.project.name }}</a> > {{ subproject.name }}
+    </div>
 
-  <div class="row">
-    <div class="col-12 col-md-4 offset-md-4 text-center">
-      <p><b>{{ subproject.name }}</b></p>
-      <p>resterend: {{ amounts['left_str'] }}</p>
-      <p>uitgegeven: {{ amounts['spent_str'] }}</p>
-      <p>totaal: {{ amounts['awarded_str'] }}</p>
-      <p>percentage: {{ amounts['percentage_spent_str'] }}</p>
+    <div class="row">
+      <div class="col-10 offset-1">
+        <div class="row">
+          <div class="col-12 col-md-4 offset-md-4">
+            <div class="amounts-card bg-grey-light">
+              {% if subproject.hidden %}
+                <p><i>Dit subproject is verborgen en dus niet te zien door het publiek</i><p>
+              {% endif %}
+              <div class="amounts-card-title">
+                <h1 class="text-center">{{ subproject.name }}</h1>
+              </div>
+              <div class="row">
+                <div class="col-4 text-right">
+                  <h3 class="text-blue">resterend</h3>
+                  <h2>{{ amounts.left_str }}</h2>
+                </div>
+                <div class="col-4 text-center">
+                  <h2>{{ amounts.percentage_spent_str }}</h2>
+                </div>
+                <div class="col-4">
+                  <h3 class="text-red">uitgegeven</h3>
+                  <h2>{{ amounts.spent_str }}</h2>
+                </div>
+              </div>
+              <h3 class="text-center totaal">totaal {{ amounts.awarded_str }}</h3>
 
-      {% if project_owner %}
-        <!-- Button trigger modal -->
-        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#subproject-bijwerken">
-          Subproject bijwerken
-        </button>
-
-        <!-- Modal -->
-        <div class="modal fade text-left" id="subproject-bijwerken" tabindex="-1" role="dialog" aria-labelledby="subprojectBijwerkenLabel" aria-hidden="true">
-          <div class="modal-dialog" role="document">
-            <div class="modal-content">
-              <form method="POST" action="">
-                <div class="modal-header">
-                  <h5 class="modal-title" id="subprojectBijwerkenLabel">Subproject Bijwerken</h5>
-                  <button type="button" class="close" data-dismiss="modal" aria-label="Annuleren">
-                    <span aria-hidden="true">&times;</span>
+              {% if project_owner %}
+                <!-- Button trigger modal -->
+                <div class="text-center">
+                  <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#subproject-bijwerken">
+                    Subproject bijwerken
                   </button>
                 </div>
-                <div class="modal-body">
-                  <div>
-                    {{ subproject_form.csrf_token }}
 
-                    {% for f in subproject_form %}
-                      {% if f.widget.input_type != 'hidden' and f.widget.input_type != 'submit' %}
-                        <div>
-                          {{ f.label }}
-                          <br>
-                          {{ f }}
-                          {% for error in f.errors %}
-                            <span style="color: red;">- {{ error }}</span>
-                          {% endfor %}
+                <!-- Modal -->
+                <div class="modal fade text-left" id="subproject-bijwerken" tabindex="-1" role="dialog" aria-labelledby="subprojectBijwerkenLabel" aria-hidden="true">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <form method="POST" action="">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="subprojectBijwerkenLabel">Subproject Bijwerken</h5>
+                          <button type="button" class="close" data-dismiss="modal" aria-label="Annuleren">
+                            <span aria-hidden="true">&times;</span>
+                          </button>
                         </div>
-                      {% endif %}
-                    {% endfor %}
-                    {{ subproject_form.project_id }}
-                    {{ subproject_form.id }}
-                  </div>
-                </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuleren</button>
-                  <!-- Button trigger modal -->
-                  <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#subproject-verwijder">
-                    Verwijderen
-                  </button>
+                        <div class="modal-body">
+                          <div>
+                            {{ subproject_form.csrf_token }}
 
-                  <!-- Modal -->
-                  <div class="modal fade" id="subproject-verwijder" tabindex="-1" role="dialog" aria-labelledby="subprojectVerwijderLabel" aria-hidden="true">
-                    <div class="modal-dialog" role="document">
-                      <div class="modal-content">
-                        <form method="POST" action="">
-                          <div class="modal-header">
-                            <h5 class="modal-title" id="subprojectVerwijderLabel">Subproject Verwijderen</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Annuleren">
-                              <span aria-hidden="true">&times;</span>
-                            </button>
+                            {% for f in subproject_form %}
+                              {% if f.widget.input_type != 'hidden' and f.widget.input_type != 'submit' %}
+                                <div>
+                                  {{ f.label }}
+                                  <br>
+                                  {{ f }}
+                                  {% for error in f.errors %}
+                                    <span style="color: red;">- {{ error }}</span>
+                                  {% endfor %}
+                                </div>
+                              {% endif %}
+                            {% endfor %}
+                            {{ subproject_form.project_id }}
+                            {{ subproject_form.id }}
                           </div>
-                          <div class="modal-body">
-                            <div>
-                              <p>Weet u zeker dat u subproject "<b>{{ subproject['name'] }}</b>" wilt verwijderen? Als u een subproject niet wilt tonen aan het publiek kunt u het subproject ook 'verbergen' in plaats van verwijderen.</p>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuleren</button>
+                          <!-- Button trigger modal -->
+                          <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#subproject-verwijder">
+                            Verwijderen
+                          </button>
+
+                          <!-- Modal -->
+                          <div class="modal fade" id="subproject-verwijder" tabindex="-1" role="dialog" aria-labelledby="subprojectVerwijderLabel" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                              <div class="modal-content">
+                                <form method="POST" action="">
+                                  <div class="modal-header">
+                                    <h5 class="modal-title" id="subprojectVerwijderLabel">Subproject Verwijderen</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Annuleren">
+                                      <span aria-hidden="true">&times;</span>
+                                    </button>
+                                  </div>
+                                  <div class="modal-body">
+                                    <div>
+                                      <p>Weet u zeker dat u subproject "<b>{{ subproject['name'] }}</b>" wilt verwijderen? Als u een subproject niet wilt tonen aan het publiek kunt u het subproject ook 'verbergen' in plaats van verwijderen.</p>
+                                    </div>
+                                  </div>
+                                  <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuleren</button>
+                                    {{ subproject_form.remove }}
+                                  </div>
+                                </form>
+                              </div>
                             </div>
                           </div>
-                          <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuleren</button>
-                            {{ subproject_form.remove }}
-                          </div>
-                        </form>
-                      </div>
+                          {{ subproject_form.submit }}
+                        </div>
+                      </form>
                     </div>
                   </div>
-                  {{ subproject_form.submit }}
                 </div>
-              </form>
+              {% endif %}
             </div>
           </div>
         </div>
-      {% endif %}
+      </div>
     </div>
   </div>
 
-  <table class="table">
-    <tr>
-      <th>bedrag €</th>
-      <th>ontvanger</th>
-      <th>initiatiefnemer</th>
-      <th>omschrijving</th>
-      <th>datum</th>
-      <th>media</th>
-      <th>info</th>
-      <th>details</th>
-    </tr>
-    {% for payment in subproject.payments|sort(attribute='created', reverse=true) %}
-      <tr>
-        <td>{{ payment.amount_value }}</td>
-        <td>{{ payment.counterparty_alias_name }}</td>
-        <td>{{ payment.alias_name }}</td>
-        {% if payment.short_user_description %}
-          <td>{{ payment.short_user_description }}</td>
-        {% else %}
-          <td><i>nog niet toegevoegd</i></td>
-        {% endif %}
-        <td>{{ payment.created.strftime('%Y-%m-%d') }}</td>
-        <td>TODO</td>
-        <td>TODO</td>
-        <td>TODO</td>
-      </tr>
-    {% endfor %}
-  </table>
+  <div class="container">
+    <div class="row">
+      <div class="col-12 col-lg-10 offset-lg-1 content bg-white">
+        <div class="row">
+          <table class="table">
+            <tr>
+              <th>bedrag €</th>
+              <th>ontvanger</th>
+              <th>initiatiefnemer</th>
+              <th>omschrijving</th>
+              <th>datum</th>
+              <th>media</th>
+              <th>info</th>
+              <th>details</th>
+            </tr>
+            {% for payment in subproject.payments|sort(attribute='created', reverse=true) %}
+              <tr>
+                <td>{{ payment.amount_value }}</td>
+                <td>{{ payment.counterparty_alias_name }}</td>
+                <td>{{ payment.alias_name }}</td>
+                {% if payment.short_user_description %}
+                  <td>{{ payment.short_user_description }}</td>
+                {% else %}
+                  <td><i>nog niet toegevoegd</i></td>
+                {% endif %}
+                <td>{{ payment.created.strftime('%Y-%m-%d') }}</td>
+                <td>TODO</td>
+                <td>TODO</td>
+                <td>TODO</td>
+              </tr>
+            {% endfor %}
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
 {% endblock %}

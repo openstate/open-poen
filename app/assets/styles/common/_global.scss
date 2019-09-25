@@ -141,6 +141,13 @@ hr {
   padding: 26px 54px;
 }
 
+.amounts-card {
+  padding: 33px 20px;
+  border-radius: 35px;
+  min-height: 326px;
+  margin-bottom: 13px;
+}
+
 .amounts-card-title {
   color: $blue-dark;
 
@@ -200,5 +207,9 @@ hr {
   h6 {
     font-size: 16px;
     line-height: 16px;
+  }
+
+  .index-project {
+    min-height: 246px;
   }
 }

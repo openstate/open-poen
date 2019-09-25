@@ -55,7 +55,7 @@
           {% if user.admin %}
             <div class="col-12 col-md-6 col-xxl-4">
               <!-- Button trigger modal -->
-              <button type="button" class="btn index-project w-100 bg-green-light text-white" data-toggle="modal" data-target="#project-toevoegen">
+              <button type="button" class="btn amounts-card w-100 bg-green-light text-white" data-toggle="modal" data-target="#project-toevoegen">
                 <h1>Project toevoegen</h1>
                 <br>
                 <br>
@@ -107,7 +107,7 @@
             {% for project in project_data %}
               {% if True %}
                 <div class="col-12 col-md-6 col-xxl-4">
-                  <div class="index-project bg-green-light">
+                  <div class="amounts-card bg-green-light">
                     {% if project.hidden %}
                       <p><i>Dit project is verborgen en dus niet te zien door het publiek</i><p>
                     {% endif %}
@@ -129,7 +129,7 @@
                         <h2>{{ project.amounts.spent_str }}</h2>
                       </div>
                     </div>
-                    <h2 class="text-center totaal">totaal {{ project.amounts.awarded_str }}</h2>
+                    <h3 class="text-center totaal">totaal {{ project.amounts.awarded_str }}</h3>
 
                     {% if project.project_owner %}
                       <div class="text-center">

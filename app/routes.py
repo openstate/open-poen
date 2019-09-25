@@ -9,7 +9,7 @@ from app.forms import (
 from app.email import send_password_reset_email
 from app.models import User, Project, Subproject, Payment, UserStory, IBAN
 from app import util
-from babel.numbers import format_currency, format_percent
+from babel.numbers import format_percent
 from sqlalchemy.exc import IntegrityError
 
 from bunq.sdk.context import ApiEnvironmentType
@@ -102,7 +102,7 @@ def calculate_subproject_amounts(subproject_id):
     amounts = {
         'id': subproject.id,
         'awarded': subproject_awarded,
-        'awarded_str': format_currency(subproject_awarded, 'EUR'),
+        'awarded_str': util.format_currency(subproject_awarded),
         'spent': 0
     }
 
@@ -126,11 +126,9 @@ def calculate_subproject_amounts(subproject_id):
             )
         )
 
-    amounts['spent_str'] = format_currency(
-        amounts['spent'], 'EUR'
-    )
-    amounts['left_str'] = format_currency(
-        amounts['awarded'] - amounts['spent'], 'EUR'
+    amounts['spent_str'] = util.format_currency(amounts['spent'])
+    amounts['left_str'] = util.format_currency(
+        amounts['awarded'] - amounts['spent']
     )
 
     return amounts
