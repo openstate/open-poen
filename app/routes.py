@@ -182,7 +182,7 @@ def index():
             flash(
                 '<span class="text-red">Bunq account koppelen aan het project '
                 ' is mislukt. Probeer het later nog een keer of neem contact '
-                'op met de info@openpoen.nl.'
+                'op met <a href="mailto:info@openpoen.nl>info@openpoen.nl</a>.'
             )
             app.logger.warn(
                 'Retrieved wrong token (used for retrieving Bunq '
@@ -245,8 +245,9 @@ def index():
                         flash(
                             '<span class="text-red">Bunq account koppelen aan '
                             'het project is mislukt. Probeer het later nog '
-                            'een keer of neem contact op met de '
-                            'info@openpoen.nl.'
+                            'een keer of neem contact op met '
+                            '<a href="mailto:info@openpoen.nl>info@openpoen.nl'
+                            '</a>.'
                         )
                         app.logger.error(
                             'Retrieval of Bunq access token failed. Bunq '
