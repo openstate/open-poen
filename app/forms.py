@@ -4,8 +4,9 @@ from wtforms.validators import DataRequired, Email, EqualTo, Length, Optional
 from wtforms.widgets import HiddenInput
 from wtforms import (
     StringField, IntegerField, BooleanField, PasswordField, SubmitField,
-    SelectField
+    SelectField, TextAreaField
 )
+from wtforms.fields.html5 import EmailField
 
 
 class ResetPasswordRequestForm(FlaskForm):
@@ -40,7 +41,7 @@ class ResetPasswordForm(FlaskForm):
 
 
 class LoginForm(FlaskForm):
-    email = StringField('E-mailadres', validators=[DataRequired(), Email()])
+    email = EmailField('E-mailadres', validators=[DataRequired(), Email()])
     Wachtwoord = PasswordField('Wachtwoord', validators=[DataRequired()])
     submit = SubmitField(
         'Inloggen',
@@ -52,7 +53,7 @@ class LoginForm(FlaskForm):
 
 class ProjectForm(FlaskForm):
     name = StringField('Naam', validators=[DataRequired()])
-    description = StringField('Beschrijving', validators=[DataRequired()])
+    description = TextAreaField('Beschrijving', validators=[DataRequired()])
     hidden = BooleanField('Verbergen')
     iban = SelectField('IBAN', validators=[Optional()], choices=[])
     id = IntegerField(widget=HiddenInput())
@@ -74,7 +75,7 @@ class ProjectForm(FlaskForm):
 
 class SubprojectForm(FlaskForm):
     name = StringField('Naam', validators=[DataRequired()])
-    description = StringField('Beschrijving', validators=[DataRequired()])
+    description = TextAreaField('Beschrijving', validators=[DataRequired()])
     hidden = BooleanField('Verbergen')
     iban = SelectField('IBAN', validators=[Optional()], choices=[])
     project_id = IntegerField(widget=HiddenInput())
