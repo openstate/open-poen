@@ -102,46 +102,48 @@
     <div class="row">
       <div class="col-12 col-lg-10 offset-lg-1 content bg-white">
         <div class="row">
-          <table class="payment-table">
-            <thead>
-              <tr>
-                <th data-sortable="true">waarvoor?</th>
-                <th data-sortable="true">bedrag €</th>
-                <th data-sortable="true">ontvanger</th>
-                <th data-sortable="true">initiatiefnemer</th>
-                <th data-sortable="true">omschrijving</th>
-                <th data-sortable="true">datum</th>
-                <th>media</th>
-                <th data-sortable="true">info</th>
-                <th>details</th>
-              </tr>
-            </thead>
-            <tbody>
-            {% for subproject in project.subprojects %}
-              {% for payment in subproject.payments|sort(attribute='created', reverse=true) %}
+          <div class="col-12">
+            <table class="payment-table">
+              <thead>
                 <tr>
-                  <td><a href="{{ url_for('subproject', project_id=project.id, subproject_id=subproject.id) }}">{{ subproject.name }}</a></td>
-                  {% if payment.amount_value >= 0 %}
-                    <td><h1 class="text-blue text-right">+{{ payment.get_formatted_currency() }}</h1></td>
-                  {% else %}
-                    <td><h1 class="text-red text-right">{{ payment.get_formatted_currency() }}</h1></td>
-                  {% endif %}
-                  <td>{{ payment.counterparty_alias_name }}</td>
-                  <td>{{ payment.alias_name }}</td>
-                  {% if payment.short_user_description %}
-                    <td>{{ payment.short_user_description }}</td>
-                  {% else %}
-                    <td><i>nog niet toegevoegd</i></td>
-                  {% endif %}
-                  <td>{{ payment.created.strftime('%Y-%m-%d') }}</td>
-                  <td>TODO</td>
-                  <td>TODO</td>
-                  <td>TODO</td>
+                  <th data-sortable="true">waarvoor?</th>
+                  <th data-sortable="true">bedrag €</th>
+                  <th data-sortable="true">ontvanger</th>
+                  <th data-sortable="true">initiatiefnemer</th>
+                  <th data-sortable="true">omschrijving</th>
+                  <th data-sortable="true">datum</th>
+                  <th>media</th>
+                  <th data-sortable="true">info</th>
+                  <th>details</th>
                 </tr>
-              {% endfor %}
-            {% endfor %}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {% for subproject in project.subprojects %}
+                  {% for payment in subproject.payments|sort(attribute='created', reverse=true) %}
+                    <tr>
+                      <td><a href="{{ url_for('subproject', project_id=project.id, subproject_id=subproject.id) }}">{{ subproject.name }}</a></td>
+                      {% if payment.amount_value >= 0 %}
+                        <td><h1 class="text-blue text-right">+{{ payment.get_formatted_currency() }}</h1></td>
+                      {% else %}
+                        <td><h1 class="text-red text-right">{{ payment.get_formatted_currency() }}</h1></td>
+                      {% endif %}
+                      <td>{{ payment.counterparty_alias_name }}</td>
+                      <td>{{ payment.alias_name }}</td>
+                      {% if payment.short_user_description %}
+                        <td>{{ payment.short_user_description }}</td>
+                      {% else %}
+                        <td><i>nog niet toegevoegd</i></td>
+                      {% endif %}
+                      <td>{{ payment.created.strftime('%Y-%m-%d') }}</td>
+                      <td>TODO</td>
+                      <td>TODO</td>
+                      <td>TODO</td>
+                    </tr>
+                  {% endfor %}
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
