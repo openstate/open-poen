@@ -1,0 +1,47 @@
+.payment-table { 
+  border-collapse: separate; 
+  border-spacing: 0 26px;
+
+  thead th {
+    border: none;
+    border-top: 1px solid $blue-dark;
+    font-weight: normal;
+  }
+
+  //tr {
+  //  box-shadow: 0 -5px 5px -5px #E8E8E8, 0 5px 5px -5px #E8E8E8;
+  //}
+
+  td {
+    //box-shadow: 0 -5px 5px -5px #E8E8E8, 0 5px 5px -5px ;
+    border: solid 1px #F5F5F5;
+    border-style: solid none;
+    padding: 8px 0;
+
+    .cell {
+      border-right: solid 1px lighten($blue, 30%);
+      height: 54px;
+      display: flex;
+      align-items: center;
+      padding: 0 8px;
+
+      &.last-cell {
+        border-right: none;
+      }
+    }
+  }
+
+  td:first-child {
+    //box-shadow: -5px 0 5px -5px #E8E8E8;
+    border-left-style: solid;
+    border-top-left-radius: 35px; 
+    border-bottom-left-radius: 35px;
+  }
+
+  td:last-child {
+    //box-shadow: 5px 0 5px -5px #E8E8E8;
+    border-right-style: solid;
+    border-bottom-right-radius: 35px; 
+    border-top-right-radius: 35px; 
+  }
+}
