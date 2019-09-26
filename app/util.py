@@ -1,4 +1,4 @@
-from os.path import abspath, join, dirname
+from os.path import abspath, dirname, exists, join
 from time import sleep
 import json
 import socket
@@ -38,6 +38,8 @@ def get_bunq_api_config_filename(environment_type, project_id):
 def get_all_monetary_account_active(project_id):
     environment_type = app.config['BUNQ_ENVIRONMENT_TYPE']
     filename = get_bunq_api_config_filename(environment_type, project_id)
+    if not exists(filename):
+        return []
     bunq_api = BunqLib(environment_type, conf=filename)
     return bunq_api.get_all_monetary_account_active()
 
@@ -68,7 +70,7 @@ def _transform_payment(payment):
     for k, v in payment_as_dict.items():
         # Skip these fields as we don't use them
         if k in ['allow_chat', 'attachment',
-                 'request_reference_split_the_bill']:
+                 'request_reference_split_the_bill', 'geolocation']:
             continue
 
         # Rename the 'id' field
