@@ -37,7 +37,7 @@ login_manager.init_app(app)
 login_manager.login_message = u"Log in om verder te gaan"
 login_manager.login_view = "login"
 
-locale.setlocale(locale.LC_NUMERIC, 'nl_NL.UTF-8')
+locale.setlocale(locale.LC_ALL, 'nl_NL.UTF-8')
 
 from app import routes, models, errors
 

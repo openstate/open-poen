@@ -1,6 +1,9 @@
 // Import external dependencies
 import 'jquery';
 import 'bootstrap';
+import 'bootstrap-table';
+import 'bootstrap-table/dist/extensions/sticky-header/bootstrap-table-sticky-header.min.js';
+import 'bootstrap-table/dist/extensions/mobile/bootstrap-table-mobile.min.js';
 
 // Import local dependencies
 import Router from './util/Router';

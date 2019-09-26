@@ -3,6 +3,7 @@ from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from time import time
 import jwt
+import locale
 
 
 # Association table between Project and User
@@ -201,7 +202,7 @@ class Payment(db.Model):
     #  *'type': 'BUNQ',
     #  *'updated': '2019-09-09 14:07:38.942900'}
     id = db.Column(db.Integer, primary_key=True)
-    bank_payment_id = db.Column(db.Integer)
+    bank_payment_id = db.Column(db.Integer, unique=True)
     alias_name = db.Column(db.String(120))
     alias_type = db.Column(db.String(12))
     alias_value = db.Column(db.String(120), index=True)
@@ -225,6 +226,11 @@ class Payment(db.Model):
     flag_suspicious_count = db.Column(db.Integer)
 
     hidden = db.Column(db.Boolean, default=False)
+
+    def get_formatted_currency(self):
+        return locale.format(
+            "%.2f", self.amount_value, grouping=True, monetary=True
+        )
 
 
 class Funder(db.Model):
