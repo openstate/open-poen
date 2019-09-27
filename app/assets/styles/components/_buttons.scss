@@ -4,6 +4,22 @@
   color: $blue-dark;
 }
 
+.button-poen-small {
+  border-radius: 30px;
+  padding: 11px 20px;
+  font-size: 13px;
+  line-height: 21px;
+  width: 184px;
+}
+
+.button-poen-small-hidden {
+  border-radius: 999px;
+  padding: 23px 20px 22px 20px;
+  font-size: 13px;
+  line-height: 21px;
+  width: 184px;
+}
+
 .button-detail {
   border: none;
   border-radius: 999px;
@@ -13,5 +29,12 @@
 @media (max-width: 767px) {
   .button-poen {
     padding: 10px 30px;
+  }
+
+  .button-poen-small {
+    font-size: 11px;
+    line-height: 18px;
+    height: 60px;
+    width: 100%;
   }
 }

@@ -38,12 +38,12 @@ $(document).ready(() => routes.loadEvents());
 
 // Used for sorting amounts in the payment tables. It filters the amounts from the HTML, replaces the comma with a dot and removes white space (thousand separators).
 window.customSort = function(a, b) {
-        var aa = a.match('[^>]*>(.*)</h1>')[1].replace(',', '.').replace(/\s/g, '');
-        var bb = b.match('[^>]*>(.*)</h1>')[1].replace(',', '.').replace(/\s/g, '');
-        return naturalSort(aa, bb);
+  var aa = a.match('[^>]*>(.*)</h1>')[1].replace(',', '.').replace(/\s/g, '');
+  var bb = b.match('[^>]*>(.*)</h1>')[1].replace(',', '.').replace(/\s/g, '');
+  return naturalSort(aa, bb);
 };
 
 // Format detail view of payment table row
 window.detailFormatter = function(index, row) {
-    return $('#detail-' + index).html()
+  return $('#detail-' + index).html()
 }

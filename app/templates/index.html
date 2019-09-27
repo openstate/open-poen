@@ -11,22 +11,22 @@
 {% endblock %}
 
 {% block content %}
-  <div class="container index-lead bg-grey-light">
+  <div class="container poen-lead index-lead bg-grey-light">
     <div class="row">
       <div class="col-12 col-md-6 header-logo text-center">
-        <img class="index-lead-logo-index img-fluid" src="{{ url_for('static', filename='images/Open-Poen-Logo-2.svg') }}" alt="Open Poen logo">
+        <img class="index-lead-logo img-fluid" src="{{ url_for('static', filename='images/Open-Poen-Logo-2.svg') }}" alt="Open Poen logo">
       </div>
       <div class="col-12 col-md-6 my-auto text-center text-md-left">
         <h5>ZÓ <span class="text-red">WORDT ONS</span> <span class="text-blue">GELD BESTEED</span></h5>
         <br>
-        <button class="btn button-poen bg-white"><h2>bekijk hoe het werkt ></h2></button>
+        <button type="button" class="btn button-poen bg-white"><h2>bekijk hoe het werkt ></h2></button>
       </div>
     </div>
   </div>
 
   <div class="container">
     <div class="row">
-      <div class="col-12 col-lg-10 offset-lg-1 content bg-white">
+      <div class="col-12 col-lg-10 offset-lg-1 poen-content bg-white">
         <div class="row">
           <div class="col-4 border-r">
             <h4>€ {{ total_spent_str }}</h3>
@@ -52,7 +52,7 @@
         <hr class="index-hr-top">
 
         <div class="row">
-          {% if user.admin %}
+          {% if current_user.admin %}
             <div class="col-12 col-md-6 col-xxl-4">
               <!-- Button trigger modal -->
               <button type="button" class="btn amounts-card w-100 bg-green-light text-white" data-toggle="modal" data-target="#project-toevoegen">

@@ -1,8 +1,5 @@
 .index-lead {
-  height: 510px;
   padding-top: 60px;
-  border-bottom-left-radius: 115px;
-  border-bottom-right-radius: 115px;
 }
 
 .index-lead-logo {
@@ -28,27 +25,11 @@
 
 .totaal {
   margin-top: 40px;
-  margin-bottom: 40px;
-}
-
-@media (max-width: 1199px) {
-  .index-lead {
-    height: 420px;
-  }
-}
-
-@media (max-width: 991px) {
-  .index-lead {
-    height: 280px;
-  }
 }
 
 @media (max-width: 767px) {
   .index-lead {
-    height: 330px;
     padding-top: 20px;
-    border-bottom-left-radius: 70px;
-    border-bottom-right-radius: 70px;
   }
 
   .index-hr-top {

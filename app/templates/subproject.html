@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block content %}
-  <div class="container project-lead bg-blue-light">
+  <div class="container poen-lead project-lead bg-blue-light">
     <div class="text-center poen-breadcrumb">
       <a href="/">Home</a> > <a href="{{ url_for('project', project_id=subproject.project.id) }}">{{ subproject.project.name }}</a> > {{ subproject.name }}
     </div>
@@ -14,8 +14,18 @@
     <div class="row">
       <div class="col-10 offset-1">
         <div class="row">
-          <div class="col-12 col-md-4 offset-md-4">
-            <div class="amounts-card bg-grey-light">
+          <div class="lead-side-col col-6 col-lg-3 col-xxl-4 order-6 order-lg-1 d-flex flex-column justify-content-between">
+            <div class="d-none d-lg-block button-poen-small-hidden bg-blue-light mx-auto"></div>
+            <div class="card-small bg-white mx-auto d-flex">
+              <ul class="card-small-list mx-auto my-auto">
+                TODO
+              </ul>
+            </div>
+            <a type="button" class="btn button-poen-small bg-grey-blue mx-auto" href="{{ url_for('project', project_id=subproject.id) }}">< terug</a>
+          </div>
+
+          <div class="col-12 col-lg-6 col-xxl-4 order-1 order-lg-4">
+            <div class="amounts-card bg-white">
               {% if subproject.hidden %}
                 <p><i>Dit subproject is verborgen en dus niet te zien door het publiek</i><p>
               {% endif %}
@@ -116,6 +126,25 @@
               {% endif %}
             </div>
           </div>
+
+          <div class="lead-side-col col-6 col-lg-3 col-xxl-4 order-9 d-flex flex-column justify-content-between">
+            {% if current_user.admin %}
+              <button type="button" class="btn button-poen-small bg-grey-blue mx-auto">initiatiefnemers bewerken ></button>
+            {% else %}
+              <div class="d-none d-lg-block button-poen-small-hidden bg-blue-light mx-auto"></div>
+            {% endif %}
+            <div class="card-small bg-white mx-auto d-flex">
+              <ul class="card-small-list mx-auto my-auto">
+                {% for user in subproject.project.users %}
+                  <li>{{ user.first_name }} {{ user.last_name }}</li>
+                {% endfor %}
+                {% for user in subproject.users %}
+                  <li>{{ user.first_name }} {{ user.last_name }}</li>
+                {% endfor %}
+              </ul>
+            </div>
+            <a type="button" class="btn button-poen-small bg-grey-blue mx-auto" href="{{ url_for('project', project_id=subproject.id) }}">initiatiefnemers ></a>
+          </div>
         </div>
       </div>
     </div>
@@ -123,7 +152,7 @@
 
   <div class="container">
     <div class="row">
-      <div class="col-12 col-lg-10 offset-lg-1 content bg-white">
+      <div class="col-12 col-lg-10 offset-lg-1 poen-content bg-white">
         <div class="row">
           <div class="col-12">
             <table class="payment-table" data-locale="nl-NL" data-detail-view="true" data-detail-view-by-click="true" data-detail-view-icon="false" data-detail-formatter="detailFormatter">
@@ -187,7 +216,7 @@
                     </td>
                     <td>
                       <div class="cell last-cell justify-content-center">
-                        <button class="btn button-detail"><i class="fas fa-chevron-down"></i></button>
+                        <button type="button" class="btn button-detail"><i class="fas fa-chevron-down"></i></button>
                       </div>
                     </td>
                     <div id="detail-{{ loop.index - 1 }}" class="d-none">

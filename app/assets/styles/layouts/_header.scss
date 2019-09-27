@@ -18,6 +18,11 @@
   }
 }
 
+.navbar-collapse {
+  padding-right: 20px;
+  text-align: right;
+}
+
 @media (max-width: 767px) {
   .navbar {
     height: 74px;

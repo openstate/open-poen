@@ -298,7 +298,6 @@ def index():
 
     return render_template(
         'index.html',
-        user=current_user,
         project_data=project_data,
         total_awarded_str=util.human_format(total_awarded),
         total_spent_str=util.human_format(total_spent),

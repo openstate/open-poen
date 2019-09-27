@@ -234,7 +234,10 @@ class Payment(db.Model):
 
     def get_formatted_balance(self):
         return locale.format(
-            "%.2f", self.balance_after_mutation_value, grouping=True, monetary=True
+            "%.2f",
+            self.balance_after_mutation_value,
+            grouping=True,
+            monetary=True
         )
 
 

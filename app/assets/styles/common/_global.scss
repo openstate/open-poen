@@ -108,6 +108,10 @@ hr {
   background-color: $grey-light;
 }
 
+.bg-grey-blue {
+  background-color: $grey-blue;
+}
+
 .abs-center-x {
   position: absolute;
   left: 50%;
@@ -135,17 +139,27 @@ hr {
   }
 }
 
-.content {
+.poen-lead {
+  height: 510px;
+  border-bottom-left-radius: 115px;
+  border-bottom-right-radius: 115px;
+}
+
+.poen-content {
   border-radius: 70px;
   top: -100px;
   padding: 26px 54px;
 }
 
+.lead-side-col {
+  margin-bottom: 26px;
+}
+
 .amounts-card {
-  padding: 33px 20px;
+  padding: 33px 20px 10px 20px;
   border-radius: 35px;
   min-height: 326px;
-  margin-bottom: 13px;
+  margin-bottom: 26px;
 }
 
 .amounts-card-title {
@@ -160,11 +174,47 @@ hr {
   }
 }
 
+.card-small {
+  margin-top: 26px;
+  margin-bottom: 26px;
+  border-radius: 35px;
+  height: 184px;
+  width: 184px;
+}
+
+.card-small-list {
+  list-style: none;
+  padding: 10px;
+}
+
+@media (max-width: 1199px) {
+  .poen-lead {
+    height: 420px;
+
+    &.project-lead {
+      height: 510px;
+    }
+  }
+}
+
 @media (max-width: 991px) {
-  .content {
+  .poen-lead {
+    height: 280px;
+
+    &.project-lead {
+      min-height: 680px;
+    }
+  }
+
+  .poen-content {
     border-radius: 13px;
     top: 0;
     padding: 20px 15px;
+  }
+
+  .amounts-card {
+    padding-top: 20px;
+    min-height: 246px;
   }
 }
 
@@ -209,7 +259,13 @@ hr {
     line-height: 16px;
   }
 
-  .index-project {
-    min-height: 246px;
+  .poen-lead {
+    height: 330px;
+    border-bottom-left-radius: 70px;
+    border-bottom-right-radius: 70px;
+  }
+
+  .card-small {
+    width: 100%;
   }
 }

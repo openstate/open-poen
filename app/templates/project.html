@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block content %}
-  <div class="container project-lead bg-blue">
+  <div class="container poen-lead project-lead bg-blue">
     <div class="text-center poen-breadcrumb">
       <a href="/">Home</a> > {{ project.name }}
     </div>
@@ -14,15 +14,30 @@
     <div class="row">
       <div class="col-10 offset-1">
         <div class="row">
-          <div class="col-12 col-md-4">
-            ter beschikking door:
-            {% for funder in project.funders %}
-              <a href="{{ funder.url }}" target="_blank" rel="noopener">{{ funder.name }}</a>
-            {% endfor %}
+          <div class="lead-side-col col-6 col-lg-3 col-xxl-4 order-6 order-lg-1 d-flex flex-column justify-content-between">
+            {% if current_user.admin %}
+              <button type="button" class="btn button-poen-small bg-grey-blue mx-auto">sponsoren bewerken ></button>
+            {% else %}
+              <div class="d-none d-lg-block button-poen-small-hidden bg-blue mx-auto"></div>
+            {% endif %}
+            <div class="card-small bg-white mx-auto d-flex">
+              {% for funder in project.funders %}
+                {% if funder.image %}
+                  <ul class="card-small-list mx-auto my-auto">
+                    <li><a class="mx-auto my-auto" href="{{ funder.url }}" target="_blank" rel="noopener">{{ funder.name }}</a></li>
+                  </ul>
+                {% else %}
+                  <ul class="card-small-list mx-auto my-auto">
+                    <li><a class="mx-auto my-auto" href="{{ funder.url }}" target="_blank" rel="noopener">{{ funder.name }}</a></li>
+                  </ul>
+                {% endif %}
+              {% endfor %}
+            </div>
+            <button type="button" class="btn button-poen-small bg-grey-blue mx-auto">gesponsord door ></button>
           </div>
 
-          <div class="col-12 col-md-4">
-            <div class="amounts-card bg-grey-light">
+          <div class="col-12 col-lg-6 col-xxl-4 order-1 order-lg-4">
+            <div class="amounts-card bg-white">
               {% if project.hidden %}
                 <p><i>Dit project is verborgen en dus niet te zien door het publiek</i><p>
               {% endif %}
@@ -46,11 +61,11 @@
             </div>
           </div>
 
-          <div class="col-12 col-md-4">
+          <div class="lead-side-col col-6 col-lg-3 col-xxl-4 order-9 d-flex flex-column justify-content-between">
             {% if project_owner %}
               <!-- Button trigger modal -->
-              <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#subproject-toevoegen">
-                Subproject toevoegen
+              <button type="button" class="btn button-poen-small bg-grey-blue mx-auto" data-toggle="modal" data-target="#subproject-toevoegen">
+                initiatief toevoegen >
               </button>
 
               <!-- Modal -->
@@ -91,7 +106,17 @@
                   </div>
                 </div>
               </div>
+            {% else %}
+              <div class="d-none d-lg-block button-poen-small-hidden bg-blue mx-auto"></div>
             {% endif %}
+            <div class="card-small bg-white mx-auto d-flex">
+              <ul class="card-small-list mx-auto my-auto">
+                {% for subproject in project.subprojects %}
+                  <li><a href="{{ url_for('subproject', project_id=project.id, subproject_id=subproject.id) }}">{{ subproject.name }}</a></li>
+                {% endfor %}
+              </ul>
+            </div>
+            <button type="button" class="btn button-poen-small bg-grey-blue mx-auto">intiatieven ></button>
           </div>
         </div>
       </div>
@@ -100,7 +125,7 @@
 
   <div class="container">
     <div class="row">
-      <div class="col-12 col-lg-10 offset-lg-1 content bg-white">
+      <div class="col-12 col-lg-10 offset-lg-1 poen-content bg-white">
         <div class="row">
           <div class="col-12">
             <table class="payment-table" data-locale="nl-NL" data-detail-view="true" data-detail-view-by-click="true" data-detail-view-icon="false" data-detail-formatter="detailFormatter">
@@ -171,7 +196,7 @@
                       </td>
                       <td>
                         <div class="cell last-cell justify-content-center">
-                          <button class="btn button-detail"><i class="fas fa-chevron-down"></i></button>
+                          <button type="button" class="btn button-detail"><i class="fas fa-chevron-down"></i></button>
                         </div>
                       </td>
                       <div id="detail-{{ loop.index - 1 }}" class="d-none">
