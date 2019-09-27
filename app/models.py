@@ -232,6 +232,11 @@ class Payment(db.Model):
             "%.2f", self.amount_value, grouping=True, monetary=True
         )
 
+    def get_formatted_balance(self):
+        return locale.format(
+            "%.2f", self.balance_after_mutation_value, grouping=True, monetary=True
+        )
+
 
 class Funder(db.Model):
     id = db.Column(db.Integer, primary_key=True)

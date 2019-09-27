@@ -15,15 +15,12 @@ import home from './routes/home';
 // Import the needed Font Awesome functionality
 import { config, library, dom } from '@fortawesome/fontawesome-svg-core';
 // Import required icons
-import { faArrowRight, faBars } from '@fortawesome/free-solid-svg-icons';
+import { faArrowRight, faBars, faChevronDown } from '@fortawesome/free-solid-svg-icons';
 import { faEnvelope } from '@fortawesome/free-regular-svg-icons';
 import { faGithub } from '@fortawesome/free-brands-svg-icons';
 
-// Allow usage in pseudo elements
-config.searchPseudoElements=true;
-
 // Add the imported icons to the library
-library.add(faArrowRight, faEnvelope, faGithub, faBars);
+library.add(faArrowRight, faEnvelope, faGithub, faBars, faChevronDown);
 
 // Tell FontAwesome to watch the DOM and add the SVGs when it detects icon markup
 dom.watch();
@@ -45,3 +42,15 @@ window.customSort = function(a, b) {
         var bb = b.match('[^>]*>(.*)</h1>')[1].replace(',', '.').replace(/\s/g, '');
         return naturalSort(aa, bb);
 };
+
+// Format detail view of payment table row
+window.detailFormatter = function(index, row) {
+    var html = []
+    console.log(index)
+    //console.log(row)
+    //$.each(row, function (key, value) {
+    //    html.push('<p><b>' + key + ':</b> ' + value + '</p>')
+    //})
+    //return html.join('')
+    return $('#detail-' + index).html()
+}

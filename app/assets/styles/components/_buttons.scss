@@ -1,11 +1,17 @@
-.poen-button {
+.button-poen {
   border-radius: 999px;
   padding: 20px 30px;
   color: $blue-dark;
 }
 
+.button-detail {
+  border: none;
+  border-radius: 999px;
+  background-color: $grey-blue;
+}
+
 @media (max-width: 767px) {
-  .poen-button {
+  .button-poen {
     padding: 10px 30px;
   }
 }

@@ -11,6 +11,7 @@
 }
 
 .payment-table { 
+  color: $blue-dark;
   border-collapse: separate; 
   border-spacing: 0 26px;
 
@@ -55,5 +56,9 @@
     border-right-style: solid;
     border-bottom-right-radius: 35px; 
     border-top-right-radius: 35px; 
+  }
+
+  .detail-row {
+    padding: 20px;
   }
 }
