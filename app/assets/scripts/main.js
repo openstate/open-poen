@@ -4,6 +4,7 @@ import 'bootstrap';
 import 'bootstrap-table';
 import 'bootstrap-table/dist/extensions/sticky-header/bootstrap-table-sticky-header.min.js';
 import 'bootstrap-table/dist/extensions/mobile/bootstrap-table-mobile.min.js';
+import naturalSort from 'javascript-natural-sort';
 
 // Import local dependencies
 import Router from './util/Router';
@@ -36,3 +37,10 @@ const routes = new Router({
 
 // Load events
 $(document).ready(() => routes.loadEvents());
+
+// Used for sorting amounts in the payment tables. It filters the amounts from the HTML, replaces the comma with a dot and removes white space (thousand separators).
+window.customSort = function(a, b) {
+        var aa = a.match('[^>]*>(.*)</h1>')[1].replace(',', '.').replace(/\s/g, '');
+        var bb = b.match('[^>]*>(.*)</h1>')[1].replace(',', '.').replace(/\s/g, '');
+        return naturalSort(aa, bb);
+};

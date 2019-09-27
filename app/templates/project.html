@@ -107,7 +107,7 @@
               <thead>
                 <tr>
                   <th data-sortable="true">waarvoor?</th>
-                  <th data-sortable="true">bedrag €</th>
+                  <th data-sortable="true" data-sorter="customSort">bedrag €</th>
                   <th data-sortable="true">ontvanger</th>
                   <th data-sortable="true">initiatiefnemer</th>
                   <th data-sortable="true">omschrijving</th>
@@ -129,7 +129,7 @@
                       <td>
                         <div class="cell justify-content-end">
                           {% if payment.amount_value >= 0 %}
-                            <h1 class="text-blue text-right">{{ payment.get_formatted_currency() }}</h1>
+                            <h1 class="text-blue text-right">+{{ payment.get_formatted_currency() }}</h1>
                           {% else %}
                             <h1 class="text-red text-right">{{ payment.get_formatted_currency() }}</h1>
                           {% endif %}
