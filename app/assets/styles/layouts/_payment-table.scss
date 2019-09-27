@@ -10,9 +10,9 @@
   }
 }
 
-.payment-table { 
+.payment-table {
   color: $blue-dark;
-  border-collapse: separate; 
+  border-collapse: separate;
   border-spacing: 0 26px;
 
   thead th {
@@ -47,15 +47,15 @@
   td:first-child {
     //box-shadow: -5px 0 5px -5px #E8E8E8;
     border-left-style: solid;
-    border-top-left-radius: 35px; 
+    border-top-left-radius: 35px;
     border-bottom-left-radius: 35px;
   }
 
   td:last-child {
     //box-shadow: 5px 0 5px -5px #E8E8E8;
     border-right-style: solid;
-    border-bottom-right-radius: 35px; 
-    border-top-right-radius: 35px; 
+    border-bottom-right-radius: 35px;
+    border-top-right-radius: 35px;
   }
 
   .detail-row {

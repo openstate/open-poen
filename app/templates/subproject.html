@@ -126,10 +126,10 @@
       <div class="col-12 col-lg-10 offset-lg-1 content bg-white">
         <div class="row">
           <div class="col-12">
-            <table class="payment-table">
+            <table class="payment-table" data-locale="nl-NL" data-detail-view="true" data-detail-view-by-click="true" data-detail-view-icon="false" data-detail-formatter="detailFormatter">
               <thead>
                 <tr>
-                  <th data-sortable="true">bedrag €</th>
+                  <th data-sortable="true" data-sorter="customSort">bedrag €</th>
                   <th data-sortable="true">ontvanger</th>
                   <th data-sortable="true">initiatiefnemer</th>
                   <th data-sortable="true">omschrijving</th>
@@ -142,22 +142,103 @@
               <tbody>
                 {% for payment in subproject.payments|sort(attribute='created', reverse=true) %}
                   <tr>
-                    {% if payment.amount_value >= 0 %}
-                      <td><h1 class="text-blue text-right">+{{ payment.get_formatted_currency() }}</h1></td>
-                    {% else %}
-                      <td><h1 class="text-red text-right">{{ payment.get_formatted_currency() }}</h1></td>
-                    {% endif %}
-                    <td>{{ payment.counterparty_alias_name }}</td>
-                    <td>{{ payment.alias_name }}</td>
-                    {% if payment.short_user_description %}
-                      <td>{{ payment.short_user_description }}</td>
-                    {% else %}
-                      <td><i>nog niet toegevoegd</i></td>
-                    {% endif %}
-                    <td>{{ payment.created.strftime('%Y-%m-%d') }}</td>
-                    <td>TODO</td>
-                    <td>TODO</td>
-                    <td>TODO</td>
+                    <td>
+                      <div class="cell justify-content-end">
+                        {% if payment.amount_value >= 0 %}
+                          <h1 class="text-blue text-right">+{{ payment.get_formatted_currency() }}</h1>
+                        {% else %}
+                          <h1 class="text-red text-right">{{ payment.get_formatted_currency() }}</h1>
+                        {% endif %}
+                      </div>
+                    </td>
+                    <td>
+                      <div class="cell">
+                        {{ payment.counterparty_alias_name }}
+                      </div>
+                    </td>
+                    <td>
+                      <div class="cell">
+                        {{ payment.alias_name }}
+                      </div>
+                    </td>
+                    <td>
+                      <div class="cell">
+                        {% if payment.short_user_description %}
+                          {{ payment.short_user_description }}
+                        {% else %}
+                          <i>nog niet toegevoegd</i>
+                        {% endif %}
+                      </div>
+                    </td>
+                    <td>
+                      <div class="cell">
+                        {{ payment.created.strftime('%Y-%m-%d') }}
+                      </div>
+                    </td>
+                    <td>
+                      <div class="cell">
+                        TODO
+                      </div>
+                    </td>
+                    <td>
+                      <div class="cell">
+                        TODO
+                      </div>
+                    </td>
+                    <td>
+                      <div class="cell last-cell justify-content-center">
+                        <button class="btn button-detail"><i class="fas fa-chevron-down"></i></button>
+                      </div>
+                    </td>
+                    <div id="detail-{{ loop.index - 1 }}" class="d-none">
+                      <div class="row detail-row">
+                        <div class="col-5">
+                          <b>Initiatiefnemer</b>
+                          <br>
+                          {{ payment.alias_name }}
+                          <br>
+                          <br>
+                          <b>Omschrijving</b>
+                          <br>
+                          {% if payment.description %}
+                            {{ payment.description }}
+                          {% else %}
+                            <i>geen beschrijving</i>
+                          {% endif %}
+                          <br>
+                          <br>
+                          <b>Saldo na boeking</b>
+                          <br>
+                          €{{ payment.get_formatted_balance() }}
+                          <br>
+                          <br>
+                          {{ payment.created.strftime('%Y-%m-%d') }}
+                          <br>
+                          <br>
+                          {% if payment.amount_value >= 0 %}
+                            <h6 class="text-blue">+{{ payment.get_formatted_currency() }}</h6>
+                          {% else %}
+                            <h6 class="text-red">{{ payment.get_formatted_currency() }}</h6>
+                          {% endif %}
+                        </div>
+                        <div class="col-7">
+                          <b>Ontvanger</b>
+                          <br>
+                          {{ payment.counterparty_alias_name }}
+                          <br>
+                          <br>
+                          <b>Waarvoor?</b>
+                          <br>
+                          <i>{{ subproject.name }}</i>
+                          <br>
+                          {% if payment.long_user_description %}
+                            <i>{{ payment.long_user_description }}</i>
+                          {% else %}
+                            <i>er is door de initiatiefnemer nog geen beschrijving van deze transactie toegevoegd</i>
+                          {% endif %}
+                        </div>
+                      </div>
+                    </div>
                   </tr>
                 {% endfor %}
               </tbody>

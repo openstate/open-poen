@@ -45,12 +45,5 @@ window.customSort = function(a, b) {
 
 // Format detail view of payment table row
 window.detailFormatter = function(index, row) {
-    var html = []
-    console.log(index)
-    //console.log(row)
-    //$.each(row, function (key, value) {
-    //    html.push('<p><b>' + key + ':</b> ' + value + '</p>')
-    //})
-    //return html.join('')
     return $('#detail-' + index).html()
 }
