@@ -50,18 +50,18 @@
               {% if project_owner %}
                 <!-- Button trigger modal -->
                 <div class="text-center">
-                  <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#subproject-bijwerken">
-                    Subproject bijwerken
+                  <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#subproject-bewerken">
+                    initiatief bewerken
                   </button>
                 </div>
 
                 <!-- Modal -->
-                <div class="modal fade text-left" id="subproject-bijwerken" tabindex="-1" role="dialog" aria-labelledby="subprojectBijwerkenLabel" aria-hidden="true">
+                <div class="modal fade text-left" id="subproject-bewerken" tabindex="-1" role="dialog" aria-labelledby="subprojectBewerkenLabel" aria-hidden="true">
                   <div class="modal-dialog" role="document">
                     <div class="modal-content">
                       <form method="POST" action="">
                         <div class="modal-header">
-                          <h5 class="modal-title" id="subprojectBijwerkenLabel">Subproject Bijwerken</h5>
+                          <h5 class="modal-title" id="subprojectBewerkenLabel">Initiatief Bewerken</h5>
                           <button type="button" class="close" data-dismiss="modal" aria-label="Annuleren">
                             <span aria-hidden="true">&times;</span>
                           </button>
@@ -143,7 +143,7 @@
                 {% endfor %}
               </ul>
             </div>
-            <a type="button" class="btn button-poen-small bg-grey-blue mx-auto" href="{{ url_for('project', project_id=subproject.id) }}">initiatiefnemers ></a>
+            <button type="button" class="btn button-poen-small bg-grey-blue mx-auto">initiatiefnemers ></button>
           </div>
         </div>
       </div>
