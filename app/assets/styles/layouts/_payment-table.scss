@@ -1,3 +1,15 @@
+.search {
+  margin: 0 !important;
+
+  input {
+    background-color: $grey-blue;
+    color: $blue-dark;
+    height: 44px;
+    border: none;
+    border-radius: 22px;
+  }
+}
+
 .payment-table { 
   border-collapse: separate; 
   border-spacing: 0 26px;
