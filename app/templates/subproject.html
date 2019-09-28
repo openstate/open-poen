@@ -166,6 +166,9 @@
                   <th class="d-none d-xl-table-cell">media</th>
                   <th data-sortable="true" class="d-none d-xl-table-cell">info</th>
                   <th>details</th>
+                  {# the columns below are not shown, but need to be included to make them searchable #}
+                  <th class="d-none">betaalomschrijving</th>
+                  <th class="d-none">lange omschrijving</th>
                 </tr>
               </thead>
               <tbody>
@@ -219,6 +222,17 @@
                         <button type="button" class="btn button-detail"><i class="fas fa-chevron-down"></i></button>
                       </div>
                     </td>
+                    <td>
+                      <div class="cell">
+                        {{ payment.description }}
+                      </div>
+                    </td>
+                    <td>
+                      <div class="cell">
+                        {{ payment.long_user_description }}
+                      </div>
+                    </td>
+
                     <div id="detail-{{ loop.index - 1 }}" class="d-none">
                       <div class="row detail-row">
                         <div class="col-5">
@@ -227,7 +241,7 @@
                           {{ payment.alias_name }}
                           <br>
                           <br>
-                          <b>Omschrijving</b>
+                          <b>Betaalomschrijving</b>
                           <br>
                           {% if payment.description %}
                             {{ payment.description }}
