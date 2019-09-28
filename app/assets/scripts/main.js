@@ -45,5 +45,6 @@ window.customSort = function(a, b) {
 
 // Format detail view of payment table row
 window.detailFormatter = function(index, row) {
-  return $('#detail-' + index).html()
+  var id = row[0].match(/>\s+(\d+)\s+<\/div>/)[1]
+  return $('#detail-' + id).html()
 }
