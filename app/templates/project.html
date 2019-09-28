@@ -133,12 +133,12 @@
                 <tr>
                   <th data-sortable="true">waarvoor?</th>
                   <th data-sortable="true" data-sorter="customSort">bedrag €</th>
-                  <th data-sortable="true">ontvanger</th>
-                  <th data-sortable="true">initiatiefnemer</th>
-                  <th data-sortable="true">omschrijving</th>
-                  <th data-sortable="true">datum</th>
-                  <th>media</th>
-                  <th data-sortable="true">info</th>
+                  <th data-sortable="true" class="d-none d-sm-table-cell">ontvanger</th>
+                  <th data-sortable="true" class="d-none d-md-table-cell">initiatiefnemer</th>
+                  <th data-sortable="true" class="d-none d-sm-table-cell">omschrijving</th>
+                  <th data-sortable="true" class="d-none d-xl-table-cell">datum</th>
+                  <th class="d-none d-xl-table-cell">media</th>
+                  <th data-sortable="true" class="d-none d-xxl-table-cell">info</th>
                   <th>details</th>
                 </tr>
               </thead>
@@ -181,7 +181,7 @@
                       </td>
                       <td>
                         <div class="cell">
-                          {{ payment.created.strftime('%Y-%m-%d') }}
+                          {{ payment.created.strftime('%d-%m-\'%y') }}
                         </div>
                       </td>
                       <td>
@@ -199,6 +199,7 @@
                           <button type="button" class="btn button-detail"><i class="fas fa-chevron-down"></i></button>
                         </div>
                       </td>
+
                       <div id="detail-{{ loop.index - 1 }}" class="d-none">
                         <div class="row detail-row">
                           <div class="col-5">
@@ -221,7 +222,7 @@
                             €{{ payment.get_formatted_balance() }}
                             <br>
                             <br>
-                            {{ payment.created.strftime('%Y-%m-%d') }}
+                            {{ payment.created.strftime('%d-%m-\'%y') }}
                             <br>
                             <br>
                             {% if payment.amount_value >= 0 %}
@@ -238,7 +239,7 @@
                             <br>
                             <b>Waarvoor?</b>
                             <br>
-                            <i>{{ subproject.name }}</i>
+                            <a href="{{ url_for('subproject', project_id=project.id, subproject_id=subproject.id) }}"><i>{{ subproject.name }}</i></a>
                             <br>
                             {% if payment.long_user_description %}
                               <i>{{ payment.long_user_description }}</i>

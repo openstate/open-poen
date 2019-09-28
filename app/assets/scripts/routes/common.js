@@ -6,7 +6,6 @@ export default {
             search: true,
             pagination: true,
             stickyHeader: true,
-            mobileResponsive: true,
             classes: 'table'
         }
     );
