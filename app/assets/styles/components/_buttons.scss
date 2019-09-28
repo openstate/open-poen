@@ -10,6 +10,11 @@
   font-size: 13px;
   line-height: 21px;
   width: 184px;
+
+  a {
+    color: $blue-dark;
+    text-decoration: none;
+  }
 }
 
 .button-poen-small-hidden {

@@ -21,7 +21,9 @@
                 TODO
               </ul>
             </div>
-            <a type="button" class="btn button-poen-small bg-grey-blue mx-auto" href="{{ url_for('project', project_id=subproject.id) }}">< terug</a>
+            <button type="button" class="btn button-poen-small bg-grey-blue mx-auto">
+              <a href="{{ url_for('project', project_id=subproject.project.id) }}">< terug</a>
+            </button>
           </div>
 
           <div class="col-12 col-lg-6 col-xxl-4 order-1 order-lg-4">
