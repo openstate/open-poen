@@ -214,51 +214,53 @@
                       </td>
 
                       <div id="detail-{{ loop.index - 1 }}" class="d-none">
-                        <div class="row detail-row">
-                          <div class="col-5">
-                            <b>Initiatiefnemer</b>
-                            <br>
-                            {{ payment.alias_name }}
-                            <br>
-                            <br>
-                            <b>Betaalomschrijving</b>
-                            <br>
-                            {% if payment.description %}
-                              {{ payment.description }}
-                            {% else %}
-                              <i>geen beschrijving</i>
-                            {% endif %}
-                            <br>
-                            <br>
-                            <b>Saldo na boeking</b>
-                            <br>
-                            €{{ payment.get_formatted_balance() }}
-                            <br>
-                            <br>
-                            {{ payment.created.strftime('%d-%m-\'%y') }}
-                            <br>
-                            <br>
-                            {% if payment.amount_value >= 0 %}
-                              <h6 class="text-blue">+{{ payment.get_formatted_currency() }}</h6>
-                            {% else %}
-                              <h6 class="text-red">{{ payment.get_formatted_currency() }}</h6>
-                            {% endif %}
-                          </div>
-                          <div class="col-7">
-                            <b>Ontvanger</b>
-                            <br>
-                            {{ payment.counterparty_alias_name }}
-                            <br>
-                            <br>
-                            <b>Waarvoor?</b>
-                            <br>
-                            <a href="{{ url_for('subproject', project_id=project.id, subproject_id=subproject.id) }}"><i>{{ subproject.name }}</i></a>
-                            <br>
-                            {% if payment.long_user_description %}
-                              <i>{{ payment.long_user_description }}</i>
-                            {% else %}
-                              <i>er is door de initiatiefnemer nog geen beschrijving van deze transactie toegevoegd</i>
-                            {% endif %}
+                        <div class="detail-row">
+                          <div class="row">
+                            <div class="col-5">
+                              <b>Initiatiefnemer</b>
+                              <br>
+                              {{ payment.alias_name }}
+                              <br>
+                              <br>
+                              <b>Betaalomschrijving</b>
+                              <br>
+                              {% if payment.description %}
+                                {{ payment.description }}
+                              {% else %}
+                                <i>geen beschrijving</i>
+                              {% endif %}
+                              <br>
+                              <br>
+                              <b>Saldo na boeking</b>
+                              <br>
+                              €{{ payment.get_formatted_balance() }}
+                              <br>
+                              <br>
+                              {{ payment.created.strftime('%d-%m-\'%y') }}
+                              <br>
+                              <br>
+                              {% if payment.amount_value >= 0 %}
+                                <h6 class="text-blue">+{{ payment.get_formatted_currency() }}</h6>
+                              {% else %}
+                                <h6 class="text-red">{{ payment.get_formatted_currency() }}</h6>
+                              {% endif %}
+                            </div>
+                            <div class="col-7">
+                              <b>Ontvanger</b>
+                              <br>
+                              {{ payment.counterparty_alias_name }}
+                              <br>
+                              <br>
+                              <b>Waarvoor?</b>
+                              <br>
+                              <a href="{{ url_for('subproject', project_id=project.id, subproject_id=subproject.id) }}"><i>{{ subproject.name }}</i></a>
+                              <br>
+                              {% if payment.long_user_description %}
+                                <i>{{ payment.long_user_description }}</i>
+                              {% else %}
+                                <i>er is door de initiatiefnemer nog geen beschrijving van deze transactie toegevoegd</i>
+                              {% endif %}
+                            </div>
                           </div>
                         </div>
                       </div>
