@@ -397,10 +397,15 @@ def project(project_id):
 
     amounts = util.calculate_project_amounts(project_id)
 
+    payments = []
+    for subproject in project.subprojects:
+        payments += subproject.payments
+
     return render_template(
         'project.html',
         project=project,
         amounts=amounts,
+        payments=payments,
         subproject_form=subproject_form,
         project_owner=project_owner
     )
