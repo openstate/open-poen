@@ -39,13 +39,14 @@
     }
   }
 
-  td:first-child {
+  .detail-view td,
+  td:first-child + td:not([style*='display: none']) {
     border-left-style: solid;
     border-top-left-radius: 35px;
     border-bottom-left-radius: 35px;
   }
 
-  td:last-child {
+  .detail-view td {
     border-right-style: solid;
     border-bottom-right-radius: 35px;
     border-top-right-radius: 35px;
