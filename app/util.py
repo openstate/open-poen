@@ -252,7 +252,7 @@ def calculate_project_amounts(project_id):
     else:
         amounts['percentage_spent_str'] = (
             format_percent(
-                subproject_spent / amounts['awarded']
+                amounts['spent'] / amounts['awarded']
             )
         )
 
@@ -307,7 +307,7 @@ def calculate_subproject_amounts(subproject_id):
     else:
         amounts['percentage_spent_str'] = (
             format_percent(
-                subproject_spent / amounts['awarded']
+                amounts['spent'] / amounts['awarded']
             )
         )
 
