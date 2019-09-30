@@ -36,6 +36,21 @@ subproject_user = db.Table(
 )
 
 
+# Association table between Payment and File
+payment_file = db.Table(
+    'payment_file',
+    db.Column(
+        'payment_id', db.Integer, db.ForeignKey(
+            'payment.id', ondelete='CASCADE'
+        )
+    ),
+    db.Column(
+        'file_id', db.Integer, db.ForeignKey('file.id', ondelete='CASCADE')
+    ),
+    db.PrimaryKeyConstraint('payment_id', 'file_id')
+)
+
+
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(120), index=True, unique=True)
@@ -165,6 +180,12 @@ class Subproject(db.Model):
     )
     payments = db.relationship('Payment', backref='subproject', lazy='dynamic')
 
+    # Returns true if the subproject is linked to the given user_id
+    def has_user(self, user_id):
+        return self.users.filter(
+            subproject_user.c.user_id == user_id
+        ).count() > 0
+
 
 class DebitCard(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -180,6 +201,9 @@ class Payment(db.Model):
     )
     project_id = db.Column(
         db.Integer, db.ForeignKey('project.id', ondelete='SET NULL')
+    )
+    attachment_id = db.Column(
+        db.Integer, db.ForeignKey('file.id', ondelete='CASCADE')
     )
 
     # Fields coming from the bank
@@ -221,11 +245,11 @@ class Payment(db.Model):
     type = db.Column(db.String(12))
 
     # Fields coming from the user
-    short_user_description = db.Column(db.String(100))
+    short_user_description = db.Column(db.String(50))
     long_user_description = db.Column(db.String(1000))
-    flag_suspicious_count = db.Column(db.Integer)
-
     hidden = db.Column(db.Boolean, default=False)
+
+    flag_suspicious_count = db.Column(db.Integer)
 
     def get_formatted_currency(self):
         return locale.format(
@@ -239,6 +263,12 @@ class Payment(db.Model):
             grouping=True,
             monetary=True
         )
+
+
+class File(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    filename = db.Column(db.String(255), index=True)
+    mimetype = db.Column(db.String(255))
 
 
 class Funder(db.Model):

@@ -4,7 +4,7 @@ from flask_login import login_required, login_user, logout_user, current_user
 from app import app, db
 from app.forms import (
     ResetPasswordRequestForm, ResetPasswordForm, LoginForm, ProjectForm,
-    SubprojectForm
+    SubprojectForm, PaymentForm
 )
 from app.email import send_password_reset_email
 from app.models import User, Project, Subproject, Payment, UserStory, IBAN
@@ -67,6 +67,8 @@ def index():
             project_id = token_info['project_id']
             bank_name = token_info['bank_name']
 
+            # A project owner is either an admin or a user that is part
+            # of the project where this subproject belongs to
             project_owner = False
             project = Project.query.filter_by(id=project_id).first()
             if current_user.is_authenticated and (
@@ -317,6 +319,8 @@ def project(project_id):
             '404.html'
         )
 
+    # A project owner is either an admin or a user that is part of the
+    # project where this subproject belongs to
     project_owner = False
     if current_user.is_authenticated and (
         current_user.admin or project.has_user(current_user.id)
@@ -422,6 +426,13 @@ def subproject(project_id, subproject_id):
             '404.html'
         )
 
+    # Check if the user is logged in and is part of this subproject
+    user_in_subproject = False
+    if current_user.is_authenticated and subproject.has_user(current_user.id):
+        user_in_subproject = True
+
+    # A project owner is either an admin or a user that is part of the
+    # project where this subproject belongs to
     project_owner = False
     if current_user.is_authenticated and (
         current_user.admin or subproject.project.has_user(current_user.id)
@@ -537,6 +548,62 @@ def subproject(project_id, subproject_id):
             subproject.iban, subproject.iban_name
         )
 
+    # Process filled in payment form
+    payment_form = PaymentForm()
+    if payment_form.validate_on_submit():
+        # Get data from the form
+        new_payment_data = {}
+        for f in payment_form:
+            if (f.type != 'SubmitField' and f.type != 'CSRFTokenField'):
+                new_payment_data[f.name] = f.data
+
+        try:
+            # Update if the payment already exists
+            payments = Payment.query.filter_by(
+                id=payment_form.id.data
+            )
+            if len(payments.all()):
+                payments.update(new_payment_data)
+                db.session.commit()
+                flash(
+                    '<span class="text-green">Transactie is bijgewerkt</span>'
+                )
+        except IntegrityError as e:
+            db.session().rollback()
+            app.logger.error(e)
+            flash(
+                '<span class="text-red">Transactie bijwerken mislukt<span>'
+            )
+        # redirect back to clear form data
+        return redirect(
+            url_for(
+                'subproject',
+                project_id=subproject.project.id,
+                subproject_id=subproject.id
+            )
+        )
+
+    payment_forms = {}
+    if project_owner or user_in_subproject:
+        # Populate the payment forms which allows the user to edit it
+        for payment in subproject.payments:
+            # Only allow project owners to hide a transaction
+            if project_owner:
+                payment_form = PaymentForm(**{
+                    'short_user_description': payment.short_user_description,
+                    'long_user_description': payment.long_user_description,
+                    'hidden': payment.hidden,
+                    'id': payment.id
+                })
+            else:
+                payment_form = PaymentForm(**{
+                    'short_user_description': payment.short_user_description,
+                    'long_user_description': payment.long_user_description,
+                    'id': payment.id
+                })
+
+            payment_forms[payment.id] = payment_form
+
     amounts = util.calculate_subproject_amounts(subproject_id)
 
     return render_template(
@@ -544,7 +611,9 @@ def subproject(project_id, subproject_id):
         subproject=subproject,
         amounts=amounts,
         subproject_form=subproject_form,
-        project_owner=project_owner
+        payment_forms=payment_forms,
+        project_owner=project_owner,
+        user_in_subproject=user_in_subproject
     )
 
 

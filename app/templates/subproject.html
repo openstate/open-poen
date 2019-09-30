@@ -130,7 +130,7 @@
           </div>
 
           <div class="lead-side-col col-6 col-lg-3 col-xxl-4 order-9 d-flex flex-column justify-content-between">
-            {% if current_user.admin %}
+            {% if project_owner %}
               <button type="button" class="btn button-poen-small bg-grey-blue mx-auto">initiatiefnemers bewerken ></button>
             {% else %}
               <div class="d-none d-lg-block button-poen-small-hidden bg-blue-light mx-auto"></div>
@@ -177,6 +177,7 @@
               </thead>
               <tbody>
                 {% for payment in subproject.payments|sort(attribute='created', reverse=true) %}
+                {% if not payment.hidden or (project_owner or user_in_subproject) %}
                   <tr>
                     <td>
                       <div class="cell">
@@ -185,6 +186,9 @@
                     </td>
                     <td>
                       <div class="cell justify-content-end">
+                        {% if payment.hidden %}
+                          <i>Deze transactie is verborgen</i>
+                        {% endif %}
                         {% if payment.amount_value >= 0 %}
                           <h1 class="text-blue text-right">+{{ payment.get_formatted_currency() }}</h1>
                         {% else %}
@@ -273,6 +277,15 @@
                             {% else %}
                               <h6 class="text-red">{{ payment.get_formatted_currency() }}</h6>
                             {% endif %}
+
+                            {% if payment_forms %}
+                              <br>
+                              <!-- Button trigger modal -->
+                              <button type="button" class="btn button-poen-small bg-green-light text-white" data-toggle="modal" data-target="#transactie-bewerken-{{ payment.id }}">
+                                transactie bewerken
+                              </button>
+                            {% endif %}
+
                           </div>
                           <div class="col-7">
                             <b>Ontvanger</b>
@@ -283,7 +296,7 @@
                             <b>Waarvoor?</b>
                             <br>
                             {% if payment.long_user_description %}
-                              <i>{{ payment.long_user_description }}</i>
+                              {{ payment.long_user_description }}
                             {% else %}
                               <i>er is door de initiatiefnemer nog geen beschrijving van deze transactie toegevoegd</i>
                             {% endif %}
@@ -292,6 +305,7 @@
                       </div>
                     </div>
                   </tr>
+                  {% endif %}
                 {% endfor %}
               </tbody>
             </table>
@@ -300,4 +314,49 @@
       </div>
     </div>
   </div>
+
+  {% if payment_forms %}
+    {% for payment in subproject.payments %}
+      <!-- Modal -->
+      <div class="modal fade" id="transactie-bewerken-{{ payment.id }}" tabindex="-1" role="dialog" aria-labelledby="transactieBewerkenLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <form method="POST" action="">
+              <div class="modal-header">
+                <h5 class="modal-title" id="transactieBewerkenLabel">Transactie Bewerken</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Annuleren">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <div>
+                  {{ payment_forms[payment.id].csrf_token }}
+
+                  {% for f in payment_forms[payment.id] %}
+                    {% if f.widget.input_type != 'hidden' and f.widget.input_type != 'submit' %}
+                      {% if not f.name == 'hidden' or project_owner %}
+                        <div>
+                          {{ f.label }}
+                          <br>
+                          {{ f }}
+                          {% for error in f.errors %}
+                            <span style="color: red;">- {{ error }}</span>
+                          {% endfor %}
+                        </div>
+                      {% endif %}
+                    {% endif %}
+                  {% endfor %}
+                  {{ payment_forms[payment.id].id }}
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuleren</button>
+                {{ payment_forms[payment.id].submit }}
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  {% endif %}
 {% endblock %}

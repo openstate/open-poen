@@ -10,7 +10,9 @@ from wtforms.fields.html5 import EmailField
 
 
 class ResetPasswordRequestForm(FlaskForm):
-    email = StringField('E-mailadres', validators=[DataRequired(), Email()])
+    email = StringField(
+        'E-mailadres', validators=[DataRequired(), Email(), Length(max=120)]
+    )
     submit = SubmitField(
         'Bevestig',
         render_kw={
@@ -41,8 +43,12 @@ class ResetPasswordForm(FlaskForm):
 
 
 class LoginForm(FlaskForm):
-    email = EmailField('E-mailadres', validators=[DataRequired(), Email()])
-    Wachtwoord = PasswordField('Wachtwoord', validators=[DataRequired()])
+    email = EmailField(
+        'E-mailadres', validators=[DataRequired(), Email(), Length(max=120)]
+    )
+    Wachtwoord = PasswordField(
+        'Wachtwoord', validators=[DataRequired(), Length(min=12)]
+    )
     submit = SubmitField(
         'Inloggen',
         render_kw={
@@ -52,9 +58,9 @@ class LoginForm(FlaskForm):
 
 
 class ProjectForm(FlaskForm):
-    name = StringField('Naam', validators=[DataRequired()])
+    name = StringField('Naam', validators=[DataRequired(), Length(max=120)])
     description = TextAreaField('Beschrijving', validators=[DataRequired()])
-    hidden = BooleanField('Verbergen')
+    hidden = BooleanField('Project verbergen')
     iban = SelectField('IBAN', validators=[Optional()], choices=[])
     id = IntegerField(widget=HiddenInput())
 
@@ -74,10 +80,12 @@ class ProjectForm(FlaskForm):
 
 
 class SubprojectForm(FlaskForm):
-    name = StringField('Naam', validators=[DataRequired()])
+    name = StringField('Naam', validators=[DataRequired(), Length(max=120)])
     description = TextAreaField('Beschrijving', validators=[DataRequired()])
-    hidden = BooleanField('Verbergen')
-    iban = SelectField('IBAN', validators=[Optional()], choices=[])
+    hidden = BooleanField('Initiatief verbergen')
+    iban = SelectField(
+        'IBAN', validators=[Optional(), Length(max=34)], choices=[]
+    )
     project_id = IntegerField(widget=HiddenInput())
     id = IntegerField(widget=HiddenInput())
 
@@ -92,5 +100,23 @@ class SubprojectForm(FlaskForm):
         'Verwijderen',
         render_kw={
             'class': 'btn btn-danger'
+        }
+    )
+
+
+class PaymentForm(FlaskForm):
+    short_user_description = StringField(
+        'Korte beschrijving', validators=[Length(max=50)]
+    )
+    long_user_description = TextAreaField(
+        'Lange beschrijving', validators=[Length(max=2000)]
+    )
+    hidden = BooleanField('Transactie verbergen')
+    id = IntegerField(widget=HiddenInput())
+
+    submit = SubmitField(
+        'Opslaan',
+        render_kw={
+            'class': 'btn btn-info'
         }
     )

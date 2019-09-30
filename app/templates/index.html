@@ -134,14 +134,14 @@
                     {% if project.project_owner %}
                       <div class="text-center">
                         {% if project['already_authorized'] and project['iban'] %}
-                        <p>Rekening {{ project['iban'] }} -  {{ project['iban_name'] }} ({{ project['bank_name'] }}) is gekoppeld aan dit project<p>
+                        <p>Rekening {{ project['iban'] }} -  {{ project['iban_name'] }} ({{ project['bank_name'] }}) is gekoppeld aan dit project</p>
                         {% elif project['already_authorized'] and not project['iban'] %}
                         <p><i>Er is een {{project['bank_name']}} account gekoppeld aan dit project, maar er is nog geen IBAN geselecteerd. Bewerk dit project en selecteer de IBAN die bij dit project hoort.</i></p>
                         {% else %}
                           <p>
-                          Koppel een Bunq account aan project <b>{{ project.name }}</b>:
-                          <br>
-                          <a href="{{ base_url_auth }}/auth?response_type=code&client_id={{ bunq_client_id }}&redirect_uri=https://openpoen.nl/&state={{ project.bunq_token }}" rel="noopener"><img class="bunq-connect-button" src="{{ url_for('static', filename='images/bunq_Connect_button_svg.svg') }}"></a>
+                            Koppel een Bunq account aan project <b>{{ project.name }}</b>:
+                            <br>
+                            <a href="{{ base_url_auth }}/auth?response_type=code&client_id={{ bunq_client_id }}&redirect_uri=https://openpoen.nl/&state={{ project.bunq_token }}" rel="noopener"><img class="bunq-connect-button" src="{{ url_for('static', filename='images/bunq_Connect_button_svg.svg') }}"></a>
                           </p>
                         {% endif %}
 

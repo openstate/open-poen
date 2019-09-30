@@ -262,7 +262,7 @@
                             <a href="{{ url_for('subproject', project_id=project.id, subproject_id=payment.subproject.id) }}"><i>{{ payment.subproject.name }}</i></a>
                             <br>
                             {% if payment.long_user_description %}
-                              <i>{{ payment.long_user_description }}</i>
+                              {{ payment.long_user_description }}
                             {% else %}
                               <i>er is door de initiatiefnemer nog geen beschrijving van deze transactie toegevoegd</i>
                             {% endif %}
