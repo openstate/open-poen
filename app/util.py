@@ -243,16 +243,18 @@ def calculate_project_amounts(project_id):
                         subproject.project.iban):
                     subproject_spent += abs(payment.amount_value)
         amounts['spent'] += subproject_spent
-        if amounts['awarded'] == 0:
-            amounts['percentage_spent_str'] = (
-                format_percent(0)
+
+    # Calculate percentage spent
+    if amounts['awarded'] == 0:
+        amounts['percentage_spent_str'] = (
+            format_percent(0)
+        )
+    else:
+        amounts['percentage_spent_str'] = (
+            format_percent(
+                subproject_spent / amounts['awarded']
             )
-        else:
-            amounts['percentage_spent_str'] = (
-                format_percent(
-                    subproject_spent / amounts['awarded']
-                )
-            )
+        )
 
     amounts['spent_str'] = format_currency(amounts['spent'])
     amounts['left_str'] = format_currency(
@@ -296,6 +298,8 @@ def calculate_subproject_amounts(subproject_id):
                     subproject.project.iban):
                 subproject_spent += abs(payment.amount_value)
     amounts['spent'] += subproject_spent
+
+    # Calculate percentage spent
     if amounts['awarded'] == 0:
         amounts['percentage_spent_str'] = (
             format_percent(0)
