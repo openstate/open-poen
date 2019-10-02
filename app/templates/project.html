@@ -264,9 +264,17 @@
                               <i>er is door de initiatiefnemer nog geen beschrijving van deze transactie toegevoegd</i>
                             {% endif %}
 
-                            {% for attachment in payment.attachments %}
-                              <img class="img-fluid" src="{{ url_for('upload', filename='transaction-attachment/' + attachment.filename) }}">
-                            {% endfor %}
+                            {% if payment.attachments.all() %}
+                              <div class="row">
+                                {% for attachment in payment.attachments %}
+                                  <div class="col-6">
+                                    <a href="{{ url_for('upload', filename='transaction-attachment/' + attachment.filename) }}" data-toggle="lightbox" data-gallery="transaction-gallery-{{ payment.id }}">
+                                      <img class="img-fluid" src="{{ url_for('upload', filename='transaction-attachment/' + attachment.filename) }}">
+                                    </a>
+                                  </div>
+                                {% endfor %}
+                              </div>
+                            {% endif %}
                           </div>
                         </div>
                       </div>

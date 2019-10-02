@@ -24,7 +24,7 @@ mix.copy('node_modules/@openfonts/dosis_latin/files/', '../static/dist/styles/fi
 mix.imagemin('images/*');
 
 mix.autoload({
-  jquery: ['$', 'window.jQuery'],
+  jquery: ['jQuery', '$', 'window.jQuery'],
 });
 
 mix.options({
