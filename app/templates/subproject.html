@@ -61,7 +61,7 @@
                 <div class="modal fade text-left" id="subproject-bewerken" tabindex="-1" role="dialog" aria-labelledby="subprojectBewerkenLabel" aria-hidden="true">
                   <div class="modal-dialog" role="document">
                     <div class="modal-content">
-                      <form method="POST" action="">
+                      <form method="POST">
                         <div class="modal-header">
                           <h5 class="modal-title" id="subprojectBewerkenLabel">Initiatief Bewerken</h5>
                           <button type="button" class="close" data-dismiss="modal" aria-label="Annuleren">
@@ -78,9 +78,6 @@
                                   {{ f.label }}
                                   <br>
                                   {{ f }}
-                                  {% for error in f.errors %}
-                                    <span style="color: red;">- {{ error }}</span>
-                                  {% endfor %}
                                 </div>
                               {% endif %}
                             {% endfor %}
@@ -99,7 +96,7 @@
                           <div class="modal fade" id="subproject-verwijder" tabindex="-1" role="dialog" aria-labelledby="subprojectVerwijderLabel" aria-hidden="true">
                             <div class="modal-dialog" role="document">
                               <div class="modal-content">
-                                <form method="POST" action="">
+                                <form method="POST">
                                   <div class="modal-header">
                                     <h5 class="modal-title" id="subprojectVerwijderLabel">Subproject Verwijderen</h5>
                                     <button type="button" class="close" data-dismiss="modal" aria-label="Annuleren">
@@ -160,7 +157,7 @@
             <table class="payment-table" data-locale="nl-NL" data-detail-view="true" data-detail-view-by-click="true" data-detail-view-icon="false" data-detail-formatter="detailFormatter">
               <thead>
                 <tr>
-                  {# Hidden field required to make search work with the detailed view; NOTE: the id should always be the first column of the table #}
+                  {# Hidden column used to make search work with the detailed view; NOTE: the id should always be the first column of the table #}
                   <th class="d-none">id</th>
                   <th data-sortable="true" data-sorter="customSort">bedrag €</th>
                   <th data-sortable="true" class="d-none d-sm-table-cell">ontvanger</th>
@@ -170,141 +167,155 @@
                   <th class="d-none d-xl-table-cell">media</th>
                   <th data-sortable="true" class="d-none d-xl-table-cell">info</th>
                   <th>details</th>
-                  {# The columns below are not shown, but need to be included to make them searchable #}
-                  <th class="d-none">betaalomschrijving</th>
-                  <th class="d-none">lange omschrijving</th>
+                  {# Hidden column used to generate the detailed view #}
+                  <th class="d-none">detail-view</th>
                 </tr>
               </thead>
               <tbody>
                 {% for payment in subproject.payments|sort(attribute='created', reverse=true) %}
-                {% if not payment.hidden or (project_owner or user_in_subproject) %}
-                  <tr>
-                    <td>
-                      <div class="cell">
-                        {{ payment.id }}
-                      </div>
-                    </td>
-                    <td>
-                      <div class="cell justify-content-end">
-                        {% if payment.hidden %}
-                          <i>Deze transactie is verborgen</i>
-                        {% endif %}
-                        {% if payment.amount_value >= 0 %}
-                          <h1 class="text-blue text-right">+{{ payment.get_formatted_currency() }}</h1>
-                        {% else %}
-                          <h1 class="text-red text-right">{{ payment.get_formatted_currency() }}</h1>
-                        {% endif %}
-                      </div>
-                    </td>
-                    <td>
-                      <div class="cell">
-                        {{ payment.counterparty_alias_name }}
-                      </div>
-                    </td>
-                    <td>
-                      <div class="cell">
-                        {{ payment.alias_name }}
-                      </div>
-                    </td>
-                    <td>
-                      <div class="cell">
-                        {% if payment.short_user_description %}
-                          {{ payment.short_user_description }}
-                        {% else %}
-                          <i>nog niet toegevoegd</i>
-                        {% endif %}
-                      </div>
-                    </td>
-                    <td>
-                      <div class="cell">
-                        {{ payment.created.strftime('%d-%m-\'%y') }}
-                      </div>
-                    </td>
-                    <td>
-                      <div class="cell">
-                        TODO
-                      </div>
-                    </td>
-                    <td>
-                      <div class="cell">
-                        TODO
-                      </div>
-                    </td>
-                    <td>
-                      <div class="cell last-cell justify-content-center">
-                        <button type="button" class="btn button-detail"><i class="fas fa-chevron-down"></i></button>
-                      </div>
-                    </td>
-                    <td>
-                      <div class="cell">
-                        {{ payment.description }}
-                      </div>
-                    </td>
-                    <td>
-                      <div class="cell">
-                        {{ payment.long_user_description }}
-                      </div>
-                    </td>
+                  {% if not payment.hidden or (project_owner or user_in_subproject) %}
+                    <tr>
+                      <td>
+                        <div class="cell">
+                          {{ payment.id }}
+                        </div>
+                      </td>
+                      <td>
+                        <div class="cell justify-content-end">
+                          {% if payment.hidden %}
+                            <i>Deze transactie is verborgen</i>
+                          {% endif %}
+                          {% if payment.amount_value >= 0 %}
+                            <h1 class="text-blue text-right">+{{ payment.get_formatted_currency() }}</h1>
+                          {% else %}
+                            <h1 class="text-red text-right">{{ payment.get_formatted_currency() }}</h1>
+                          {% endif %}
+                        </div>
+                      </td>
+                      <td>
+                        <div class="cell">
+                          {{ payment.counterparty_alias_name }}
+                        </div>
+                      </td>
+                      <td>
+                        <div class="cell">
+                          {{ payment.alias_name }}
+                        </div>
+                      </td>
+                      <td>
+                        <div class="cell">
+                          {% if payment.short_user_description %}
+                            {{ payment.short_user_description }}
+                          {% else %}
+                            <i>nog niet toegevoegd</i>
+                          {% endif %}
+                        </div>
+                      </td>
+                      <td>
+                        <div class="cell">
+                          {{ payment.created.strftime('%d-%m-\'%y') }}
+                        </div>
+                      </td>
+                      <td>
+                        <div class="cell">
+                          TODO
+                        </div>
+                      </td>
+                      <td>
+                        <div class="cell">
+                          TODO
+                        </div>
+                      </td>
+                      <td>
+                        <div class="cell last-cell justify-content-center">
+                          <button type="button" class="btn button-detail"><i class="fas fa-chevron-down"></i></button>
+                        </div>
+                      </td>
+                      <td>
+                        <div id="detail-{{ payment.id }}">
+                          <div class="detail-row">
+                            <div class="row">
+                              <div class="col-5">
+                                <b>Initiatiefnemer</b>
+                                <br>
+                                {{ payment.alias_name }}
+                                <br>
+                                <br>
+                                <b>Betaalomschrijving</b>
+                                <br>
+                                {% if payment.description %}
+                                  {{ payment.description }}
+                                {% else %}
+                                  <i>geen beschrijving</i>
+                                {% endif %}
+                                <br>
+                                <br>
+                                <b>Saldo na boeking</b>
+                                <br>
+                                €{{ payment.get_formatted_balance() }}
+                                <br>
+                                <br>
+                                {{ payment.created.strftime('%d-%m-\'%y') }}
+                                <br>
+                                <br>
+                                {% if payment.amount_value >= 0 %}
+                                  <h6 class="text-blue">+{{ payment.get_formatted_currency() }}</h6>
+                                {% else %}
+                                  <h6 class="text-red">{{ payment.get_formatted_currency() }}</h6>
+                                {% endif %}
 
-                    <div id="detail-{{ payment.id }}" class="d-none">
-                      <div class="detail-row">
-                        <div class="row">
-                          <div class="col-5">
-                            <b>Initiatiefnemer</b>
-                            <br>
-                            {{ payment.alias_name }}
-                            <br>
-                            <br>
-                            <b>Betaalomschrijving</b>
-                            <br>
-                            {% if payment.description %}
-                              {{ payment.description }}
-                            {% else %}
-                              <i>geen beschrijving</i>
-                            {% endif %}
-                            <br>
-                            <br>
-                            <b>Saldo na boeking</b>
-                            <br>
-                            €{{ payment.get_formatted_balance() }}
-                            <br>
-                            <br>
-                            {{ payment.created.strftime('%d-%m-\'%y') }}
-                            <br>
-                            <br>
-                            {% if payment.amount_value >= 0 %}
-                              <h6 class="text-blue">+{{ payment.get_formatted_currency() }}</h6>
-                            {% else %}
-                              <h6 class="text-red">{{ payment.get_formatted_currency() }}</h6>
-                            {% endif %}
+                                {% if payment_forms %}
+                                  <br>
+                                  <!-- Button trigger modal -->
+                                  <button type="button" class="btn button-poen-small bg-green-light text-white" data-toggle="modal" data-target="#transactie-bewerken-{{ payment.id }}">
+                                    transactie bewerken
+                                  </button>
+                                {% endif %}
 
-                            {% if payment_forms %}
-                              <br>
-                              <!-- Button trigger modal -->
-                              <button type="button" class="btn button-poen-small bg-green-light text-white" data-toggle="modal" data-target="#transactie-bewerken-{{ payment.id }}">
-                                transactie bewerken
-                              </button>
-                            {% endif %}
+                              </div>
+                              <div class="col-7">
+                                <b>Ontvanger</b>
+                                <br>
+                                {{ payment.counterparty_alias_name }}
+                                <br>
+                                <br>
+                                <b>Waarvoor?</b>
+                                <br>
+                                {% if payment.long_user_description %}
+                                  {{ payment.long_user_description }}
+                                {% else %}
+                                  <i>er is door de initiatiefnemer nog geen beschrijving van deze transactie toegevoegd</i>
+                                {% endif %}
 
-                          </div>
-                          <div class="col-7">
-                            <b>Ontvanger</b>
-                            <br>
-                            {{ payment.counterparty_alias_name }}
-                            <br>
-                            <br>
-                            <b>Waarvoor?</b>
-                            <br>
-                            {% if payment.long_user_description %}
-                              {{ payment.long_user_description }}
-                            {% else %}
-                              <i>er is door de initiatiefnemer nog geen beschrijving van deze transactie toegevoegd</i>
-                            {% endif %}
+                                {% for attachment in payment.attachments %}
+                                  <img class="img-fluid" src="{{ url_for('upload', filename='transaction-attachment/' + attachment.filename) }}">
+                                {% endfor %}
+
+                                {% if transaction_attachment_form %}
+                                  <form method="POST" enctype="multipart/form-data">
+                                    {{ transaction_attachment_form.csrf_token }}
+                                    {% for f in transaction_attachment_form %}
+                                      {% if f.widget.input_type != 'hidden' and f.widget.input_type != 'submit' %}
+                                        <div>
+                                          {{ f.label }}
+                                          <br>
+                                          {{ f }}
+                                          {% for error in f.errors %}
+                                            <span style="color: red;">- {{ error }}</span>
+                                          {% endfor %}
+                                        </div>
+                                      {% endif %}
+                                    {% endfor %}
+                                    {{ transaction_attachment_form.payment_id(**{'value': payment.id}) }}
+                                    {{ transaction_attachment_form.submit(**{'formmethod': 'post'}) }}
+                                  </form>
+                                {% endif %}
+                              </div>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </div>
-                  </tr>
+                      </td>
+                    </tr>
                   {% endif %}
                 {% endfor %}
               </tbody>
@@ -321,7 +332,7 @@
       <div class="modal fade" id="transactie-bewerken-{{ payment.id }}" tabindex="-1" role="dialog" aria-labelledby="transactieBewerkenLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
           <div class="modal-content">
-            <form method="POST" action="">
+            <form method="POST">
               <div class="modal-header">
                 <h5 class="modal-title" id="transactieBewerkenLabel">Transactie Bewerken</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Annuleren">
@@ -339,9 +350,6 @@
                           {{ f.label }}
                           <br>
                           {{ f }}
-                          {% for error in f.errors %}
-                            <span style="color: red;">- {{ error }}</span>
-                          {% endfor %}
                         </div>
                       {% endif %}
                     {% endif %}

@@ -36,9 +36,9 @@ subproject_user = db.Table(
 )
 
 
-# Association table between Payment and File
-payment_file = db.Table(
-    'payment_file',
+# Association table between Payment and File for attachments
+payment_attachment = db.Table(
+    'payment_attachment',
     db.Column(
         'payment_id', db.Integer, db.ForeignKey(
             'payment.id', ondelete='CASCADE'
@@ -48,6 +48,81 @@ payment_file = db.Table(
         'file_id', db.Integer, db.ForeignKey('file.id', ondelete='CASCADE')
     ),
     db.PrimaryKeyConstraint('payment_id', 'file_id')
+)
+
+
+# Assocation table between User and File for images
+user_image = db.Table(
+    'user_image',
+    db.Column(
+        'user_id', db.Integer, db.ForeignKey(
+            'user.id', ondelete='CASCADE'
+        )
+    ),
+    db.Column(
+        'file_id', db.Integer, db.ForeignKey('file.id', ondelete='CASCADE')
+    ),
+    db.PrimaryKeyConstraint('user_id', 'file_id')
+)
+
+
+# Assocation table between Project and File for images
+project_image = db.Table(
+    'project_image',
+    db.Column(
+        'project_id', db.Integer, db.ForeignKey(
+            'project.id', ondelete='CASCADE'
+        )
+    ),
+    db.Column(
+        'file_id', db.Integer, db.ForeignKey('file.id', ondelete='CASCADE')
+    ),
+    db.PrimaryKeyConstraint('project_id', 'file_id')
+)
+
+
+# Assocation table between Subproject and File for images
+subproject_image = db.Table(
+    'subproject_image',
+    db.Column(
+        'subproject_id', db.Integer, db.ForeignKey(
+            'subproject.id', ondelete='CASCADE'
+        )
+    ),
+    db.Column(
+        'file_id', db.Integer, db.ForeignKey('file.id', ondelete='CASCADE')
+    ),
+    db.PrimaryKeyConstraint('subproject_id', 'file_id')
+)
+
+
+# Assocation table between Funder and File for images
+funder_image = db.Table(
+    'funder_image',
+    db.Column(
+        'funder_id', db.Integer, db.ForeignKey(
+            'funder.id', ondelete='CASCADE'
+        )
+    ),
+    db.Column(
+        'file_id', db.Integer, db.ForeignKey('file.id', ondelete='CASCADE')
+    ),
+    db.PrimaryKeyConstraint('funder_id', 'file_id')
+)
+
+
+# Assocation table between UserStory and File for images
+user_story_image = db.Table(
+    'userstory_image',
+    db.Column(
+        'user_story_id', db.Integer, db.ForeignKey(
+            'user_story.id', ondelete='CASCADE'
+        )
+    ),
+    db.Column(
+        'file_id', db.Integer, db.ForeignKey('file.id', ondelete='CASCADE')
+    ),
+    db.PrimaryKeyConstraint('user_story_id', 'file_id')
 )
 
 
@@ -63,6 +138,11 @@ class User(UserMixin, db.Model):
 
     debit_cards = db.relationship('DebitCard', backref='user', lazy='dynamic')
     payments = db.relationship('Payment', backref='user', lazy='dynamic')
+    images = db.relationship(
+        'File',
+        secondary=user_image,
+        lazy='dynamic'
+    )
 
     def set_password(self, password):
         if len(password) < 12:
@@ -129,6 +209,11 @@ class Project(db.Model):
         lazy='dynamic',
         order_by='Payment.bank_payment_id.desc()'
     )
+    images = db.relationship(
+        'File',
+        secondary=project_image,
+        lazy='dynamic'
+    )
 
     def set_bank_name(self, bank_name):
         self.bank_name = bank_name
@@ -179,6 +264,11 @@ class Subproject(db.Model):
         lazy='dynamic'
     )
     payments = db.relationship('Payment', backref='subproject', lazy='dynamic')
+    images = db.relationship(
+        'File',
+        secondary=subproject_image,
+        lazy='dynamic'
+    )
 
     # Returns true if the subproject is linked to the given user_id
     def has_user(self, user_id):
@@ -202,11 +292,8 @@ class Payment(db.Model):
     project_id = db.Column(
         db.Integer, db.ForeignKey('project.id', ondelete='SET NULL')
     )
-    attachment_id = db.Column(
-        db.Integer, db.ForeignKey('file.id', ondelete='CASCADE')
-    )
 
-    # Fields coming from the bank
+    # Fields coming from the Bunq API
     # Some example payment values:
     # {*'alias_name': 'Highchurch',
     #  *'alias_type': 'IBAN',
@@ -251,6 +338,12 @@ class Payment(db.Model):
 
     flag_suspicious_count = db.Column(db.Integer)
 
+    attachments = db.relationship(
+        'File',
+        secondary=payment_attachment,
+        lazy='dynamic'
+    )
+
     def get_formatted_currency(self):
         return locale.format(
             "%.2f", self.amount_value, grouping=True, monetary=True
@@ -265,12 +358,6 @@ class Payment(db.Model):
         )
 
 
-class File(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    filename = db.Column(db.String(255), index=True)
-    mimetype = db.Column(db.String(255))
-
-
 class Funder(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     project_id = db.Column(
@@ -278,6 +365,11 @@ class Funder(db.Model):
     )
     name = db.Column(db.String(120), index=True)
     url = db.Column(db.String(2000))
+    images = db.relationship(
+        'File',
+        secondary=funder_image,
+        lazy='dynamic'
+    )
 
 
 class IBAN(db.Model):
@@ -295,6 +387,17 @@ class UserStory(db.Model):
     title = db.Column(db.String(200))
     text = db.Column(db.String(200))
     hidden = db.Column(db.Boolean, default=False)
+    images = db.relationship(
+        'File',
+        secondary=user_story_image,
+        lazy='dynamic'
+    )
+
+
+class File(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    filename = db.Column(db.String(255), index=True)
+    mimetype = db.Column(db.String(255))
 
 
 @login_manager.user_loader

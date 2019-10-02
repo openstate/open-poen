@@ -1,19 +1,27 @@
-from flask import render_template, redirect, url_for, flash, session, request
+from flask import (
+    render_template, redirect, url_for, flash, session, request,
+    send_from_directory
+)
 from flask_login import login_required, login_user, logout_user, current_user
 
 from app import app, db
 from app.forms import (
     ResetPasswordRequestForm, ResetPasswordForm, LoginForm, ProjectForm,
-    SubprojectForm, PaymentForm
+    SubprojectForm, PaymentForm, TransactionAttachmentForm
 )
 from app.email import send_password_reset_email
-from app.models import User, Project, Subproject, Payment, UserStory, IBAN
+from app.models import (
+    User, Project, Subproject, Payment, UserStory, IBAN, File
+)
 from app import util
 from sqlalchemy.exc import IntegrityError
 
 from bunq.sdk.context import ApiEnvironmentType
 
+from datetime import datetime
+from werkzeug.utils import secure_filename
 from time import time
+import os
 import jwt
 import re
 import requests
@@ -51,7 +59,7 @@ def index():
                 app.config['SECRET_KEY'],
                 algorithms='HS256'
             )
-        except:
+        except Exception as e:
             flash(
                 '<span class="text-red">Bunq account koppelen aan het project '
                 ' is mislukt. Probeer het later nog een keer of neem contact '
@@ -59,8 +67,9 @@ def index():
             )
             app.logger.warn(
                 'Retrieved wrong token (used for retrieving Bunq '
-                'authorization code)'
+                'authorization code): %s' % e
             )
+
 
         if token_info:
             user_id = token_info['user_id']
@@ -136,7 +145,7 @@ def index():
             return redirect(url_for('index'))
 
     # Process filled in project form
-    project_form = ProjectForm()
+    project_form = ProjectForm(prefix="project_form")
 
     # Remove project
     if project_form.remove.data:
@@ -154,15 +163,19 @@ def index():
     # Somehow we need to repopulate the iban.choices with the same
     # values as used when the form was generated for this project. I
     # thought this should happen automatically.
-    if request.method == 'POST' and project_form.name.data:
-        projects = Project.query.filter_by(id=project_form.id.data)
-        if len(projects.all()):
-            project_form.iban.choices = projects.first().make_select_options()
+    if util.form_in_request(project_form, request):
+        if request.method == 'POST' and project_form.name.data:
+            projects = Project.query.filter_by(id=project_form.id.data)
+            if len(projects.all()):
+                project_form.iban.choices = (
+                    projects.first().make_select_options()
+                )
+
     if project_form.validate_on_submit():
         new_project_data = {}
         for f in project_form:
             if (f.type != 'SubmitField' and f.type != 'CSRFTokenField'):
-                if (f.name == 'iban'):
+                if (f.short_name == 'iban'):
                     new_iban = None
                     new_iban_name = None
                     # New projects f.data is 'None', editing an existing
@@ -175,7 +188,7 @@ def index():
                     new_project_data['iban'] = new_iban
                     new_project_data['iban_name'] = new_iban_name
                 else:
-                    new_project_data[f.name] = f.data
+                    new_project_data[f.short_name] = f.data
 
         try:
             # Update if the project already exists
@@ -224,6 +237,8 @@ def index():
             )
         # redirect back to clear form data
         return redirect(url_for('index'))
+    else:
+        util.flash_form_errors(project_form, request)
 
     # Retrieve data for each project
     project_data = []
@@ -261,7 +276,7 @@ def index():
 
             # Populate the project's form which allows the user to edit
             # it
-            form = ProjectForm(**{
+            form = ProjectForm(prefix="project_form", **{
                 'name': project.name,
                 'description': project.description,
                 'hidden': project.hidden,
@@ -333,20 +348,22 @@ def project(project_id):
         )
 
     # Process filled in subproject form
-    subproject_form = SubprojectForm()
+    subproject_form = SubprojectForm(prefix="subproject_form")
 
     # Save subproject
     # Somehow we need to repopulate the iban.choices with the same
     # values as used when the form was generated for this
     # subproject. I thought this should happen automatically.
-    if request.method == 'POST' and subproject_form.name.data:
-        subproject_form.iban.choices = project.make_select_options()
+    if util.form_in_request(subproject_form, request):
+        if request.method == 'POST' and subproject_form.name.data:
+            subproject_form.iban.choices = project.make_select_options()
+
     if subproject_form.validate_on_submit():
         # Get data from the form
         new_subproject_data = {}
         for f in subproject_form:
             if (f.type != 'SubmitField' and f.type != 'CSRFTokenField'):
-                if (f.name == 'iban'):
+                if (f.short_name == 'iban'):
                     new_iban = None
                     new_iban_name = None
                     if not f.data == '':
@@ -356,7 +373,7 @@ def project(project_id):
                     new_subproject_data['iban'] = new_iban
                     new_subproject_data['iban_name'] = new_iban_name
                 else:
-                    new_subproject_data[f.name] = f.data
+                    new_subproject_data[f.short_name] = f.data
 
         try:
             # Save a new subproject
@@ -376,8 +393,9 @@ def project(project_id):
                     new_subproject_data['name']
                 )
             )
-        except IntegrityError:
+        except IntegrityError as e:
             db.session().rollback()
+            app.logger.error(e)
             flash(
                 '<span class="text-red">Subproject toevoegen mislukt: naam '
                 '"%s" en/of IBAN "%s" bestaan al, kies een andere naam en/of '
@@ -388,9 +406,11 @@ def project(project_id):
             )
         # redirect back to clear form data
         return redirect(url_for('project', project_id=project_id))
+    else:
+        util.flash_form_errors(subproject_form, request)
 
     # Populate the the new subproject form with its project's ID
-    subproject_form = SubprojectForm(**{
+    subproject_form = SubprojectForm(prefix="subproject_form", **{
         'project_id': project.id
     })
 
@@ -445,7 +465,7 @@ def subproject(project_id, subproject_id):
         )
 
     # Process filled in subproject form
-    subproject_form = SubprojectForm()
+    subproject_form = SubprojectForm(prefix="subproject_form")
 
     # Remove subproject
     if subproject_form.remove.data:
@@ -468,14 +488,18 @@ def subproject(project_id, subproject_id):
     # Somehow we need to repopulate the iban.choices with the same
     # values as used when the form was generated for this subproject. I
     # thought this should happen automatically.
-    if request.method == 'POST' and subproject_form.name.data:
-        subproject_form.iban.choices = subproject.project.make_select_options()
+    if util.form_in_request(subproject_form, request):
+        if request.method == 'POST' and subproject_form.name.data:
+            subproject_form.iban.choices = (
+                subproject.project.make_select_options()
+            )
+
     if subproject_form.validate_on_submit():
         # Get data from the form
         new_subproject_data = {}
         for f in subproject_form:
             if (f.type != 'SubmitField' and f.type != 'CSRFTokenField'):
-                if (f.name == 'iban'):
+                if (f.short_name == 'iban'):
                     new_iban = None
                     new_iban_name = None
                     if not f.data == '':
@@ -485,7 +509,7 @@ def subproject(project_id, subproject_id):
                     new_subproject_data['iban'] = new_iban
                     new_subproject_data['iban_name'] = new_iban_name
                 else:
-                    new_subproject_data[f.name] = f.data
+                    new_subproject_data[f.short_name] = f.data
 
         try:
             # Update if the subproject already exists
@@ -529,9 +553,11 @@ def subproject(project_id, subproject_id):
                 subproject_id=subproject.id
             )
         )
+    else:
+        util.flash_form_errors(subproject_form, request)
 
     # Populate the subproject's form which allows the user to edit it
-    subproject_form = SubprojectForm(**{
+    subproject_form = SubprojectForm(prefix='subproject_form', **{
         'name': subproject.name,
         'description': subproject.description,
         'hidden': subproject.hidden,
@@ -549,13 +575,13 @@ def subproject(project_id, subproject_id):
         )
 
     # Process filled in payment form
-    payment_form = PaymentForm()
+    payment_form = PaymentForm(prefix="payment_form")
     if payment_form.validate_on_submit():
         # Get data from the form
         new_payment_data = {}
         for f in payment_form:
             if (f.type != 'SubmitField' and f.type != 'CSRFTokenField'):
-                new_payment_data[f.name] = f.data
+                new_payment_data[f.short_name] = f.data
 
         try:
             # Update if the payment already exists
@@ -582,6 +608,8 @@ def subproject(project_id, subproject_id):
                 subproject_id=subproject.id
             )
         )
+    else:
+        util.flash_form_errors(payment_form, request)
 
     payment_forms = {}
     if project_owner or user_in_subproject:
@@ -589,14 +617,14 @@ def subproject(project_id, subproject_id):
         for payment in subproject.payments:
             # Only allow project owners to hide a transaction
             if project_owner:
-                payment_form = PaymentForm(**{
+                payment_form = PaymentForm(prefix='payment_form', **{
                     'short_user_description': payment.short_user_description,
                     'long_user_description': payment.long_user_description,
                     'hidden': payment.hidden,
                     'id': payment.id
                 })
             else:
-                payment_form = PaymentForm(**{
+                payment_form = PaymentForm(prefix='payment_form', **{
                     'short_user_description': payment.short_user_description,
                     'long_user_description': payment.long_user_description,
                     'id': payment.id
@@ -606,20 +634,65 @@ def subproject(project_id, subproject_id):
 
     amounts = util.calculate_subproject_amounts(subproject_id)
 
+    # Process filled in transaction attachment form
+    transaction_attachment_form = ''
+    if project_owner or user_in_subproject:
+        transaction_attachment_form = TransactionAttachmentForm(
+            prefix="transaction_attachment_form"
+        )
+        if transaction_attachment_form.validate_on_submit():
+            # Save attachment to disk
+            f = transaction_attachment_form.data_file.data
+            filename = secure_filename(f.filename)
+            filename = '%s_%s' % (
+                datetime.now().isoformat()[:19], filename
+            )
+            filepath = os.path.join(
+                os.path.abspath(
+                    os.path.join(
+                        app.instance_path, '../%s/transaction-attachment' % (
+                            app.config['UPLOAD_FOLDER']
+                        )
+                    )
+                ),
+                filename
+            )
+            f.save(filepath)
+            new_file = File(filename=filename, mimetype=request.mimetype)
+            db.session.add(new_file)
+            db.session.commit()
+
+            # Link attachment to payment in the database
+            payment = Payment.query.get(
+                transaction_attachment_form.payment_id.data
+            )
+            payment.attachments.append(new_file)
+            db.session.commit()
+        else:
+            util.flash_form_errors(transaction_attachment_form, request)
+
     return render_template(
         'subproject.html',
         subproject=subproject,
         amounts=amounts,
         subproject_form=subproject_form,
         payment_forms=payment_forms,
+        transaction_attachment_form=transaction_attachment_form,
         project_owner=project_owner,
         user_in_subproject=user_in_subproject
     )
 
 
+@app.route('/upload/<filename>')
+def upload(filename):
+    return send_from_directory(
+        app.config['UPLOAD_FOLDER'], filename
+    )
+
+
 @app.route("/reset-wachtwoord-verzoek", methods=['GET', 'POST'])
 def reset_wachtwoord_verzoek():
-    form = ResetPasswordRequestForm()
+    form = ResetPasswordRequestForm(prefix="reset_password_request_form")
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         if user:
@@ -637,7 +710,7 @@ def reset_wachtwoord(token):
     user = User.verify_reset_password_token(token)
     if not user:
         return redirect(url_for('index'))
-    form = ResetPasswordForm()
+    form = ResetPasswordForm(prefix="reset_password_request_form")
     if form.validate_on_submit():
         user.set_password(form.Wachtwoord.data)
         db.session.commit()
@@ -651,7 +724,7 @@ def login():
     if current_user.is_authenticated:
         return redirect(url_for('index'))
 
-    form = LoginForm()
+    form = LoginForm(prefix="login_form")
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         if user is None or not user.check_password(form.Wachtwoord.data):
@@ -679,3 +752,14 @@ def logout():
 
 if __name__ == "__main__":
     app.run(threaded=True)
+
+
+@app.errorhandler(413)
+def request_entity_too_large(error):
+    flash(
+        '<span class="text-red">Het verstuurde bestand is te groot. Deze mag '
+        'maximaal %sMB zijn.</span>' % (
+            app.config['MAX_CONTENT_LENGTH'] / 1024 / 1024
+        )
+    )
+    return redirect(url_for('index'))

@@ -1,5 +1,6 @@
 from app import app
 from flask_wtf import FlaskForm
+from flask_wtf.file import FileField, FileRequired, FileAllowed
 from wtforms.validators import DataRequired, Email, EqualTo, Length, Optional
 from wtforms.widgets import HiddenInput
 from wtforms import (
@@ -116,6 +117,35 @@ class PaymentForm(FlaskForm):
 
     submit = SubmitField(
         'Opslaan',
+        render_kw={
+            'class': 'btn btn-info'
+        }
+    )
+
+
+class TransactionAttachmentForm(FlaskForm):
+    allowed_extensions = [
+        'jpg', 'jpeg', 'png', 'txt', 'pdf', 'ods', 'xls', 'xlsx', 'odt', 'doc',
+        'docx'
+    ]
+    data_file = FileField(
+        'Bestand',
+        validators=[
+            FileRequired(),
+            FileAllowed(
+                allowed_extensions,
+                (
+                    'bestandstype niet toegstaan. Enkel de volgende '
+                    'bestandstypen worden geaccepteerd: %s' % ', '.join(
+                        allowed_extensions
+                    )
+                )
+            )
+        ]
+    )
+    payment_id = IntegerField(widget=HiddenInput())
+    submit = SubmitField(
+        'Uploaden',
         render_kw={
             'class': 'btn btn-info'
         }

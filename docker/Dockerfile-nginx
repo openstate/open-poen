@@ -1,4 +1,4 @@
-FROM nginx:1.17.3-alpine
+FROM nginx:1.17.4-alpine
 MAINTAINER Open State Foundation <developers@openstate.eu>
 
 WORKDIR /usr/share/nginx/html

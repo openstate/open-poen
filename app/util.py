@@ -1,4 +1,5 @@
 from babel.numbers import format_percent
+from flask import flash
 from os.path import abspath, dirname, exists, join
 from time import sleep
 import json
@@ -336,3 +337,30 @@ def calculate_total_amounts():
         total_spent += amounts['spent']
 
     return total_awarded, total_spent
+
+
+# Check if the given form is in the request
+def form_in_request(form, request):
+    if not request.form:
+        return False
+
+    if next(iter(request.form)).startswith(form._prefix):
+        return True
+    else:
+        return False
+
+
+# Output form errors to flashed messages
+def flash_form_errors(form, request):
+    # Don't print the errors if the request doesn't contain values for
+    # this form
+    if not request.form:
+        return
+    if not form_in_request(form, request):
+        return
+
+    for f in form:
+        for error in f.errors:
+            flash(
+                '<span class="text-red">%s: %s</span>' % (f.label, error)
+            )

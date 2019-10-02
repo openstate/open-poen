@@ -13,6 +13,7 @@ services:
       # compilation and will therefor be unmounted after running webpack.
       - ../app/static/:/usr/share/nginx/html/static/
       - ../files/:/usr/share/nginx/html/files/
+      - ../upload/:/usr/share/nginx/html/upload/
     networks:
       - nginx-load-balancer
       - internal

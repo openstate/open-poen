@@ -67,7 +67,7 @@
               <div class="modal fade" id="project-toevoegen" tabindex="-1" role="dialog" aria-labelledby="projectToevoegenLabel" aria-hidden="true">
                 <div class="modal-dialog" role="document">
                   <div class="modal-content">
-                    <form method="POST" action="">
+                    <form method="POST">
                       <div class="modal-header">
                         <h5 class="modal-title" id="projectToevoegenLabel">Project Toevoegen</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Annuleren">
@@ -84,9 +84,6 @@
                                 {{ f.label }}
                                 <br>
                                 {{ f }}
-                                {% for error in f.errors %}
-                                  <span style="color: red;">- {{ error }}</span>
-                                {% endfor %}
                               </div>
                             {% endif %}
                           {% endfor %}
@@ -154,7 +151,7 @@
                         <div class="modal fade" id="project-bewerken-{{ project['id'] }}" tabindex="-1" role="dialog" aria-labelledby="projectbewerkenLabel" aria-hidden="true">
                           <div class="modal-dialog" role="document">
                             <div class="modal-content">
-                              <form method="POST" action="">
+                              <form method="POST">
                                 <div class="modal-header">
                                   <h5 class="modal-title" id="projectBewerkenLabel">Project Bewerken</h5>
                                   <button type="button" class="close" data-dismiss="modal" aria-label="Annuleren">
@@ -171,9 +168,6 @@
                                           {{ f.label }}
                                           <br>
                                           {{ f }}
-                                          {% for error in f.errors %}
-                                            <span style="color: red;">- {{ error }}</span>
-                                          {% endfor %}
                                         </div>
                                       {% endif %}
                                     {% endfor %}
@@ -193,7 +187,7 @@
                                   <div class="modal fade" id="project-verwijder-{{ project['id'] }}" tabindex="-1" role="dialog" aria-labelledby="projectVerwijderLabel" aria-hidden="true">
                                     <div class="modal-dialog" role="document">
                                       <div class="modal-content">
-                                        <form method="POST" action="">
+                                        <form method="POST">
                                           <div class="modal-header">
                                             <h5 class="modal-title" id="projectVerwijderLabel">Project Verwijderen</h5>
                                             <button type="button" class="close" data-dismiss="modal" aria-label="Annuleren">

@@ -72,7 +72,7 @@
               <div class="modal fade" id="subproject-toevoegen" tabindex="-1" role="dialog" aria-labelledby="subprojectToevoegenLabel" aria-hidden="true">
                 <div class="modal-dialog" role="document">
                   <div class="modal-content">
-                    <form method="POST" action="">
+                    <form method="POST">
                       <div class="modal-header">
                         <h5 class="modal-title" id="subprojectToevoegenLabel">Initiatief Toevoegen</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Annuleren">
@@ -89,9 +89,6 @@
                                 {{ f.label }}
                                 <br>
                                 {{ f }}
-                                {% for error in f.errors %}
-                                  <span style="color: red;">- {{ error }}</span>
-                                {% endfor %}
                               </div>
                             {% endif %}
                           {% endfor %}
@@ -266,6 +263,10 @@
                             {% else %}
                               <i>er is door de initiatiefnemer nog geen beschrijving van deze transactie toegevoegd</i>
                             {% endif %}
+
+                            {% for attachment in payment.attachments %}
+                              <img class="img-fluid" src="{{ url_for('upload', filename='transaction-attachment/' + attachment.filename) }}">
+                            {% endfor %}
                           </div>
                         </div>
                       </div>
