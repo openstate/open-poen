@@ -85,7 +85,7 @@ class SubprojectForm(FlaskForm):
     description = TextAreaField('Beschrijving', validators=[DataRequired()])
     hidden = BooleanField('Initiatief verbergen')
     iban = SelectField(
-        'IBAN', validators=[Optional(), Length(max=34)], choices=[]
+        'IBAN', validators=[Optional()], choices=[]
     )
     project_id = IntegerField(widget=HiddenInput())
     id = IntegerField(widget=HiddenInput())
