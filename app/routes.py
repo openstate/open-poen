@@ -366,7 +366,7 @@ def project(project_id):
                 if (f.short_name == 'iban'):
                     new_iban = None
                     new_iban_name = None
-                    if not f.data == '':
+                    if not f.data == '' and f.data != 'None':
                         new_iban, new_iban_name = f.data.split(
                             ' - ', maxsplit=1
                         )
