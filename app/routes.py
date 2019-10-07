@@ -658,7 +658,7 @@ def subproject(project_id, subproject_id):
                 filename
             )
             f.save(filepath)
-            new_file = File(filename=filename, mimetype=request.mimetype)
+            new_file = File(filename=filename, mimetype=f.headers[1][1])
             db.session.add(new_file)
             db.session.commit()
 
@@ -668,6 +668,15 @@ def subproject(project_id, subproject_id):
             )
             payment.attachments.append(new_file)
             db.session.commit()
+
+            # redirect back to clear form data
+            return redirect(
+                url_for(
+                    'subproject',
+                    project_id=subproject.project.id,
+                    subproject_id=subproject.id
+                )
+            )
         else:
             util.flash_form_errors(transaction_attachment_form, request)
 

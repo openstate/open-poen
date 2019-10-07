@@ -56,3 +56,18 @@
     padding: 20px;
   }
 }
+
+.attachment-div {
+  padding-bottom: 15px;
+}
+
+.attachment {
+  object-fit: cover;
+  border-radius: 35px;
+}
+
+@media (max-width: 767px) {
+  .attachment {
+    border-radius: 20px;
+  }
+}
