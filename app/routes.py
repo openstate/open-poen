@@ -8,11 +8,11 @@ from app import app, db
 from app.forms import (
     ResetPasswordRequestForm, ResetPasswordForm, LoginForm, ProjectForm,
     SubprojectForm, PaymentForm, TransactionAttachmentForm,
-    RemoveAttachmentForm
+    RemoveAttachmentForm, FunderForm
 )
 from app.email import send_password_reset_email
 from app.models import (
-    User, Project, Subproject, Payment, UserStory, IBAN, File
+    User, Project, Subproject, Payment, UserStory, IBAN, File, Funder
 )
 from app import util
 from sqlalchemy.exc import IntegrityError
@@ -348,6 +348,69 @@ def project(project_id):
             '404.html'
         )
 
+    # Process filled in funder form
+    funder_form = FunderForm(prefix="funder_form")
+
+    # Remove funder
+    if funder_form.remove.data:
+        Funder.query.filter_by(id=funder_form.id.data).delete()
+        db.session.commit()
+        flash(
+            '<span class="text-green">Sponsor "%s" is verwijderd</span>' % (
+                funder_form.name.data
+            )
+        )
+        # redirect back to clear form data
+        return redirect(url_for('project', project_id=project_id))
+
+    # Save or update funder
+    if funder_form.validate_on_submit():
+        funders = Funder.query.filter_by(id=funder_form.id.data)
+        new_funder_data = {}
+        for f in funder_form:
+            if (f.type != 'SubmitField' and f.type != 'CSRFTokenField'):
+                new_funder_data[f.short_name] = f.data
+
+        # Update if the funder already exists
+        if len(funders.all()):
+            funders.update(new_funder_data)
+            db.session.commit()
+            flash(
+                '<span class="text-green">Sponsor "%s" is '
+                'bijgewerkt</span>' % (
+                    new_funder_data['name']
+                )
+            )
+        # Otherwise, save a new funder
+        else:
+            funder = Funder(**new_funder_data)
+            funder.project_id = project_id
+            db.session.add(funder)
+            db.session.commit()
+            flash(
+                '<span class="text-green">Sponsor "%s" is '
+                'toegevoegd</span>' % (
+                    new_funder_data['name']
+                )
+            )
+
+        # redirect back to clear form data
+        return redirect(url_for('project', project_id=project_id))
+    else:
+        util.flash_form_errors(funder_form, request)
+
+    # Populate the funder forms which allows the user to edit
+    # it
+    funder_forms = []
+    for funder in project.funders:
+        funder_forms.append(
+            FunderForm(prefix="funder_form", **{
+            'name': funder.name,
+            'url': funder.url,
+            'id': funder.id
+            })
+        )
+
     # Process filled in subproject form
     subproject_form = SubprojectForm(prefix="subproject_form")
 
@@ -432,6 +495,8 @@ def project(project_id):
         amounts=amounts,
         payments=payments,
         subproject_form=subproject_form,
+        funder_forms=funder_forms,
+        new_funder_form = FunderForm(prefix="funder_form"),
         project_owner=project_owner
     )
 

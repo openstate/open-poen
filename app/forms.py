@@ -1,7 +1,9 @@
 from app import app
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileRequired, FileAllowed
-from wtforms.validators import DataRequired, Email, EqualTo, Length, Optional
+from wtforms.validators import (
+    DataRequired, Email, EqualTo, Length, Optional, URL
+)
 from wtforms.widgets import HiddenInput
 from wtforms import (
     StringField, IntegerField, BooleanField, PasswordField, SubmitField,
@@ -154,6 +156,26 @@ class TransactionAttachmentForm(FlaskForm):
 
 class RemoveAttachmentForm(FlaskForm):
     id = IntegerField(widget=HiddenInput())
+
+    remove = SubmitField(
+        'Verwijderen',
+        render_kw={
+            'class': 'btn btn-danger'
+        }
+    )
+
+
+class FunderForm(FlaskForm):
+    name = StringField('Naam', validators=[DataRequired(), Length(max=120)])
+    url = StringField('URL', validators=[DataRequired(), URL(), Length(max=2000)])
+    id = IntegerField(widget=HiddenInput())
+
+    submit = SubmitField(
+        'Opslaan',
+        render_kw={
+            'class': 'btn btn-info'
+        }
+    )
 
     remove = SubmitField(
         'Verwijderen',
