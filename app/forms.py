@@ -150,3 +150,14 @@ class TransactionAttachmentForm(FlaskForm):
             'class': 'btn btn-info'
         }
     )
+
+
+class RemoveAttachmentForm(FlaskForm):
+    id = IntegerField(widget=HiddenInput())
+
+    remove = SubmitField(
+        'Verwijderen',
+        render_kw={
+            'class': 'btn btn-danger'
+        }
+    )

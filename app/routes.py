@@ -7,7 +7,8 @@ from flask_login import login_required, login_user, logout_user, current_user
 from app import app, db
 from app.forms import (
     ResetPasswordRequestForm, ResetPasswordForm, LoginForm, ProjectForm,
-    SubprojectForm, PaymentForm, TransactionAttachmentForm
+    SubprojectForm, PaymentForm, TransactionAttachmentForm,
+    RemoveAttachmentForm
 )
 from app.email import send_password_reset_email
 from app.models import (
@@ -680,6 +681,24 @@ def subproject(project_id, subproject_id):
         else:
             util.flash_form_errors(transaction_attachment_form, request)
 
+    # Process attachment removal form
+    remove_attachment_form = RemoveAttachmentForm(
+        prefix="remove_attachment_form"
+    )
+    # Remove attachment
+    if remove_attachment_form.remove.data:
+        File.query.filter_by(id=remove_attachment_form.id.data).delete()
+        db.session.commit()
+        flash('<span class="text-green">Bijlage is verwijderd</span>')
+        # redirect back to clear form data
+        return redirect(
+            url_for(
+                'subproject',
+                project_id=subproject.project.id,
+                subproject_id=subproject.id
+            )
+        )
+
     return render_template(
         'subproject.html',
         subproject=subproject,
@@ -687,6 +706,7 @@ def subproject(project_id, subproject_id):
         subproject_form=subproject_form,
         payment_forms=payment_forms,
         transaction_attachment_form=transaction_attachment_form,
+        remove_attachment_form=remove_attachment_form,
         project_owner=project_owner,
         user_in_subproject=user_in_subproject
     )
