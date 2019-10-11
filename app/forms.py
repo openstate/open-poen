@@ -183,3 +183,29 @@ class FunderForm(FlaskForm):
             'class': 'btn btn-danger'
         }
     )
+
+
+class AddAdminForm(FlaskForm):
+    email = StringField(
+        'E-mailadres', validators=[DataRequired(), Email(), Length(max=120)]
+    )
+
+    submit = SubmitField(
+        'Uitnodigen',
+        render_kw={
+            'class': 'btn btn-info'
+        }
+    )
+
+
+class EditAdminForm(FlaskForm):
+    admin = BooleanField('Admin')
+    active = BooleanField('Gebruikersaccount is actief')
+    id = IntegerField(widget=HiddenInput())
+
+    submit = SubmitField(
+        'Opslaan',
+        render_kw={
+            'class': 'btn btn-info'
+        }
+    )

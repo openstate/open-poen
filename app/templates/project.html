@@ -25,107 +25,106 @@
               <div class="modal fade" id="sponsoren-bewerken" tabindex="-1" role="dialog" aria-labelledby="sponsorenBewerkenLabel" aria-hidden="true">
                 <div class="modal-dialog" role="document">
                   <div class="modal-content">
-                      <div class="modal-header">
-                        <h5 class="modal-title" id="sponsorenBewerkenLabel">Sponsoren Bewerken</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Annuleren">
-                          <span aria-hidden="true">&times;</span>
-                        </button>
-                      </div>
-                      <div class="modal-body">
-                        {% for funder_form in funder_forms %}
-                          <div>
-                            <!-- Button trigger modal -->
-                            <button type="button" class="btn button-poen-small bg-grey-blue mx-auto" data-toggle="modal" data-target="#sponsor-bewerken-{{ funder_form.id.data }}">
-                              bewerken
-                            </button>
-                            {{ funder_form.name.data }}
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="sponsorenBewerkenLabel">Sponsoren Bewerken</h5>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Annuleren">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <div class="modal-body">
+                      <!-- Button trigger modal -->
+                      <button type="button" class="btn button-poen-small bg-grey-blue mx-auto" data-toggle="modal" data-target="#sponsor-toevoegen">
+                        sponsor toevoegen
+                      </button>
 
-                            <!-- Modal -->
-                            <div class="modal fade" id="sponsor-bewerken-{{ funder_form.id.data }}" tabindex="-1" role="dialog" aria-labelledby="sponsorBewerkenLabel" aria-hidden="true">
-                              <div class="modal-dialog" role="document">
-                                <div class="modal-content">
-                                  <form method="POST">
-                                    <div class="modal-header">
-                                      <h5 class="modal-title" id="sponsortBewerkenLabel">Sponsor Bewerken</h5>
-                                      <button type="button" class="close" data-dismiss="modal" aria-label="Annuleren">
-                                        <span aria-hidden="true">&times;</span>
-                                      </button>
-                                    </div>
-                                    <div class="modal-body">
+                      <!-- Modal -->
+                      <div class="modal fade" id="sponsor-toevoegen" tabindex="-1" role="dialog" aria-labelledby="sponsorToevoegenLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                          <div class="modal-content">
+                            <form method="POST">
+                              <div class="modal-header">
+                                <h5 class="modal-title" id="sponsorToevoegenLabel">Sponsor Toevoegen</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Annuleren">
+                                  <span aria-hidden="true">&times;</span>
+                                </button>
+                              </div>
+                              <div class="modal-body">
+                                <div>
+                                  {{ new_funder_form.csrf_token }}
+
+                                  {% for f in new_funder_form %}
+                                    {% if f.widget.input_type != 'hidden' and f.widget.input_type != 'submit' %}
                                       <div>
-                                        {{ funder_form.csrf_token }}
-
-                                        {% for f in funder_form %}
-                                          {% if f.widget.input_type != 'hidden' and f.widget.input_type != 'submit' %}
-                                            <div>
-                                              {{ f.label }}
-                                              <br>
-                                              {{ f }}
-                                            </div>
-                                          {% endif %}
-                                        {% endfor %}
-                                        {{ funder_form.id }}
+                                        {{ f.label }}
+                                        <br>
+                                        {{ f }}
                                       </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                      <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuleren</button>
-                                      {{ funder_form.remove }}
-                                      {{ funder_form.submit }}
-                                    </div>
-                                  </form>
+                                    {% endif %}
+                                  {% endfor %}
                                 </div>
+                              </div>
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuleren</button>
+                                {{ new_funder_form.submit }}
+                              </div>
+                            </form>
+                          </div>
+                        </div>
+                      </div>
+
+                      <hr>
+
+                      {% for funder_form in funder_forms %}
+                        <div>
+                          <!-- Button trigger modal -->
+                          <button type="button" class="btn button-poen-small bg-grey-blue mx-auto" data-toggle="modal" data-target="#sponsor-bewerken-{{ funder_form.id.data }}">
+                            bewerken
+                          </button>
+                          {{ funder_form.name.data }}
+
+                          <!-- Modal -->
+                          <div class="modal fade" id="sponsor-bewerken-{{ funder_form.id.data }}" tabindex="-1" role="dialog" aria-labelledby="sponsorBewerkenLabel" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                              <div class="modal-content">
+                                <form method="POST">
+                                  <div class="modal-header">
+                                    <h5 class="modal-title" id="sponsortBewerkenLabel">Sponsor Bewerken</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Annuleren">
+                                      <span aria-hidden="true">&times;</span>
+                                    </button>
+                                  </div>
+                                  <div class="modal-body">
+                                    <div>
+                                      {{ funder_form.csrf_token }}
+
+                                      {% for f in funder_form %}
+                                        {% if f.widget.input_type != 'hidden' and f.widget.input_type != 'submit' %}
+                                          <div>
+                                            {{ f.label }}
+                                            <br>
+                                            {{ f }}
+                                          </div>
+                                        {% endif %}
+                                      {% endfor %}
+                                      {{ funder_form.id }}
+                                    </div>
+                                  </div>
+                                  <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuleren</button>
+                                    {{ funder_form.remove }}
+                                    {{ funder_form.submit }}
+                                  </div>
+                                </form>
                               </div>
                             </div>
                           </div>
-                          <br>
-                        {% endfor %}
-                        <hr>
-                        <!-- Button trigger modal -->
-                        <button type="button" class="btn button-poen-small bg-grey-blue mx-auto" data-toggle="modal" data-target="#sponsor-toevoegen">
-                          nieuwe sponsor toevoegen
-                        </button>
-
-                        <!-- Modal -->
-                        <div class="modal fade" id="sponsor-toevoegen" tabindex="-1" role="dialog" aria-labelledby="sponsorToevoegenLabel" aria-hidden="true">
-                          <div class="modal-dialog" role="document">
-                            <div class="modal-content">
-                              <form method="POST">
-                                <div class="modal-header">
-                                  <h5 class="modal-title" id="sponsortToevoegenLabel">Sponsor Toevoegen</h5>
-                                  <button type="button" class="close" data-dismiss="modal" aria-label="Annuleren">
-                                    <span aria-hidden="true">&times;</span>
-                                  </button>
-                                </div>
-                                <div class="modal-body">
-                                  <div>
-                                    {{ new_funder_form.csrf_token }}
-
-                                    {% for f in new_funder_form %}
-                                      {% if f.widget.input_type != 'hidden' and f.widget.input_type != 'submit' %}
-                                        <div>
-                                          {{ f.label }}
-                                          <br>
-                                          {{ f }}
-                                        </div>
-                                      {% endif %}
-                                    {% endfor %}
-                                  </div>
-                                </div>
-                                <div class="modal-footer">
-                                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuleren</button>
-                                  {{ new_funder_form.submit }}
-                                </div>
-                              </form>
-                            </div>
-                          </div>
                         </div>
-                        <div>
-                        </div>
-                      </div>
-                      <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuleren</button>
-                      </div>
-                    </form>
+                        <br>
+                      {% endfor %}
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuleren</button>
+                    </div>
                   </div>
                 </div>
               </div>

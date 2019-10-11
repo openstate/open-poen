@@ -8,7 +8,7 @@ from app import app, db
 from app.forms import (
     ResetPasswordRequestForm, ResetPasswordForm, LoginForm, ProjectForm,
     SubprojectForm, PaymentForm, TransactionAttachmentForm,
-    RemoveAttachmentForm, FunderForm
+    RemoveAttachmentForm, FunderForm, AddAdminForm, EditAdminForm
 )
 from app.email import send_password_reset_email
 from app.models import (
@@ -35,6 +35,20 @@ def after_request_callback(response):
         response.headers['Cache-Control'] = 'private'
 
     return response
+
+
+# Check if the current user is still active before every request. If an
+# admin/project owner sets a user to inactive then the user will be
+#logged out when it tries to make a new request.
+@app.before_request
+def check_active():
+    if current_user.is_authenticated and not current_user.is_active():
+        flash(
+            '<span class="text-red">Deze gebruiker is niet meer '
+            'actief</span>'
+        )
+        logout_user()
+        return redirect(url_for('index'))
 
 
 @app.route("/", methods=['GET', 'POST'])
@@ -144,6 +158,61 @@ def index():
 
             # redirect back to clear form data
             return redirect(url_for('index'))
+
+    # Process filled in edit admin form
+    edit_admin_form = EditAdminForm(prefix="edit_admin_form")
+
+    # Update admin
+    if edit_admin_form.validate_on_submit():
+        admins = User.query.filter_by(id=edit_admin_form.id.data)
+        new_admin_data = {}
+        for f in edit_admin_form:
+            if (f.type != 'SubmitField' and f.type != 'CSRFTokenField'):
+                new_admin_data[f.short_name] = f.data
+
+        # Update if the admin exists
+        if len(admins.all()):
+            admins.update(new_admin_data)
+            db.session.commit()
+            flash('<span class="text-green">gebruiker is bijgewerkt</span>')
+
+        # redirect back to clear form data
+        return redirect(url_for('index'))
+    else:
+        util.flash_form_errors(edit_admin_form, request)
+
+    # Populate the edit admin forms which allows the user to edit it
+    edit_admin_forms = {}
+    for admin in User.query.filter_by(admin=True):
+        edit_admin_forms[admin.email] = EditAdminForm(
+            prefix="edit_admin_form", **{
+                'admin': admin.admin,
+                'active': admin.active,
+                'id': admin.id
+            })
+
+    # Process filled in add admin form
+    add_admin_form = AddAdminForm(prefix="add_admin_form")
+
+    # Add admin
+    if add_admin_form.validate_on_submit():
+        new_admin_data = {}
+        for f in add_admin_form:
+            if (f.type != 'SubmitField' and f.type != 'CSRFTokenField'):
+                new_admin_data[f.short_name] = f.data
+
+        util.add_admin_user(new_admin_data['email'])
+        flash(
+            '<span class="text-green">"%s" is uitgenodigd als admin (of '
+            'toegevoegd als admin als de gebruiker al bestond)' % (
+                new_admin_data['email']
+            )
+        )
+
+        # redirect back to clear form data
+        return redirect(url_for('index'))
+    else:
+        util.flash_form_errors(add_admin_form, request)
 
     # Process filled in project form
     project_form = ProjectForm(prefix="project_form")
@@ -320,6 +389,8 @@ def index():
         total_awarded_str=util.human_format(total_awarded),
         total_spent_str=util.human_format(total_spent),
         project_form=project_form,
+        add_admin_form=AddAdminForm(prefix='add_admin_form'),
+        edit_admin_forms=edit_admin_forms,
         user_stories=UserStory.query.all(),
         bunq_client_id=app.config['BUNQ_CLIENT_ID'],
         base_url_auth=base_url_auth
@@ -405,9 +476,9 @@ def project(project_id):
     for funder in project.funders:
         funder_forms.append(
             FunderForm(prefix="funder_form", **{
-            'name': funder.name,
-            'url': funder.url,
-            'id': funder.id
+                'name': funder.name,
+                'url': funder.url,
+                'id': funder.id
             })
         )
 
@@ -826,12 +897,6 @@ def login():
                 '<span class="text-red">Fout e-mailadres of wachtwoord</span>'
             )
             return(redirect(url_for('login')))
-        if not user.is_active:
-            flash(
-                '<span class="text-red">Deze gebruiker is niet meer '
-                'actief</span>'
-            )
-            return(redirect(url_for('login')))
         login_user(user)
         return redirect(url_for('index'))
     return render_template('login.html', form=form)
@@ -844,10 +909,6 @@ def logout():
     return redirect(url_for('index'))
 
 
-if __name__ == "__main__":
-    app.run(threaded=True)
-
-
 @app.errorhandler(413)
 def request_entity_too_large(error):
     flash(
@@ -857,3 +918,7 @@ def request_entity_too_large(error):
         )
     )
     return redirect(url_for('index'))
+
+
+if __name__ == "__main__":
+    app.run(threaded=True)

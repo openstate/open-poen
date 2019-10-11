@@ -1,5 +1,6 @@
 from babel.numbers import format_percent
 from flask import flash
+from os import urandom
 from os.path import abspath, dirname, exists, join
 from time import sleep
 import json
@@ -8,7 +9,8 @@ import socket
 import sys
 
 from app import app, db
-from app.models import Payment, Project, Subproject, IBAN
+from app.email import send_invite
+from app.models import Payment, Project, Subproject, IBAN, User
 
 from bunq.sdk.context import ApiContext
 from bunq.sdk.context import ApiEnvironmentType
@@ -364,3 +366,23 @@ def flash_form_errors(form, request):
             flash(
                 '<span class="text-red">%s: %s</span>' % (f.label, error)
             )
+
+
+def add_admin_user(email):
+    # Check if a user already exists with this email address
+    user = User.query.filter_by(email=email).first()
+
+    if user:
+        user.admin = True
+        db.session.commit()
+    if not user:
+        user = User(
+            email=email,
+            admin=True
+        )
+        user.set_password(urandom(24))
+        db.session.add(user)
+        db.session.commit()
+
+        # Send the new user an invitation email
+        send_invite(user)

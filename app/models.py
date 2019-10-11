@@ -134,7 +134,7 @@ class User(UserMixin, db.Model):
     first_name = db.Column(db.String(120), index=True)
     last_name = db.Column(db.String(120), index=True)
     biography = db.Column(db.String(1000), default=True)
-    is_active = db.Column(db.Boolean, default=True)
+    active = db.Column(db.Boolean, default=True)
 
     debit_cards = db.relationship('DebitCard', backref='user', lazy='dynamic')
     payments = db.relationship('Payment', backref='user', lazy='dynamic')
@@ -143,6 +143,9 @@ class User(UserMixin, db.Model):
         secondary=user_image,
         lazy='dynamic'
     )
+
+    def is_active(self):
+        return self.active
 
     def set_password(self, password):
         if len(password) < 12:

@@ -135,26 +135,7 @@ def add_admin_user(email):
     If it does not exist yet a user will be created and given admin
     rights.
     """
-
-    # Check if a user already exists with this email address
-    user = User.query.filter_by(email=email).first()
-
-    if user:
-        user.admin = True
-    if not user:
-        user = User(
-            email=email,
-            admin=True
-        )
-        user.set_password(urandom(24))
-        db.session.add(user)
-        db.session.commit()
-
-        # Send the new user an invitation email
-        send_invite(user)
-
-    db.session.commit()
-
+    util.add_admin_user(email)
     print("Added user as admin")
 
 
