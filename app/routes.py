@@ -8,7 +8,7 @@ from app import app, db
 from app.forms import (
     ResetPasswordRequestForm, ResetPasswordForm, LoginForm, ProjectForm,
     SubprojectForm, PaymentForm, TransactionAttachmentForm,
-    RemoveAttachmentForm, FunderForm, AddAdminForm, EditAdminForm
+    RemoveAttachmentForm, FunderForm, AddUserForm, EditAdminForm
 )
 from app.email import send_password_reset_email
 from app.models import (
@@ -84,7 +84,6 @@ def index():
                 'Retrieved wrong token (used for retrieving Bunq '
                 'authorization code): %s' % e
             )
-
 
         if token_info:
             user_id = token_info['user_id']
@@ -192,16 +191,17 @@ def index():
             })
 
     # Process filled in add admin form
-    add_admin_form = AddAdminForm(prefix="add_admin_form")
+    add_user_form = AddUserForm(prefix="add_user_form")
 
-    # Add admin
-    if add_admin_form.validate_on_submit():
+    # Add user (either admin or project owner)
+    if add_user_form.validate_on_submit():
         new_admin_data = {}
-        for f in add_admin_form:
+        for f in add_user_form:
             if (f.type != 'SubmitField' and f.type != 'CSRFTokenField'):
                 new_admin_data[f.short_name] = f.data
 
-        util.add_admin_user(new_admin_data['email'])
+        util.add_user(**new_admin_data)
+
         flash(
             '<span class="text-green">"%s" is uitgenodigd als admin (of '
             'toegevoegd als admin als de gebruiker al bestond)' % (
@@ -212,7 +212,7 @@ def index():
         # redirect back to clear form data
         return redirect(url_for('index'))
     else:
-        util.flash_form_errors(add_admin_form, request)
+        util.flash_form_errors(add_user_form, request)
 
     # Process filled in project form
     project_form = ProjectForm(prefix="project_form")
@@ -389,7 +389,7 @@ def index():
         total_awarded_str=util.human_format(total_awarded),
         total_spent_str=util.human_format(total_spent),
         project_form=project_form,
-        add_admin_form=AddAdminForm(prefix='add_admin_form'),
+        add_user_form=AddUserForm(prefix='add_user_form'),
         edit_admin_forms=edit_admin_forms,
         user_stories=UserStory.query.all(),
         bunq_client_id=app.config['BUNQ_CLIENT_ID'],
@@ -567,7 +567,7 @@ def project(project_id):
         payments=payments,
         subproject_form=subproject_form,
         funder_forms=funder_forms,
-        new_funder_form = FunderForm(prefix="funder_form"),
+        new_funder_form=FunderForm(prefix="funder_form"),
         project_owner=project_owner
     )
 

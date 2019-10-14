@@ -368,13 +368,26 @@ def flash_form_errors(form, request):
             )
 
 
-def add_admin_user(email):
+def _set_user_role(user, admin=False, project_id=0, subproject_id=0):
+    if admin:
+        user.admin = True
+        db.session.commit()
+    if project_id:
+        project = Project.query.get(project_id)
+        project.users.append(user)
+        db.session.commit()
+    if subproject_id:
+        subproject = Subproject.query.get(subproject_id)
+        subproject.users.append(user)
+        db.session.commit()
+
+
+def add_user(email, admin=False, project_id=0, subproject_id=0):
     # Check if a user already exists with this email address
     user = User.query.filter_by(email=email).first()
 
     if user:
-        user.admin = True
-        db.session.commit()
+        _set_user_role(user, admin, project_id, subproject_id)
     if not user:
         user = User(
             email=email,
@@ -383,6 +396,8 @@ def add_admin_user(email):
         user.set_password(urandom(24))
         db.session.add(user)
         db.session.commit()
+
+        _set_user_role(user, admin, project_id, subproject_id)
 
         # Send the new user an invitation email
         send_invite(user)

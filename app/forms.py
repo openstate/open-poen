@@ -167,7 +167,9 @@ class RemoveAttachmentForm(FlaskForm):
 
 class FunderForm(FlaskForm):
     name = StringField('Naam', validators=[DataRequired(), Length(max=120)])
-    url = StringField('URL', validators=[DataRequired(), URL(), Length(max=2000)])
+    url = StringField(
+        'URL', validators=[DataRequired(), URL(), Length(max=2000)]
+    )
     id = IntegerField(widget=HiddenInput())
 
     submit = SubmitField(
@@ -185,10 +187,13 @@ class FunderForm(FlaskForm):
     )
 
 
-class AddAdminForm(FlaskForm):
+class AddUserForm(FlaskForm):
     email = StringField(
         'E-mailadres', validators=[DataRequired(), Email(), Length(max=120)]
     )
+    admin = BooleanField(widget=HiddenInput())
+    project_id = IntegerField(widget=HiddenInput())
+    subproject_id = IntegerField(widget=HiddenInput())
 
     submit = SubmitField(
         'Uitnodigen',

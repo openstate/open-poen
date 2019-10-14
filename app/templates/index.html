@@ -93,22 +93,15 @@
                                     <div class="modal-body">
                                       <p>Als er nog geen gebruiker bestaat met dit e-mailadres dan krijgt deze een uitnodigingsmail met daarin een link om een wachtwoord aan te maken. Als er wel al een gebruiker bestaat met dit e-mailadres dan krijgt deze gebruiker admin-rechten (er wordt daar geen e-mail over verstuurd).</p>
                                       <div>
-                                        {{ add_admin_form.csrf_token }}
+                                        {{ add_user_form.csrf_token }}
 
-                                        {% for f in add_admin_form %}
-                                          {% if f.widget.input_type != 'hidden' and f.widget.input_type != 'submit' %}
-                                            <div>
-                                              {{ f.label }}
-                                              <br>
-                                              {{ f }}
-                                            </div>
-                                          {% endif %}
-                                        {% endfor %}
+                                        {{ add_user_form.email }}
+                                        {{ add_user_form.admin(**{'value': 1}) }}
                                       </div>
                                     </div>
                                     <div class="modal-footer">
                                       <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuleren</button>
-                                      {{ add_admin_form.submit }}
+                                      {{ add_user_form.submit }}
                                     </div>
                                   </form>
                                 </div>
@@ -293,6 +286,42 @@
                                     <a href="{{ base_url_auth }}/auth?response_type=code&client_id={{ bunq_client_id }}&redirect_uri=https://openpoen.nl/&state={{ project.bunq_token }}" rel="noopener"><img class="bunq-connect-button" src="{{ url_for('static', filename='images/bunq_Connect_button_svg.svg') }}"></a>
                                     {{ project['form'].id }}
                                   </div>
+
+                                  <hr>
+
+                                  <!-- Button trigger modal -->
+                                  <button type="button" class="btn button-poen-small bg-grey-blue" data-toggle="modal" data-target="#project-owner-toevoegen">
+                                    project owner toevoegen
+                                  </button>
+
+                                  <!-- Modal -->
+                                  <div class="modal fade" id="project-owner-toevoegen" tabindex="-1" role="dialog" aria-labelledby="projectOwnerToevoegenLabel" aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                      <div class="modal-content">
+                                        <form method="POST">
+                                          <div class="modal-header">
+                                            <h5 class="modal-title" id="projectOwnerToevoegenLabel">Project Owner Toevoegen</h5>
+                                            <button type="button" class="close" data-dismiss="modal" aria-label="Annuleren">
+                                              <span aria-hidden="true">&times;</span>
+                                            </button>
+                                          </div>
+                                          <div class="modal-body">
+                                            <p>Als er nog geen gebruiker bestaat met dit e-mailadres dan krijgt deze een uitnodigingsmail met daarin een link om een wachtwoord aan te maken. Als er wel al een gebruiker bestaat met dit e-mailadres dan krijgt deze gebruiker 'project owner'-rechten (er wordt daar geen e-mail over verstuurd).</p>
+                                            <div>
+                                              {{ add_user_form.csrf_token }}
+
+                                              {{ add_user_form.email }}
+                                              {{ add_user_form.project_id(**{'value': project.id}) }}
+                                            </div>
+                                          </div>
+                                          <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuleren</button>
+                                            {{ add_user_form.submit }}
+                                          </div>
+                                        </form>
+                                      </div>
+                                    </div>
+                                  </div>
                                 </div>
                                 <div class="modal-footer">
                                   <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuleren</button>
@@ -325,7 +354,6 @@
                                       </div>
                                     </div>
                                   </div>
-
                                   {{ project['form'].submit }}
                                 </div>
                               </form>

@@ -128,40 +128,18 @@ def show_all_payments():
 
 
 @database.command()
-@click.argument('email')
-def add_admin_user(email):
+@click.option('-e', '--email', required=True)
+@click.option('-a', '--admin', is_flag=True)
+@click.option('-pid', '--project_id', type=int)
+@click.option('-sid', '--subproject_id', type=int)
+def add_user(email, admin=False,
+             project_id=0, subproject_id=0):
     """
-    Adds an admin user. This command will prompt for an email address.
-    If it does not exist yet a user will be created and given admin
-    rights.
+    Adds a user. This command will prompt for an email address and
+    allows the user to be added as admin or linked to a (sub)project. If
+    it does not exist yet a user will be created.
     """
-    util.add_admin_user(email)
-    print("Added user as admin")
-
-
-@database.command()
-@click.argument('email')
-def add_user(email):
-    """
-    Adds a user. This command will prompt for an email address.
-    """
-
-    # Check if a user already exists with this email address
-    user = User.query.filter_by(email=email).first()
-
-    if not user:
-        user = User(
-            email=email
-        )
-        user.set_password(urandom(24))
-        db.session.add(user)
-        db.session.commit()
-
-        # Send the new user an invitation email
-        send_invite(user)
-
-    db.session.commit()
-
+    util.add_user(email, admin, project_id, subproject_id)
     print("Added user")
 
 
