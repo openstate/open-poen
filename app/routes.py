@@ -911,7 +911,8 @@ def subproject(project_id, subproject_id):
 
         flash(
             '<span class="text-green">"%s" is uitgenodigd als initiatiefnemer '
-            '(of toegevoegd als initiatiefnemer als de gebruiker al bestond)' % (
+            '(of toegevoegd als initiatiefnemer als de gebruiker al '
+            'bestond)' % (
                 new_user_data['email']
             )
         )
