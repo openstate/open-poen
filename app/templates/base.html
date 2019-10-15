@@ -63,21 +63,21 @@
     </nav>
 
     <div id="navbar" class="collapse navbar-collapse">
-      {% if current_user.is_authenticated %}
-        {% set login = ('logout', 'Uitloggen') %}
-      {% else %}
-        {% set login = ('login', 'Inloggen') %}
-      {% endif %}
-
       {% set menu = [
-          ('index', 'Home')
+          (url_for('index'), 'Home')
       ] %}
-      {{ menu.append(login)|default("", True) }}
+
+      {% if current_user.is_authenticated %}
+        {{ menu.append((url_for('profile'), 'Profiel'))|default("", True) }}
+        {{ menu.append((url_for('logout'), 'Uitloggen'))|default("", True) }}
+      {% else %}
+        {{ menu.append((url_for('login'), 'Inloggen'))|default("", True) }}
+      {% endif %}
 
       <ul class="navbar-nav">
         {% for page, name in menu %}
           <li {% if page == active_page %} class="nav-item active"{% endif%}>
-            <a class="nav-link" href="{{ url_for(page) }}">{{ name }}{% if page == active_page %}<span class="sr-only">(huidige pagina)</span>{% endif %}</a>
+            <a class="nav-link" href="{{ page }}">{{ name }}{% if page == active_page %}<span class="sr-only">(huidige pagina)</span>{% endif %}</a>
           </li>
         {% endfor %}
       </ul>

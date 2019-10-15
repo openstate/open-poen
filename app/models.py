@@ -133,7 +133,7 @@ class User(UserMixin, db.Model):
     admin = db.Column(db.Boolean, default=False)
     first_name = db.Column(db.String(120), index=True)
     last_name = db.Column(db.String(120), index=True)
-    biography = db.Column(db.String(1000), default=True)
+    biography = db.Column(db.String(1000))
     active = db.Column(db.Boolean, default=True)
 
     debit_cards = db.relationship('DebitCard', backref='user', lazy='dynamic')

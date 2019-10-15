@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% set active_page = "profiel" %}
+{% block head %}
+  <title>Open Poen - Profiel</title>
+  <meta property="og:title" content="Open Poen - Profiel" />
+  {{ super() }}
+{% endblock %}
+
+{% block content %}
+  <div class="container">
+    <h1>Profiel bewerken</h1>
+
+    <br>
+    <br>
+    <form method="POST">
+      {{ edit_profile_form.csrf_token }}
+
+      {% for f in edit_profile_form %}
+        {% if f.widget.input_type != 'hidden' and f.widget.input_type != 'submit' %}
+          <div>
+            {{ f.label }} {{ f }}
+          </div>
+        {% endif %}
+      {% endfor %}
+    {{ edit_profile_form.submit }}
+  </div>
+{% endblock %}

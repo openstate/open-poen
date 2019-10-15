@@ -9,7 +9,7 @@ from app.forms import (
     ResetPasswordRequestForm, ResetPasswordForm, LoginForm, ProjectForm,
     SubprojectForm, PaymentForm, TransactionAttachmentForm,
     RemoveAttachmentForm, FunderForm, AddUserForm, EditAdminForm,
-    EditProjectOwnerForm, EditUserForm
+    EditProjectOwnerForm, EditUserForm, EditProfileForm
 )
 from app.email import send_password_reset_email
 from app.models import (
@@ -38,11 +38,12 @@ def after_request_callback(response):
     return response
 
 
-# Check if the current user is still active before every request. If an
-# admin/project owner sets a user to inactive then the user will be
-#logged out when it tries to make a new request.
+# Things to do before every request is processed
 @app.before_request
-def check_active():
+def before_request():
+    # Check if the current user is still active before every request. If
+    # an admin/project owner sets a user to inactive then the user will
+    # be logged out when it tries to make a new request.
     if current_user.is_authenticated and not current_user.is_active():
         flash(
             '<span class="text-red">Deze gebruiker is niet meer '
@@ -50,6 +51,17 @@ def check_active():
         )
         logout_user()
         return redirect(url_for('index'))
+
+    # If the current user has no first name, last name or biography then
+    # send them to their profile page where they can add them
+    if current_user.is_authenticated and request.path != '/profiel':
+        if (not current_user.first_name
+                or not current_user.last_name or not current_user.biography):
+            flash(
+                '<span class="text-red">Sommige velden in uw profiel zijn nog '
+                'niet ingevuld. Vul deze in om verder te kunnen gaan.</span>'
+            )
+            return redirect(url_for('profile'))
 
 
 @app.route("/", methods=['GET', 'POST'])
@@ -1053,6 +1065,51 @@ def login():
 def logout():
     logout_user()
     return redirect(url_for('index'))
+
+
+@app.route("/profiel", methods=['GET', 'POST'])
+@login_required
+def profile():
+    # Process filled in edit profile form
+    edit_profile_form = EditProfileForm(
+        prefix="edit_profile_form"
+    )
+
+    # Update profile
+    if edit_profile_form.validate_on_submit():
+        users = User.query.filter_by(
+            id=current_user.id
+        )
+        new_profile_data = {}
+        for f in edit_profile_form:
+            if f.type != 'SubmitField' and f.type != 'CSRFTokenField':
+                new_profile_data[f.short_name] = f.data
+
+        # Update if the user exists
+        if len(users.all()):
+            users.update(new_profile_data)
+            db.session.commit()
+            flash('<span class="text-green">gebruiker is bijgewerkt</span>')
+
+        # redirect back to clear form data
+        return redirect(
+            url_for(
+                'profile',
+                id=current_user.id
+            )
+        )
+    else:
+        util.flash_form_errors(edit_profile_form, request)
+
+    # Populate the edit profile form which allows the user to edit it
+    edit_profile_form = EditProfileForm(
+        prefix="edit_profile_form", **{
+            'first_name': current_user.first_name,
+            'last_name': current_user.last_name,
+            'biography': current_user.biography
+        }
+    )
+    return render_template('profiel.html', edit_profile_form=edit_profile_form)
 
 
 @app.errorhandler(413)

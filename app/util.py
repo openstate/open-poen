@@ -389,10 +389,7 @@ def add_user(email, admin=False, project_id=0, subproject_id=0):
     if user:
         _set_user_role(user, admin, project_id, subproject_id)
     if not user:
-        user = User(
-            email=email,
-            admin=True
-        )
+        user = User(email=email)
         user.set_password(urandom(24))
         db.session.add(user)
         db.session.commit()

@@ -246,3 +246,22 @@ class EditUserForm(FlaskForm):
             'class': 'btn btn-info'
         }
     )
+
+
+class EditProfileForm(FlaskForm):
+    first_name = StringField(
+        'Voornaam', validators=[DataRequired(), Length(max=120)]
+    )
+    last_name = StringField(
+        'Achternaam', validators=[DataRequired(), Length(max=120)]
+    )
+    biography = TextAreaField(
+        'Beschrijving', validators=[DataRequired(), Length(max=1000)]
+    )
+
+    submit = SubmitField(
+        'Opslaan',
+        render_kw={
+            'class': 'btn btn-info'
+        }
+    )
