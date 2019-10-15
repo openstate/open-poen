@@ -53,6 +53,10 @@ Development
 ## CLI
 To access the CLI of the app run `sudo docker exec -it poen_app_1 bash` and run for example `flask` and `flask database` to see the available commands. Here are some CLI commands:
 
+### Database commands
+
+- `flask database add-user --email <EMAIL_ADDRESS> --admin` adds an admin user
+
 ### Database migration commands
 
 Use these after the database is in production and you need to change the database model.
