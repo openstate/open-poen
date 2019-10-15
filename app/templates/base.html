@@ -76,7 +76,7 @@
 
       <ul class="navbar-nav">
         {% for page, name in menu %}
-          <li {% if page == active_page %} class="nav-item active"{% endif%}>
+          <li {% if name == active_page %} class="nav-item active"{% endif%}>
             <a class="nav-link" href="{{ page }}">{{ name }}{% if page == active_page %}<span class="sr-only">(huidige pagina)</span>{% endif %}</a>
           </li>
         {% endfor %}
