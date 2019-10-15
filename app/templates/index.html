@@ -110,13 +110,13 @@
 
                             <hr>
 
-                            {% for edit_admin_email, edit_admin_form in edit_admin_forms.items() %}
+                            {% for admin_email, edit_admin_form in edit_admin_forms.items() %}
                               <div>
                                 <!-- Button trigger modal -->
                                 <button type="button" class="btn button-poen-small bg-grey-blue" data-toggle="modal" data-target="#admin-bewerken-{{ edit_admin_form.id.data }}">
                                   admin bewerken
                                 </button>
-                                {{ edit_admin_email }}
+                                {{ admin_email }}
 
                                 <!-- Modal -->
                                 <div class="modal fade" id="admin-bewerken-{{ edit_admin_form.id.data }}" tabindex="-1" role="dialog" aria-labelledby="adminBewerkenLabel" aria-hidden="true">
@@ -322,6 +322,55 @@
                                       </div>
                                     </div>
                                   </div>
+
+                                  <hr>
+
+                                  {% for project_owner_email, edit_project_owner_form in edit_project_owner_forms[project.id].items() %}
+                                    <div>
+                                      <!-- Button trigger modal -->
+                                      <button type="button" class="btn button-poen-small bg-grey-blue" data-toggle="modal" data-target="#project-owner-bewerken-{{ edit_project_owner_form.id.data }}">
+                                        project owner bewerken
+                                      </button>
+                                      {{ project_owner_email }}
+
+                                      <!-- Modal -->
+                                      <div class="modal fade" id="project-owner-bewerken-{{ edit_project_owner_form.id.data }}" tabindex="-1" role="dialog" aria-labelledby="projectOwnerBewerkenLabel" aria-hidden="true">
+                                        <div class="modal-dialog" role="document">
+                                          <div class="modal-content">
+                                            <form method="POST">
+                                              <div class="modal-header">
+                                                <h5 class="modal-title" id="projectOwnerBewerkenLabel">Project Owner Bewerken</h5>
+                                                <button type="button" class="close" data-dismiss="modal" aria-label="Annuleren">
+                                                  <span aria-hidden="true">&times;</span>
+                                                </button>
+                                              </div>
+                                              <div class="modal-body">
+                                                <div>
+                                                  {{ edit_project_owner_form.csrf_token }}
+
+                                                  {% for f in edit_project_owner_form %}
+                                                    {% if f.widget.input_type != 'hidden' and f.widget.input_type != 'submit' %}
+                                                      <div>
+                                                        {{ f }}
+                                                        {{ f.label }}
+                                                      </div>
+                                                    {% endif %}
+                                                  {% endfor %}
+                                                </div>
+                                              </div>
+                                              <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuleren</button>
+                                                {{ edit_project_owner_form.id }}
+                                                {{ edit_project_owner_form.project_id }}
+                                                {{ edit_project_owner_form.submit }}
+                                              </div>
+                                            </form>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                    <br>
+                                  {% endfor %}
                                 </div>
                                 <div class="modal-footer">
                                   <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuleren</button>

@@ -214,3 +214,19 @@ class EditAdminForm(FlaskForm):
             'class': 'btn btn-info'
         }
     )
+
+
+class EditProjectOwnerForm(FlaskForm):
+    remove_from_project = BooleanField(
+        'Verwijder project owner van dit project'
+    )
+    active = BooleanField('Project owner account is actief')
+    id = IntegerField(widget=HiddenInput())
+    project_id = IntegerField(widget=HiddenInput())
+
+    submit = SubmitField(
+        'Opslaan',
+        render_kw={
+            'class': 'btn btn-info'
+        }
+    )

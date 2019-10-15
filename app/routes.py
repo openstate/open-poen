@@ -8,7 +8,8 @@ from app import app, db
 from app.forms import (
     ResetPasswordRequestForm, ResetPasswordForm, LoginForm, ProjectForm,
     SubprojectForm, PaymentForm, TransactionAttachmentForm,
-    RemoveAttachmentForm, FunderForm, AddUserForm, EditAdminForm
+    RemoveAttachmentForm, FunderForm, AddUserForm, EditAdminForm,
+    EditProjectOwnerForm
 )
 from app.email import send_password_reset_email
 from app.models import (
@@ -58,8 +59,7 @@ def index():
     # Process Bunq OAuth callback
     base_url_auth = 'https://oauth.bunq.com'
     base_url_token = 'https://api.oauth.bunq.com'
-    if (app.config['BUNQ_ENVIRONMENT_TYPE'] ==
-            ApiEnvironmentType.SANDBOX):
+    if app.config['BUNQ_ENVIRONMENT_TYPE'] == ApiEnvironmentType.SANDBOX:
         base_url_auth = 'https://oauth.sandbox.bunq.com'
         base_url_token = 'https://api-oauth.sandbox.bunq.com'
     authorization_code = ''
@@ -166,7 +166,7 @@ def index():
         admins = User.query.filter_by(id=edit_admin_form.id.data)
         new_admin_data = {}
         for f in edit_admin_form:
-            if (f.type != 'SubmitField' and f.type != 'CSRFTokenField'):
+            if f.type != 'SubmitField' and f.type != 'CSRFTokenField':
                 new_admin_data[f.short_name] = f.data
 
         # Update if the admin exists
@@ -188,16 +188,72 @@ def index():
                 'admin': admin.admin,
                 'active': admin.active,
                 'id': admin.id
-            })
+            }
+        )
 
-    # Process filled in add admin form
+    # Process filled in edit project owner form
+    edit_project_owner_form = EditProjectOwnerForm(
+        prefix="edit_project_owner_form"
+    )
+
+    # Update project owner
+    if edit_project_owner_form.validate_on_submit():
+        project_owners = User.query.filter_by(
+            id=edit_project_owner_form.id.data
+        )
+        new_project_owner_data = {}
+        remove_from_project = False
+        remove_from_project_id = 0
+        for f in edit_project_owner_form:
+            if f.type != 'SubmitField' and f.type != 'CSRFTokenField':
+                if f.short_name == 'remove_from_project' and f.data:
+                    remove_from_project = True
+                elif f.short_name == 'project_id' and f.data:
+                    remove_from_project_id = f.data
+                else:
+                    new_project_owner_data[f.short_name] = f.data
+
+        # Update if the project owner exists
+        if len(project_owners.all()):
+            project_owners.update(new_project_owner_data)
+            if remove_from_project:
+                project_owners.first().projects.remove(
+                    Project.query.get(remove_from_project_id)
+                )
+
+            db.session.commit()
+            flash('<span class="text-green">gebruiker is bijgewerkt</span>')
+
+        # redirect back to clear form data
+        return redirect(url_for('index'))
+    else:
+        util.flash_form_errors(edit_project_owner_form, request)
+
+    # Populate the edit project owner forms which allows the user to
+    # edit it
+    edit_project_owner_forms = {}
+    for project in Project.query.all():
+        temp_edit_project_owner_forms = {}
+        for project_owner in project.users:
+            temp_edit_project_owner_forms[project_owner.email] = (
+                EditProjectOwnerForm(
+                    prefix="edit_project_owner_form", **{
+                        'active': project_owner.active,
+                        'id': project_owner.id,
+                        'project_id': project.id
+                    }
+                )
+            )
+        edit_project_owner_forms[project.id] = temp_edit_project_owner_forms
+
+    # Process filled in add user form
     add_user_form = AddUserForm(prefix="add_user_form")
 
     # Add user (either admin or project owner)
     if add_user_form.validate_on_submit():
         new_admin_data = {}
         for f in add_user_form:
-            if (f.type != 'SubmitField' and f.type != 'CSRFTokenField'):
+            if f.type != 'SubmitField' and f.type != 'CSRFTokenField':
                 new_admin_data[f.short_name] = f.data
 
         util.add_user(**new_admin_data)
@@ -244,8 +300,8 @@ def index():
     if project_form.validate_on_submit():
         new_project_data = {}
         for f in project_form:
-            if (f.type != 'SubmitField' and f.type != 'CSRFTokenField'):
-                if (f.short_name == 'iban'):
+            if f.type != 'SubmitField' and f.type != 'CSRFTokenField':
+                if f.short_name == 'iban':
                     new_iban = None
                     new_iban_name = None
                     # New projects f.data is 'None', editing an existing
@@ -327,8 +383,7 @@ def index():
         form = ''
 
         if project_owner:
-            if (project.bunq_access_token and
-                    len(project.bunq_access_token)):
+            if project.bunq_access_token and len(project.bunq_access_token):
                 already_authorized = True
 
             # Always generate a token as the user can connect to Bunq
@@ -391,6 +446,7 @@ def index():
         project_form=project_form,
         add_user_form=AddUserForm(prefix='add_user_form'),
         edit_admin_forms=edit_admin_forms,
+        edit_project_owner_forms=edit_project_owner_forms,
         user_stories=UserStory.query.all(),
         bunq_client_id=app.config['BUNQ_CLIENT_ID'],
         base_url_auth=base_url_auth
@@ -439,7 +495,7 @@ def project(project_id):
         funders = Funder.query.filter_by(id=funder_form.id.data)
         new_funder_data = {}
         for f in funder_form:
-            if (f.type != 'SubmitField' and f.type != 'CSRFTokenField'):
+            if f.type != 'SubmitField' and f.type != 'CSRFTokenField':
                 new_funder_data[f.short_name] = f.data
 
         # Update if the funder already exists
@@ -497,8 +553,8 @@ def project(project_id):
         # Get data from the form
         new_subproject_data = {}
         for f in subproject_form:
-            if (f.type != 'SubmitField' and f.type != 'CSRFTokenField'):
-                if (f.short_name == 'iban'):
+            if f.type != 'SubmitField' and f.type != 'CSRFTokenField':
+                if f.short_name == 'iban':
                     new_iban = None
                     new_iban_name = None
                     if not f.data == '' and f.data != 'None':
@@ -635,8 +691,8 @@ def subproject(project_id, subproject_id):
         # Get data from the form
         new_subproject_data = {}
         for f in subproject_form:
-            if (f.type != 'SubmitField' and f.type != 'CSRFTokenField'):
-                if (f.short_name == 'iban'):
+            if f.type != 'SubmitField' and f.type != 'CSRFTokenField':
+                if f.short_name == 'iban':
                     new_iban = None
                     new_iban_name = None
                     if not f.data == '':
@@ -717,7 +773,7 @@ def subproject(project_id, subproject_id):
         # Get data from the form
         new_payment_data = {}
         for f in payment_form:
-            if (f.type != 'SubmitField' and f.type != 'CSRFTokenField'):
+            if f.type != 'SubmitField' and f.type != 'CSRFTokenField':
                 new_payment_data[f.short_name] = f.data
 
         try:
