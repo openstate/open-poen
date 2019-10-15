@@ -9,7 +9,7 @@ from app.forms import (
     ResetPasswordRequestForm, ResetPasswordForm, LoginForm, ProjectForm,
     SubprojectForm, PaymentForm, TransactionAttachmentForm,
     RemoveAttachmentForm, FunderForm, AddUserForm, EditAdminForm,
-    EditProjectOwnerForm
+    EditProjectOwnerForm, EditUserForm
 )
 from app.email import send_password_reset_email
 from app.models import (
@@ -251,17 +251,18 @@ def index():
 
     # Add user (either admin or project owner)
     if add_user_form.validate_on_submit():
-        new_admin_data = {}
+        new_user_data = {}
         for f in add_user_form:
             if f.type != 'SubmitField' and f.type != 'CSRFTokenField':
-                new_admin_data[f.short_name] = f.data
+                new_user_data[f.short_name] = f.data
 
-        util.add_user(**new_admin_data)
+        util.add_user(**new_user_data)
 
         flash(
-            '<span class="text-green">"%s" is uitgenodigd als admin (of '
-            'toegevoegd als admin als de gebruiker al bestond)' % (
-                new_admin_data['email']
+            '<span class="text-green">"%s" is uitgenodigd als admin of '
+            'project owner (of toegevoegd als admin of project owner als de '
+            'gebruiker al bestond)' % (
+                new_user_data['email']
             )
         )
 
@@ -827,6 +828,93 @@ def subproject(project_id, subproject_id):
 
     amounts = util.calculate_subproject_amounts(subproject_id)
 
+    # Process filled in edit user form
+    edit_user_form = EditUserForm(
+        prefix="edit_user_form"
+    )
+
+    # Update user
+    if edit_user_form.validate_on_submit():
+        users = User.query.filter_by(
+            id=edit_user_form.id.data
+        )
+        new_user_data = {}
+        remove_from_subproject = False
+        remove_from_subproject_id = 0
+        for f in edit_user_form:
+            if f.type != 'SubmitField' and f.type != 'CSRFTokenField':
+                if f.short_name == 'remove_from_subproject' and f.data:
+                    remove_from_subproject = True
+                elif f.short_name == 'subproject_id' and f.data:
+                    remove_from_subproject_id = f.data
+                else:
+                    new_user_data[f.short_name] = f.data
+
+        # Update if the user exists
+        if len(users.all()):
+            users.update(new_user_data)
+            if remove_from_subproject:
+                users.first().subprojects.remove(
+                    Subproject.query.get(remove_from_subproject_id)
+                )
+
+            db.session.commit()
+            flash('<span class="text-green">gebruiker is bijgewerkt</span>')
+
+        # redirect back to clear form data
+        return redirect(
+            url_for(
+                'subproject',
+                project_id=subproject.project.id,
+                subproject_id=subproject.id
+            )
+        )
+    else:
+        util.flash_form_errors(edit_user_form, request)
+
+    # Populate the edit user forms which allows the user to edit it
+    edit_user_forms = {}
+    for user in subproject.users:
+        edit_user_forms[user.email] = (
+            EditUserForm(
+                prefix="edit_user_form", **{
+                    'active': user.active,
+                    'id': user.id,
+                    'subproject_id': subproject.id
+                }
+            )
+        )
+
+    # Process filled in add user form
+    add_user_form = AddUserForm(prefix="add_user_form")
+
+    # Add user
+    if add_user_form.validate_on_submit():
+        new_user_data = {}
+        for f in add_user_form:
+            if f.type != 'SubmitField' and f.type != 'CSRFTokenField':
+                new_user_data[f.short_name] = f.data
+
+        util.add_user(**new_user_data)
+
+        flash(
+            '<span class="text-green">"%s" is uitgenodigd als initiatiefnemer '
+            '(of toegevoegd als initiatiefnemer als de gebruiker al bestond)' % (
+                new_user_data['email']
+            )
+        )
+
+        # redirect back to clear form data
+        return redirect(
+            url_for(
+                'subproject',
+                project_id=subproject.project.id,
+                subproject_id=subproject.id
+            )
+        )
+    else:
+        util.flash_form_errors(add_user_form, request)
+
     # Process filled in transaction attachment form
     transaction_attachment_form = ''
     if project_owner or user_in_subproject:
@@ -898,6 +986,8 @@ def subproject(project_id, subproject_id):
         subproject_form=subproject_form,
         payment_forms=payment_forms,
         transaction_attachment_form=transaction_attachment_form,
+        edit_user_forms=edit_user_forms,
+        add_user_form=AddUserForm(prefix='add_user_form'),
         remove_attachment_form=remove_attachment_form,
         project_owner=project_owner,
         user_in_subproject=user_in_subproject

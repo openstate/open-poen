@@ -230,3 +230,19 @@ class EditProjectOwnerForm(FlaskForm):
             'class': 'btn btn-info'
         }
     )
+
+
+class EditUserForm(FlaskForm):
+    remove_from_subproject = BooleanField(
+        'Verwijder initiatiefnemer van dit project'
+    )
+    active = BooleanField('Initiatiefnemer account is actief')
+    id = IntegerField(widget=HiddenInput())
+    subproject_id = IntegerField(widget=HiddenInput())
+
+    submit = SubmitField(
+        'Opslaan',
+        render_kw={
+            'class': 'btn btn-info'
+        }
+    )
