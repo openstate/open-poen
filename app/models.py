@@ -298,23 +298,23 @@ class Payment(db.Model):
 
     # Fields coming from the Bunq API
     # Some example payment values:
-    # {*'alias_name': 'Highchurch',
-    #  *'alias_type': 'IBAN',
-    #  *'alias_value': 'NL13BUNQ9900299981',
-    #  *'amount_currency': 'EUR',
-    #  *'amount_value': '500.00',
-    #  *'balance_after_mutation_currency': 'EUR',
-    #  *'balance_after_mutation_value': '500.00',
-    #  *'counterparty_alias_name': 'S. Daddy',
-    #  *'counterparty_alias_type': 'IBAN',
-    #  *'counterparty_alias_value': 'NL65BUNQ9900000188',
-    #  *'created': '2019-09-09 14:07:38.942900',
-    #  *'description': 'Requesting some spending money.',
-    #  *'id': 369127,
-    #  *'monetary_account_id': 27307,
-    #  *'sub_type': 'REQUEST',
-    #  *'type': 'BUNQ',
-    #  *'updated': '2019-09-09 14:07:38.942900'}
+    # {'alias_name': 'Highchurch',
+    #  'alias_type': 'IBAN',
+    #  'alias_value': 'NL13BUNQ9900299981',
+    #  'amount_currency': 'EUR',
+    #  'amount_value': '500.00',
+    #  'balance_after_mutation_currency': 'EUR',
+    #  'balance_after_mutation_value': '500.00',
+    #  'counterparty_alias_name': 'S. Daddy',
+    #  'counterparty_alias_type': 'IBAN',
+    #  'counterparty_alias_value': 'NL65BUNQ9900000188',
+    #  'created': '2019-09-09 14:07:38.942900',
+    #  'description': 'Requesting some spending money.',
+    #  'id': 369127,
+    #  'monetary_account_id': 27307,
+    #  'sub_type': 'REQUEST',
+    #  'type': 'BUNQ',
+    #  'updated': '2019-09-09 14:07:38.942900'}
     id = db.Column(db.Integer, primary_key=True)
     bank_payment_id = db.Column(db.Integer, unique=True)
     alias_name = db.Column(db.String(120))
