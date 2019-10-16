@@ -4,6 +4,7 @@ body {
   line-height: 21px;
   color: $blue-dark;
   word-wrap: break-word;
+  hyphens: manual;
 
   article {
     background-color: white;
@@ -119,6 +120,19 @@ hr {
   transform: translateX(-50%);
 }
 
+.small-gutter {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.small-gutter-left {
+  padding-left: 2px;
+}
+
+.small-gutter-right {
+  padding-right: 2px;
+}
+
 .flashed-messages {
   padding: 0;
   border: 2px solid $blue;
@@ -188,10 +202,11 @@ hr {
   border-radius: 35px;
   height: 184px;
   width: 184px;
+  padding: 5px;
 }
 
 .card-small-list {
-  list-style: none;
+  list-style: square;
   padding: 10px;
 }
 
@@ -248,7 +263,7 @@ hr {
   }
 
   h3 {
-    font-size: 15px;
+    font-size: 14px;
     line-height: 20px;
   }
 

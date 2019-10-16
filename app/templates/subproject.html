@@ -34,14 +34,14 @@
                 <h1 class="text-center">{{ subproject.name }}</h1>
               </div>
               <div class="row">
-                <div class="col-4 text-right">
+                <div class="col-4 text-right small-gutter">
                   <h3 class="text-blue">resterend</h3>
                   <h2>{{ amounts.left_str }}</h2>
                 </div>
                 <div class="col-4 text-center">
                   <h2>{{ amounts.percentage_spent_str }}</h2>
                 </div>
-                <div class="col-4">
+                <div class="col-4 small-gutter">
                   <h3 class="text-red">uitgegeven</h3>
                   <h2>{{ amounts.spent_str }}</h2>
                 </div>
@@ -128,7 +128,7 @@
           <div class="lead-side-col col-6 col-lg-3 col-xxl-4 order-9 d-flex flex-column justify-content-between">
             {% if project_owner %}
               <!-- Button trigger modal -->
-              <button type="button" class="btn button-poen-small bg-grey-blue mx-auto" data-toggle="modal" data-target="#initiatiefnemers-beheren">initiatiefnemers beheren ></button>
+              <button type="button" class="btn button-poen-small bg-grey-blue mx-auto" data-toggle="modal" data-target="#initiatiefnemers-beheren">initiatief&shy;nemers beheren ></button>
 
               <!-- Modal -->
               <div class="modal fade" id="initiatiefnemers-beheren" tabindex="-1" role="dialog" aria-labelledby="initiatiefnemersBeherenLabel" aria-hidden="true">
@@ -242,7 +242,7 @@
                 {% endfor %}
               </ul>
             </div>
-            <button type="button" class="btn button-poen-small bg-grey-blue mx-auto">initiatiefnemers ></button>
+            <button type="button" class="btn button-poen-small bg-grey-blue mx-auto">initiatief&shy;nemers ></button>
           </div>
         </div>
       </div>
@@ -341,7 +341,7 @@
                                 {{ payment.alias_name }}
                                 <br>
                                 <br>
-                                <b>Betaalomschrijving</b>
+                                <b>Betaal&shy;omschrijving</b>
                                 <br>
                                 {% if payment.description %}
                                   {{ payment.description }}

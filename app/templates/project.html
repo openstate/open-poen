@@ -150,14 +150,14 @@
                 <h1 class="text-center">{{ project.name }}</h1>
               </div>
               <div class="row">
-                <div class="col-4 text-right">
+                <div class="col-4 text-right small-gutter">
                   <h3 class="text-blue">resterend</h3>
                   <h2>{{ amounts.left_str }}</h2>
                 </div>
                 <div class="col-4 text-center">
                   <h2>{{ amounts.percentage_spent_str }}</h2>
                 </div>
-                <div class="col-4">
+                <div class="col-4 small-gutter">
                   <h3 class="text-red">uitgegeven</h3>
                   <h2>{{ amounts.spent_str }}</h2>
                 </div>
@@ -330,7 +330,7 @@
                             {{ payment.alias_name }}
                             <br>
                             <br>
-                            <b>Betaalomschrijving</b>
+                            <b>Betaal&shy;omschrijving</b>
                             <br>
                             {% if payment.description %}
                               {{ payment.description }}

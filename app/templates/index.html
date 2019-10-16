@@ -28,11 +28,11 @@
     <div class="row">
       <div class="col-12 col-lg-10 offset-lg-1 poen-content bg-white">
         <div class="row">
-          <div class="col-4 border-r">
-            <h4>€ {{ total_spent_str }}</h3>
+          <div class="col-4 border-r small-gutter-right">
+            <h4>€{{ total_spent_str }}</h3>
             <h2>totaal uitgegeven</h2>
           </div>
-          <div class="col-4 text-center">
+          <div class="col-4 text-center small-gutter">
             <h4 class="text-red">{{ project_data|length }}</h4>
             {% if project_data|length == 1 %}
               <h2>buurtproject</h2>
@@ -40,8 +40,8 @@
               <h2>buurtprojecten</h2>
             {% endif %}
           </div>
-          <div class="col-4 text-right border-l">
-            <h4 class="text-blue-light">€ {{ total_awarded_str }}</h4>
+          <div class="col-4 text-right border-l small-gutter-left">
+            <h4 class="text-blue-light">€{{ total_awarded_str }}</h4>
             <h2>totaal toegekend</h2>
           </div>
 
@@ -224,14 +224,14 @@
                     </a>
                   </div>
                   <div class="row">
-                    <div class="col-4 text-right rm-gutter">
+                    <div class="col-4 text-right small-gutter">
                       <h3 class="text-blue">resterend</h3>
                       <h2>{{ project.amounts.left_str }}</h2>
                     </div>
                     <div class="col-4 text-center">
                       <h2>{{ project.amounts.percentage_spent_str }}</h2>
                     </div>
-                    <div class="col-4 rm-gutter">
+                    <div class="col-4 small-gutter">
                       <h3 class="text-red">uitgegeven</h3>
                       <h2>{{ project.amounts.spent_str }}</h2>
                     </div>
