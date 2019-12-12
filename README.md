@@ -12,7 +12,7 @@ Publish transactions of government subsidized projects
    - Create a SECRET_KEY as per the instructions in the file
    - Specify email related information in order for the application to send emails
 - Production
-   - Edit `config.py` and add value for `BUNQ_CLIENT_ID` and `BUNQ_CLIENT_SECRET`; you can obtain these from the Bunq app (you need a Bunq bank account) 'Profile > Security & Settings > Developers > OAuth > Show client details` and also make sure to add `https://openpoen.nl/` as redirect URL
+   - Edit `config.py` and add value for `BUNQ_CLIENT_ID` and `BUNQ_CLIENT_SECRET`; you can obtain these from the Bunq app (you need a Bunq bank account) 'Profile > Security & Settings > Developers > OAuth > Show client details' and also make sure to add `https://openpoen.nl/` as redirect URL
    - Make sure to copy the latest database backup from `docker/docker-entrypoint-initdb.d/backups` to `docker/docker-entrypoint-initdb.d` if you want to import it
    - `cd docker`
    - `sudo docker-compose up -d`
