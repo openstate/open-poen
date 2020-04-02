@@ -117,10 +117,11 @@ def index():
                 if authorization_code:
                     response = requests.post(
                         '%s/v1/token?grant_type=authorization_code&code=%s'
-                        '&redirect_uri=https://openpoen.nl/&client_id=%s'
+                        '&redirect_uri=https://%s/&client_id=%s'
                         '&client_secret=%s' % (
                             base_url_token,
                             authorization_code,
+                            app.config['SERVER_NAME'],
                             app.config['BUNQ_CLIENT_ID'],
                             app.config['BUNQ_CLIENT_SECRET'],
                         )
@@ -461,6 +462,7 @@ def index():
         edit_admin_forms=edit_admin_forms,
         edit_project_owner_forms=edit_project_owner_forms,
         user_stories=UserStory.query.all(),
+        server_name=app.config['SERVER_NAME'],
         bunq_client_id=app.config['BUNQ_CLIENT_ID'],
         base_url_auth=base_url_auth
     )
