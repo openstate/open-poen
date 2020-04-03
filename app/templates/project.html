@@ -170,7 +170,7 @@
             {% if project_owner %}
               <!-- Button trigger modal -->
               <button type="button" class="btn button-poen-small bg-grey-blue mx-auto" data-toggle="modal" data-target="#subproject-toevoegen">
-                initiatief toevoegen >
+                deelproject toevoegen >
               </button>
 
               <!-- Modal -->
@@ -179,7 +179,7 @@
                   <div class="modal-content">
                     <form method="POST">
                       <div class="modal-header">
-                        <h5 class="modal-title" id="subprojectToevoegenLabel">Initiatief Toevoegen</h5>
+                        <h5 class="modal-title" id="subprojectToevoegenLabel">Deelproject Toevoegen</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Annuleren">
                           <span aria-hidden="true">&times;</span>
                         </button>
@@ -218,7 +218,7 @@
                 {% endfor %}
               </ul>
             </div>
-            <button type="button" class="btn button-poen-small bg-grey-blue mx-auto">initiatieven ></button>
+            <button type="button" class="btn button-poen-small bg-grey-blue mx-auto">deelprojecten ></button>
           </div>
         </div>
       </div>
@@ -238,7 +238,7 @@
                   <th data-sortable="true">waarvoor?</th>
                   <th data-sortable="true" data-sorter="customSort">bedrag €</th>
                   <th data-sortable="true" class="d-none d-sm-table-cell">ontvanger</th>
-                  <th data-sortable="true" class="d-none d-md-table-cell">initiatiefnemer</th>
+                  <th data-sortable="true" class="d-none d-md-table-cell">betaald door</th>
                   <th data-sortable="true" class="d-none d-sm-table-cell">omschrijving</th>
                   <th data-sortable="true" class="d-none d-xl-table-cell">datum</th>
                   <th class="d-none">media</th>
@@ -325,7 +325,7 @@
                       <div class="detail-row">
                         <div class="row">
                           <div class="col-5">
-                            <b>Initiatiefnemer</b>
+                            <b>Betaald door</b>
                             <br>
                             {{ payment.alias_name }}
                             <br>
@@ -366,7 +366,7 @@
                             {% if payment.long_user_description %}
                               {{ payment.long_user_description }}
                             {% else %}
-                              <i>er is door de initiatiefnemer nog geen beschrijving van deze transactie toegevoegd</i>
+                              <i>er is nog geen beschrijving van deze transactie toegevoegd</i>
                             {% endif %}
 
                             {% if payment.attachments.all() %}

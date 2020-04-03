@@ -28,7 +28,7 @@
           <div class="col-12 col-lg-6 col-xxl-4 order-1 order-lg-4">
             <div class="amounts-card bg-white">
               {% if subproject.hidden %}
-                <p><i>Dit subproject is verborgen en dus niet te zien door het publiek</i><p>
+                <p><i>Dit deelproject is verborgen en dus niet te zien door het publiek</i><p>
               {% endif %}
               <div class="amounts-card-title">
                 <h1 class="text-center">{{ subproject.name }}</h1>
@@ -52,7 +52,7 @@
                 <!-- Button trigger modal -->
                 <div class="text-center">
                   <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#subproject-bewerken">
-                    initiatief bewerken
+                    deelproject bewerken
                   </button>
                 </div>
 
@@ -62,7 +62,7 @@
                     <div class="modal-content">
                       <form method="POST">
                         <div class="modal-header">
-                          <h5 class="modal-title" id="subprojectBewerkenLabel">Initiatief Bewerken</h5>
+                          <h5 class="modal-title" id="subprojectBewerkenLabel">Deelproject Bewerken</h5>
                           <button type="button" class="close" data-dismiss="modal" aria-label="Annuleren">
                             <span aria-hidden="true">&times;</span>
                           </button>
@@ -97,14 +97,14 @@
                               <div class="modal-content">
                                 <form method="POST">
                                   <div class="modal-header">
-                                    <h5 class="modal-title" id="subprojectVerwijderLabel">Subproject Verwijderen</h5>
+                                    <h5 class="modal-title" id="subprojectVerwijderLabel">Deelproject Verwijderen</h5>
                                     <button type="button" class="close" data-dismiss="modal" aria-label="Annuleren">
                                       <span aria-hidden="true">&times;</span>
                                     </button>
                                   </div>
                                   <div class="modal-body">
                                     <div>
-                                      <p>Weet u zeker dat u subproject "<b>{{ subproject['name'] }}</b>" wilt verwijderen? Als u een subproject niet wilt tonen aan het publiek kunt u het subproject ook 'verbergen' in plaats van verwijderen.</p>
+                                      <p>Weet u zeker dat u deeproject "<b>{{ subproject['name'] }}</b>" wilt verwijderen? Als u een deelproject niet wilt tonen aan het publiek kunt u het deelproject ook 'verbergen' in plaats van verwijderen.</p>
                                     </div>
                                   </div>
                                   <div class="modal-footer">
@@ -261,7 +261,7 @@
                   <th class="d-none">id</th>
                   <th data-sortable="true" data-sorter="customSort">bedrag €</th>
                   <th data-sortable="true" class="d-none d-sm-table-cell">ontvanger</th>
-                  <th data-sortable="true" class="d-none d-sm-table-cell">initiatiefnemer</th>
+                  <th data-sortable="true" class="d-none d-sm-table-cell">betaald door</th>
                   <th data-sortable="true">omschrijving</th>
                   <th data-sortable="true" class="d-none d-md-table-cell">datum</th>
                   <th class="d-none">media</th>
