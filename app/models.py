@@ -196,7 +196,8 @@ class Project(db.Model):
     subprojects = db.relationship(
         'Subproject',
         backref='project',
-        lazy='dynamic'
+        lazy='dynamic',
+        order_by='Subproject.name.asc()'
     )
     users = db.relationship(
         'User',
