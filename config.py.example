@@ -31,7 +31,7 @@ class Config(object):
 
     BABEL_DEFAULT_LOCALE = 'nl'
 
-    SQLALCHEMY_DATABASE_URI = 'postgresql://%s:%s@poen_db_1:5432/%s' % (
+    SQLALCHEMY_DATABASE_URI = 'postgresql://%s:%s@db:5432/%s' % (
         DB_USER, DB_PASSWORD, DB_NAME
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
