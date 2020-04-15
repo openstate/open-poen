@@ -251,6 +251,7 @@
               </thead>
               <tbody>
                 {% for payment in payments|sort(attribute='created', reverse=true) %}
+                  {% if not payment.hidden or (project_owner or user_in_subproject) %}
                   <tr>
                     <td>
                       <div class="cell">
@@ -399,6 +400,7 @@
                       </div>
                     </div>
                   </tr>
+                  {% endif %}
                 {% endfor %}
               </tbody>
             </table>
