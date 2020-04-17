@@ -932,6 +932,7 @@ def subproject(project_id, subproject_id):
 
     # Process filled in transaction attachment form
     transaction_attachment_form = ''
+    remove_attachment_form = ''
     if project_owner or user_in_subproject:
         transaction_attachment_form = TransactionAttachmentForm(
             prefix="transaction_attachment_form"
@@ -976,23 +977,23 @@ def subproject(project_id, subproject_id):
         else:
             util.flash_form_errors(transaction_attachment_form, request)
 
-    # Process attachment removal form
-    remove_attachment_form = RemoveAttachmentForm(
-        prefix="remove_attachment_form"
-    )
-    # Remove attachment
-    if remove_attachment_form.remove.data:
-        File.query.filter_by(id=remove_attachment_form.id.data).delete()
-        db.session.commit()
-        flash('<span class="text-green">Bijlage is verwijderd</span>')
-        # redirect back to clear form data
-        return redirect(
-            url_for(
-                'subproject',
-                project_id=subproject.project.id,
-                subproject_id=subproject.id
-            )
+        # Process attachment removal form
+        remove_attachment_form = RemoveAttachmentForm(
+            prefix="remove_attachment_form"
         )
+        # Remove attachment
+        if remove_attachment_form.remove.data:
+            File.query.filter_by(id=remove_attachment_form.id.data).delete()
+            db.session.commit()
+            flash('<span class="text-green">Bijlage is verwijderd</span>')
+            # redirect back to clear form data
+            return redirect(
+                url_for(
+                    'subproject',
+                    project_id=subproject.project.id,
+                    subproject_id=subproject.id
+                )
+            )
 
     return render_template(
         'subproject.html',
