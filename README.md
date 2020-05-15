@@ -12,7 +12,7 @@ Publish transactions of government subsidized projects
    - Create a SECRET_KEY as per the instructions in the file
    - Specify email related information in order for the application to send emails
 - Production
-   - Edit `config.py` and add value for `BUNQ_CLIENT_ID` and `BUNQ_CLIENT_SECRET`; you can obtain these from the Bunq app (you need a Bunq bank account) 'Profile > Security & Settings > Developers > OAuth > Show client details' and also make sure to add `https://openpoen.nl/` as redirect URL
+   - Edit `config.py` and add values for `BUNQ_CLIENT_ID` and `BUNQ_CLIENT_SECRET`; you can obtain these from the Bunq app (you need a Bunq bank account) 'Profile > Security & Settings > Developers > OAuth > Show client details' and also make sure to add `https://openpoen.nl/` as redirect URL
    - Make sure to copy the latest database backup from `docker/docker-entrypoint-initdb.d/backups` to `docker/docker-entrypoint-initdb.d` if you want to import it
    - `cd docker`
    - `sudo docker-compose up -d`
@@ -27,6 +27,8 @@ Publish transactions of government subsidized projects
          - `26 3 * * * sudo docker exec poen_db_1 ./backup.sh`
       - The resulting SQL backup files are saved in `docker/docker-entrypoint-initdb.d/backups`
 - Development; Flask debug will be turned on which automatically reloads any changes made to Flask files so you don't have to restart the whole application manually
+   - Edit `config.py`
+        - Set `BUNQ_ENVIRONMENT_TYPE` to `ApiEnvironmentType.SANDBOX` and add values for `BUNQ_CLIENT_ID` and `BUNQ_CLIENT_SECRET`; you can obtain these from the Bunqi Sandbox app for Android (follow this guide https://together.bunq.com/d/4887-quickstart-guide-for-sandbox-api-development) 'Profile > Security & Settings > Developers > OAuth > Show client details' and also make sure to add `https://openpoen.nl/` as redirect URL
    - Make sure to copy the latest database backup from `docker/docker-entrypoint-initdb.d/backups` to `docker/docker-entrypoint-initdb.d` if you want to import it
    - `cd docker`
    - `docker-compose -f docker-compose.yml -f docker-compose-dev.yml up -d`

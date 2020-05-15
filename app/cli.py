@@ -11,9 +11,7 @@ import sys
 
 sys.path.insert(0, abspath(join(dirname(__file__), '../tinker/tinker')))
 
-from bunq.sdk.client import Pagination
 from bunq.sdk.context import ApiEnvironmentType
-from bunq.sdk.model.generated import endpoint
 from libs.bunq_lib import BunqLib
 from libs.share_lib import ShareLib
 
