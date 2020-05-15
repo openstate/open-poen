@@ -117,10 +117,11 @@ def index():
                 if authorization_code:
                     response = requests.post(
                         '%s/v1/token?grant_type=authorization_code&code=%s'
-                        '&redirect_uri=https://openpoen.nl/&client_id=%s'
+                        '&redirect_uri=https://%s/&client_id=%s'
                         '&client_secret=%s' % (
                             base_url_token,
                             authorization_code,
+                            app.config['SERVER_NAME'],
                             app.config['BUNQ_CLIENT_ID'],
                             app.config['BUNQ_CLIENT_SECRET'],
                         )
@@ -461,6 +462,7 @@ def index():
         edit_admin_forms=edit_admin_forms,
         edit_project_owner_forms=edit_project_owner_forms,
         user_stories=UserStory.query.all(),
+        server_name=app.config['SERVER_NAME'],
         bunq_client_id=app.config['BUNQ_CLIENT_ID'],
         base_url_auth=base_url_auth
     )
@@ -930,6 +932,7 @@ def subproject(project_id, subproject_id):
 
     # Process filled in transaction attachment form
     transaction_attachment_form = ''
+    remove_attachment_form = ''
     if project_owner or user_in_subproject:
         transaction_attachment_form = TransactionAttachmentForm(
             prefix="transaction_attachment_form"
@@ -974,23 +977,23 @@ def subproject(project_id, subproject_id):
         else:
             util.flash_form_errors(transaction_attachment_form, request)
 
-    # Process attachment removal form
-    remove_attachment_form = RemoveAttachmentForm(
-        prefix="remove_attachment_form"
-    )
-    # Remove attachment
-    if remove_attachment_form.remove.data:
-        File.query.filter_by(id=remove_attachment_form.id.data).delete()
-        db.session.commit()
-        flash('<span class="text-green">Bijlage is verwijderd</span>')
-        # redirect back to clear form data
-        return redirect(
-            url_for(
-                'subproject',
-                project_id=subproject.project.id,
-                subproject_id=subproject.id
-            )
+        # Process attachment removal form
+        remove_attachment_form = RemoveAttachmentForm(
+            prefix="remove_attachment_form"
         )
+        # Remove attachment
+        if remove_attachment_form.remove.data:
+            File.query.filter_by(id=remove_attachment_form.id.data).delete()
+            db.session.commit()
+            flash('<span class="text-green">Bijlage is verwijderd</span>')
+            # redirect back to clear form data
+            return redirect(
+                url_for(
+                    'subproject',
+                    project_id=subproject.project.id,
+                    subproject_id=subproject.id
+                )
+            )
 
     return render_template(
         'subproject.html',

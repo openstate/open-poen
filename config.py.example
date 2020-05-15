@@ -5,7 +5,7 @@ import os
 # a copy of this file called 'config.py' and change 'False' for
 # SECRET_KEY to a newly generated string using these python commands:
 # $ import os
-# $ os.urandom(24)
+# $ os.urandom(32)
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -19,6 +19,8 @@ class Config(object):
         DB_PASSWORD = IN.readline().strip()
 
     SECRET_KEY = False
+    # The server name is also used as the oAuth Redirect URL
+    # Please note to set your server name in nginx too, see docker/nginx[-dev]/conf.d/default.conf
     SERVER_NAME = 'openpoen.nl'
     PREFERRED_URL_SCHEME = 'https'
     FORCE_HOST_FOR_REDIRECTS = 'openpoen.nl'
@@ -29,7 +31,7 @@ class Config(object):
 
     BABEL_DEFAULT_LOCALE = 'nl'
 
-    SQLALCHEMY_DATABASE_URI = 'postgresql://%s:%s@poen_db_1:5432/%s' % (
+    SQLALCHEMY_DATABASE_URI = 'postgresql://%s:%s@db:5432/%s' % (
         DB_USER, DB_PASSWORD, DB_NAME
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
