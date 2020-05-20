@@ -10,7 +10,7 @@ psycopg2==2.8.3
 PyJWT==1.7.1
 uWSGI==2.0.18
 nose==1.3.7
-bunq-sdk==1.10.16
+bunq-sdk==1.13.1
 
 Jinja2==2.10.1
 MarkupSafe==1.1.1

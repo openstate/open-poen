@@ -1,4 +1,4 @@
-from bunq.sdk.context import ApiEnvironmentType
+from bunq.sdk.context.api_environment_type import ApiEnvironmentType
 import os
 
 # On a new deployment (whether production or development) make

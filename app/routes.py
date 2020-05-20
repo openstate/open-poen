@@ -18,7 +18,7 @@ from app.models import (
 from app import util
 from sqlalchemy.exc import IntegrityError
 
-from bunq.sdk.context import ApiEnvironmentType
+from bunq.sdk.context.api_environment_type import ApiEnvironmentType
 
 from datetime import datetime
 from werkzeug.utils import secure_filename

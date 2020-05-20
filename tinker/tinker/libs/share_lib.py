@@ -2,8 +2,8 @@ import argparse
 import os
 import sys
 
-from bunq.sdk.context import ApiEnvironmentType
-from bunq.sdk.exception import BunqException
+from bunq.sdk.context.api_environment_type import ApiEnvironmentType
+from bunq.sdk.exception.bunq_exception import BunqException
 from bunq.sdk.model.generated import endpoint
 from bunq.sdk.model.generated import object_
 

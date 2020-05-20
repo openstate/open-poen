@@ -11,7 +11,7 @@ import sys
 
 sys.path.insert(0, abspath(join(dirname(__file__), '../tinker/tinker')))
 
-from bunq.sdk.context import ApiEnvironmentType
+from bunq.sdk.context.api_environment_type import ApiEnvironmentType
 from libs.bunq_lib import BunqLib
 from libs.share_lib import ShareLib
 
@@ -90,12 +90,13 @@ def create_all_bunq_api_conf():
 
 
 @bunq.command()
-def show_sandbox_users():
-    """Show Bunq sandbox users; useful during development to log in to the Bunq
-    app
+def create_sandbox_user():
+    """create Bunq sandbox user; useful during development to log in to the Bunq
+    app; note that running this command again overwrites any previously made
+    sandbox user config
     """
     if environment_type is ApiEnvironmentType.SANDBOX:
-        bunq_api = BunqLib(environment_type)
+        bunq_api = BunqLib(environment_type, 'bunq-sandbox.conf')
         all_alias = bunq_api.get_all_user_alias()
         ShareLib.print_all_user_alias(all_alias)
 

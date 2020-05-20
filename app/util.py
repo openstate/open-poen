@@ -12,8 +12,8 @@ from app import app, db
 from app.email import send_invite
 from app.models import Payment, Project, Subproject, IBAN, User
 
-from bunq.sdk.context import ApiContext
-from bunq.sdk.context import ApiEnvironmentType
+from bunq.sdk.context.bunq_context import ApiContext
+from bunq.sdk.context.api_environment_type import ApiEnvironmentType
 from bunq.sdk.model.generated import endpoint
 
 sys.path.insert(0, abspath(join(dirname(__file__), '../tinker/tinker')))
@@ -27,7 +27,7 @@ def create_bunq_api_config(bunq_access_token, project_id):
     if environment == ApiEnvironmentType.SANDBOX:
         filename = 'bunq-sandbox'
 
-    api_context = ApiContext(
+    api_context = ApiContext.create(
         environment, bunq_access_token, socket.gethostname()
     ).save('%s-project-%s.conf' % (filename, project_id))
 

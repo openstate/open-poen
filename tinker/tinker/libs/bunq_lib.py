@@ -6,12 +6,12 @@ import socket
 from time import sleep
 
 import requests
-from bunq.sdk.client import Pagination
-from bunq.sdk.context import ApiContext
-from bunq.sdk.context import ApiEnvironmentType
-from bunq.sdk.context import BunqContext
-from bunq.sdk.exception import BunqException
-from bunq.sdk.exception import ForbiddenException
+from bunq import Pagination
+from bunq.sdk.context.bunq_context import ApiContext
+from bunq.sdk.context.api_environment_type import ApiEnvironmentType
+from bunq.sdk.context.bunq_context import BunqContext
+from bunq.sdk.exception.bunq_exception import BunqException
+from bunq.sdk.exception.forbidden_exception import ForbiddenException
 from bunq.sdk.model.generated import endpoint
 from bunq.sdk.model.generated.object_ import Pointer, Amount, NotificationFilter
 
@@ -64,7 +64,7 @@ class BunqLib(object):
             pass  # Config is already present
         elif self.env == ApiEnvironmentType.SANDBOX:
             sandbox_user = self.generate_new_sandbox_user()
-            ApiContext(ApiEnvironmentType.SANDBOX, sandbox_user.api_key,
+            ApiContext.create(ApiEnvironmentType.SANDBOX, sandbox_user.api_key,
                        socket.gethostname()).save(
                 self.determine_bunq_conf_filename())
         else:
