@@ -12,7 +12,8 @@ Publish transactions of government subsidized projects
    - Create a SECRET_KEY as per the instructions in the file
    - Specify email related information in order for the application to send emails
 - Production
-   - Edit `config.py` and add values for `BUNQ_CLIENT_ID` and `BUNQ_CLIENT_SECRET`; you can obtain these from the Bunq app (you need a Bunq bank account) 'Profile > Security & Settings > Developers > OAuth > Show client details' and also make sure to add `https://openpoen.nl/` as redirect URL
+   - Link a main Bunq account to Open Poen (you need to do this in order to link other Bunq accounts to projects using OAuth)
+      - Edit `config.py` and add values for `BUNQ_CLIENT_ID` and `BUNQ_CLIENT_SECRET`; you can obtain these from the Bunq app (you need a Bunq bank account) 'Profile > Security & Settings > Developers > OAuth > Show client details' and also make sure to add `https://openpoen.nl/` as redirect URL
    - Make sure to copy the latest database backup from `docker/docker-entrypoint-initdb.d/backups` to `docker/docker-entrypoint-initdb.d` if you want to import it
    - `cd docker`
    - `sudo docker-compose up -d`
@@ -27,11 +28,14 @@ Publish transactions of government subsidized projects
          - `26 3 * * * sudo docker exec poen_db_1 ./backup.sh`
       - The resulting SQL backup files are saved in `docker/docker-entrypoint-initdb.d/backups`
 - Development; Flask debug will be turned on which automatically reloads any changes made to Flask files so you don't have to restart the whole application manually
-   - Edit `config.py`
-        - Set `BUNQ_ENVIRONMENT_TYPE` to `ApiEnvironmentType.SANDBOX` and add values for `BUNQ_CLIENT_ID` and `BUNQ_CLIENT_SECRET`; you can obtain these from the Bunq Sandbox app for Android (follow the steps in the Introduction to download and configure the Bunq Sandbox app: https://doc.bunq.com/#/introduction) 'Profile > Security & Settings > Developers > OAuth > Show client details' and also make sure to add `https://openpoen.nl/` as redirect URL
    - Make sure to copy the latest database backup from `docker/docker-entrypoint-initdb.d/backups` to `docker/docker-entrypoint-initdb.d` if you want to import it
    - `cd docker`
    - `docker-compose -f docker-compose.yml -f docker-compose-dev.yml up -d`
+   - Link a main Bunq account to Open Poen (you need to do this in order to link other Bunq accounts to projects using OAuth); you can use either a Production (actual) Bunq account or a Sandbox Bunq account; Note that you can only link other production Bunq accounts to projects via OAuth if your main Open Poen Bunq account is also a production account (and vice versa for sandbox accounts)
+      - If you want to use a Sandbox Bunq account: create a new Sandbox account and copy the telephone number and login code (its config is written to `bunq-sandbox.conf`): `docker exec -it poen_app_1 flask bunq show-sandbox-users`
+         - Download and install the Bunq Sandbox Android app on your Android smartphone: https://appstore.bunq.com/api/android/builds/bunq-android-sandbox-master.apk
+         - Login to your Bunq Sandbox account using the telephone number and login code (000000) which you retrieved using the steps above
+      - Edit `config.py` (if you want to use the Sandbox account: set `BUNQ_ENVIRONMENT_TYPE` to `ApiEnvironmentType.SANDBOX`) and add values for `BUNQ_CLIENT_ID` and `BUNQ_CLIENT_SECRET`; you can obtain these from the Bunq (Sandbox) app for Android via 'Profile > Security & Settings > Developers > OAuth > Show client details' and also make sure to add `https://openpoen.nl/` as redirect URL (yes make sure to use 'https' even in the dev/sandbox environment, even though you need to visit openpoen.nl via http:// yourself locally)
    - Compile the assets, see the section below
    - Retrieve the IP address of the nginx container `sudo docker inspect --format='{{.NetworkSettings.Networks.poen_internal.IPAddress}}' poen_nginx_1` and add it to your hosts file `/etc/hosts`: `<IP_address> openpoen.nl`
    - You can now visit http://openpoen.nl in your browser
@@ -69,7 +73,7 @@ Use these after the database is in production and you need to change the databas
 
 ### Bunq commands
 
-- `flask bunq get_new_payments_all` gets all payments from all IBANs belonging to all projects
+- `flask bunq get-new-payments-all` gets all payments from all IBANs belonging to all projects
 
 ## To enter the database
    - `sudo docker exec -it poen_db_1 psql -U <DB_USER> <DB_NAME>` retrieve database user and name from `docker/secrets-db-user.txt` and `docker/secrets-db-name.txt`
