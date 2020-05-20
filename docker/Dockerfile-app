@@ -18,5 +18,9 @@ RUN pip install --upgrade pip
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
+# Temporary fix for a bug in bunq-sdk, until my patch is merged: https://github.com/bunq/sdk_python/pull/135
+# Make sure to check if this line still needs to be inserted to line 60 if Bunq releases a new version of the SDK without adding my fix
+RUN sed -i '60i\ \ \ \ \ \ \ \ \ \ \ \ cls._ATTRIBUTE_USER_PAYMENT_SERVER_PROVIDER: None,' /usr/local/lib/python3.7/site-packages/bunq/sdk/json/session_server_adapter.py
+
 ENV FLASK_APP=website.py
 CMD uwsgi --socket 0.0.0.0:5000 --touch-reload=uwsgi-touch-reload --processes 8 -w website:app
