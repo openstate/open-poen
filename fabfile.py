@@ -22,14 +22,14 @@ SERVER = 'Oxygen'
 
 
 @task
-def deploy(c):
+def deploy_poen(c):
     sudo_pass = getpass.getpass("Enter your sudo password on %s: " % SERVER)
     config = Config(overrides={'sudo': {'password': sudo_pass}})
     c = Connection(SERVER, config=config)
 
     # Pull from GitHub
     c.run(
-        'bash -c "cd %s && git pull git@github.com:openstate/%s.git"' % (
+        'cd %s && git pull git@github.com:openstate/%s.git' % (
             DIR,
             GIT_REPO
         )
