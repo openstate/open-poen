@@ -67,6 +67,10 @@
           (url_for('index'), 'Home')
       ] %}
 
+      {% set menu = [
+          (url_for('over'), 'Over')
+      ] %}
+
       {% if current_user.is_authenticated %}
         {{ menu.append((url_for('profile'), 'Profiel'))|default("", True) }}
         {{ menu.append((url_for('logout'), 'Uitloggen'))|default("", True) }}
