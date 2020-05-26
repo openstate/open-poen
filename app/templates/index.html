@@ -33,12 +33,11 @@
             <h2>totaal uitgegeven</h2>
           </div>
           <div class="col-4 text-center small-gutter">
-            <h4 class="text-red">{{ project_data|length }}</h4>
-            {% if project_data|length == 1 %}
-              <h2>project</h2>
-            {% else %}
-              <h2>projecten</h2>
-            {% endif %}
+            <h1 class="text-red">
+              {% for project in project_data %}
+                {{ project.description }}
+              {% endfor %}
+            </h4>
           </div>
           <div class="col-4 text-right border-l small-gutter-left">
             <h4 class="text-blue-light">€{{ total_awarded_str }}</h4>
