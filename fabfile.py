@@ -26,9 +26,8 @@ def deploy_corona(c):
 
     # Pull from GitHub
     c.run(
-        'cd %s && git pull git@github.com:openstate/%s.git' % (
-            DIR,
-            GIT_REPO
+        'cd %s && git pull' % (
+            DIR
         )
     )
 
