@@ -1,16 +1,20 @@
 from babel.numbers import format_percent
-from flask import flash
+from flask import flash, redirect, url_for
 from os import urandom
 from os.path import abspath, dirname, exists, join
+from datetime import datetime
 from time import sleep
+from werkzeug.utils import secure_filename
 import json
 import locale
+import os
 import socket
 import sys
 
 from app import app, db
 from app.email import send_invite
-from app.models import Payment, Project, Subproject, IBAN, User
+from app.forms import PaymentForm, TransactionAttachmentForm, RemoveAttachmentForm
+from app.models import Payment, Project, Subproject, IBAN, User, File
 
 from bunq.sdk.context.bunq_context import ApiContext
 from bunq.sdk.context.api_environment_type import ApiEnvironmentType
@@ -257,15 +261,20 @@ def calculate_project_amounts(project_id):
     }
 
     # Calculate amounts spent
-    subprojects = Subproject.query.filter_by(project_id=project_id).all()
-    for subproject in subprojects:
-        subproject_spent = 0
-        for payment in subproject.payments:
+    if project.contains_subprojects:
+        subprojects = Subproject.query.filter_by(project_id=project_id).all()
+        for subproject in subprojects:
+            subproject_spent = 0
+            for payment in subproject.payments:
+                if payment.amount_value < 0:
+                    if (not payment.counterparty_alias_value ==
+                            subproject.project.iban):
+                        subproject_spent += abs(payment.amount_value)
+            amounts['spent'] += subproject_spent
+    else:
+        for payment in project.payments:
             if payment.amount_value < 0:
-                if (not payment.counterparty_alias_value ==
-                        subproject.project.iban):
-                    subproject_spent += abs(payment.amount_value)
-        amounts['spent'] += subproject_spent
+                amounts['spent'] += abs(payment.amount_value)
 
     # Calculate percentage spent
     if amounts['awarded'] == 0:
@@ -418,3 +427,149 @@ def add_user(email, admin=False, project_id=0, subproject_id=0):
 
         # Send the new user an invitation email
         send_invite(user)
+
+# Process filled in payment form
+def process_payment_form(request, project_id=0, subproject_id=0):
+    payment_form = PaymentForm(prefix="payment_form")
+    if payment_form.validate_on_submit():
+        # Get data from the form
+        new_payment_data = {}
+        for f in payment_form:
+            if f.type != 'SubmitField' and f.type != 'CSRFTokenField':
+                new_payment_data[f.short_name] = f.data
+
+        try:
+            # Update if the payment already exists
+            payments = Payment.query.filter_by(
+                id=payment_form.id.data
+            )
+            if len(payments.all()):
+                payments.update(new_payment_data)
+                db.session.commit()
+                flash(
+                    '<span class="text-green">Transactie is bijgewerkt</span>'
+                )
+        except IntegrityError as e:
+            db.session().rollback()
+            app.logger.error(e)
+            flash(
+                '<span class="text-red">Transactie bijwerken mislukt<span>'
+            )
+
+        if subproject_id:
+            # redirect back to clear form data
+            return redirect(
+                url_for(
+                    'subproject',
+                    project_id=project_id,
+                    subproject_id=subproject_id
+                )
+            )
+
+        return redirect(
+            url_for(
+                'project',
+                project_id=project_id,
+            )
+        )
+    else:
+        flash_form_errors(payment_form, request)
+
+# Populate the payment forms which allows the user to edit it
+def create_payment_forms(payments, project_owner):
+    payment_forms = {}
+    for payment in payments:
+        # Only allow project owners to hide a transaction
+        if project_owner:
+            payment_form = PaymentForm(prefix='payment_form', **{
+                'short_user_description': payment.short_user_description,
+                'long_user_description': payment.long_user_description,
+                'hidden': payment.hidden,
+                'id': payment.id
+            })
+        else:
+            payment_form = PaymentForm(prefix='payment_form', **{
+                'short_user_description': payment.short_user_description,
+                'long_user_description': payment.long_user_description,
+                'id': payment.id
+            })
+
+        payment_forms[payment.id] = payment_form
+
+    return payment_forms
+
+# Process filled in transaction attachment form
+def process_transaction_attachment_form(request, transaction_attachment_form, project_id=0, subproject_id=0):
+    if transaction_attachment_form.validate_on_submit():
+        # Save attachment to disk
+        f = transaction_attachment_form.data_file.data
+        filename = secure_filename(f.filename)
+        filename = '%s_%s' % (
+            datetime.now().isoformat()[:19], filename
+        )
+        filepath = os.path.join(
+            os.path.abspath(
+                os.path.join(
+                    app.instance_path, '../%s/transaction-attachment' % (
+                        app.config['UPLOAD_FOLDER']
+                    )
+                )
+            ),
+            filename
+        )
+        f.save(filepath)
+        new_file = File(filename=filename, mimetype=f.headers[1][1])
+        db.session.add(new_file)
+        db.session.commit()
+
+        # Link attachment to payment in the database
+        payment = Payment.query.get(
+            transaction_attachment_form.payment_id.data
+        )
+        payment.attachments.append(new_file)
+        db.session.commit()
+
+        # redirect back to clear form data
+        if subproject_id:
+            # redirect back to clear form data
+            return redirect(
+                url_for(
+                    'subproject',
+                    project_id=project_id,
+                    subproject_id=subproject_id
+                )
+            )
+
+        return redirect(
+            url_for(
+                'project',
+                project_id=project_id,
+            )
+        )
+    else:
+        flash_form_errors(transaction_attachment_form, request)
+
+def process_remove_attachment_form(remove_attachment_form, project_id=0, subproject_id=0):
+    # Remove attachment
+    if remove_attachment_form.remove.data:
+        File.query.filter_by(id=remove_attachment_form.id.data).delete()
+        db.session.commit()
+        flash('<span class="text-green">Bijlage is verwijderd</span>')
+
+        # redirect back to clear form data
+        if subproject_id:
+            # redirect back to clear form data
+            return redirect(
+                url_for(
+                    'subproject',
+                    project_id=project_id,
+                    subproject_id=subproject_id
+                )
+            )
+
+        return redirect(
+            url_for(
+                'project',
+                project_id=project_id,
+            )
+        )

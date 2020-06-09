@@ -18,7 +18,11 @@
       {% for f in edit_profile_form %}
         {% if f.widget.input_type != 'hidden' and f.widget.input_type != 'submit' %}
           <div>
-            {{ f.label }} {{ f }}
+            {{ f.label }}
+            <br>
+            {{ f }}
+            <br>
+            <br>
           </div>
         {% endif %}
       {% endfor %}

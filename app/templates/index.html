@@ -193,6 +193,8 @@
                                     {{ f.label }}
                                     <br>
                                     {{ f }}
+                                    <br>
+                                    <br>
                                   </div>
                                 {% endif %}
                               {% endfor %}
@@ -298,10 +300,23 @@
                                         {{ f.label }}
                                         <br>
                                         {{ f }}
+                                        <br>
+                                        <br>
                                       </div>
                                     {% endif %}
                                   {% endfor %}
-                                  Heeft u nieuwe IBANs toegevoegd aan dit project en kunt u deze hierboven nog niet selecteren? Koppel dit project dan opnieuw aan de Bunq account om zo toestemming tot de nieuwe IBANs te krijgen.
+
+                                  {% if project['contains_subprojects'] %}
+                                  Dit project werkt <b>met</b> deelprojecten: alle uitgaven moeten vanaf Bunq sub-accounts gedaan worden.
+                                  {% else %}
+                                  Dit project werkt <b>zonder</b> deelprojecten: alle uitgaven moeten vanaf de aan dit project gekoppelde Bunq account gedaan worden.
+                                  {% endif %}
+                                </div>
+
+                                <hr>
+
+                                <div>
+                                  Heeft u nieuwe IBANs toegevoegd aan dit project en kunt u deze hierboven nog niet selecteren? Koppel dit project dan opnieuw aan de Bunq account om zo toegang tot de nieuwe IBANs te krijgen.
                                   <a href="{{ base_url_auth }}/auth?response_type=code&client_id={{ bunq_client_id }}&redirect_uri=https://{{ server_name }}/&state={{ project.bunq_token }}" rel="noopener"><img class="bunq-connect-button" src="{{ url_for('static', filename='images/bunq_Connect_button_svg.svg') }}"></a>
                                   {{ project['form'].id }}
                                 </div>
@@ -368,36 +383,36 @@
 
   {% if project_data %}
     {% for project in project_data %}
-      {% for project_owner_email, edit_project_owner_form in edit_project_owner_forms[project.id].items() %}
-        <!-- Modal -->
-        <div class="modal fade" id="project-owner-toevoegen" tabindex="-1" role="dialog" aria-labelledby="projectOwnerToevoegenLabel" aria-hidden="true">
-          <div class="modal-dialog" role="document">
-            <div class="modal-content">
-              <form method="POST">
-                <div class="modal-header">
-                  <h5 class="modal-title" id="projectOwnerToevoegenLabel">Project Owner Toevoegen</h5>
-                  <button type="button" class="close" data-dismiss="modal" aria-label="Annuleren">
-                    <span aria-hidden="true">&times;</span>
-                  </button>
-                </div>
-                <div class="modal-body">
-                  <p>Als er nog geen gebruiker bestaat met dit e-mailadres dan krijgt deze een uitnodigingsmail met daarin een link om een wachtwoord aan te maken. Als er wel al een gebruiker bestaat met dit e-mailadres dan krijgt deze gebruiker 'project owner'-rechten (er wordt daar geen e-mail over verstuurd).</p>
-                  <div>
-                    {{ add_user_form.csrf_token }}
+      <!-- Modal -->
+      <div class="modal fade" id="project-owner-toevoegen" tabindex="-1" role="dialog" aria-labelledby="projectOwnerToevoegenLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <form method="POST">
+              <div class="modal-header">
+                <h5 class="modal-title" id="projectOwnerToevoegenLabel">Project Owner Toevoegen</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Annuleren">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <p>Als er nog geen gebruiker bestaat met dit e-mailadres dan krijgt deze een uitnodigingsmail met daarin een link om een wachtwoord aan te maken. Als er wel al een gebruiker bestaat met dit e-mailadres dan krijgt deze gebruiker 'project owner'-rechten (er wordt daar geen e-mail over verstuurd).</p>
+                <div>
+                  {{ add_user_form.csrf_token }}
 
-                    {{ add_user_form.email }}
-                    {{ add_user_form.project_id(**{'value': project.id}) }}
-                  </div>
+                  {{ add_user_form.email }}
+                  {{ add_user_form.project_id(**{'value': project.id}) }}
                 </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuleren</button>
-                  {{ add_user_form.submit }}
-                </div>
-              </form>
-            </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuleren</button>
+                {{ add_user_form.submit }}
+              </div>
+            </form>
           </div>
         </div>
+      </div>
 
+      {% for project_owner_email, edit_project_owner_form in edit_project_owner_forms[project.id].items() %}
         <!-- Modal -->
         <div class="modal fade" id="project-owner-bewerken-{{ edit_project_owner_form.id.data }}" tabindex="-1" role="dialog" aria-labelledby="projectOwnerBewerkenLabel" aria-hidden="true">
           <div class="modal-dialog" role="document">

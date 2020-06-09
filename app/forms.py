@@ -63,6 +63,13 @@ class LoginForm(FlaskForm):
 class ProjectForm(FlaskForm):
     name = StringField('Naam', validators=[DataRequired(), Length(max=120)])
     description = TextAreaField('Beschrijving', validators=[DataRequired()])
+    contains_subprojects = BooleanField(
+        'Uitgaven van dit project gebeuren via subrekeningen en subprojecten',
+        render_kw={
+            'checked': '',
+            'value': 'y'
+        }
+    )
     hidden = BooleanField('Project verbergen')
     iban = SelectField('IBAN', validators=[Optional()], choices=[])
     id = IntegerField(widget=HiddenInput())

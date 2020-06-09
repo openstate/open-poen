@@ -191,6 +191,7 @@ class Project(db.Model):
     iban_name = db.Column(db.String(120), index=True)
     name = db.Column(db.String(120), index=True, unique=True)
     description = db.Column(db.Text)
+    contains_subprojects = db.Column(db.Boolean, default=True)
     hidden = db.Column(db.Boolean, default=False)
 
     subprojects = db.relationship(
