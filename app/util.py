@@ -403,10 +403,14 @@ def _set_user_role(user, admin=False, project_id=0, subproject_id=0):
         db.session.commit()
     if project_id:
         project = Project.query.get(project_id)
+        if user in project.users:
+            raise ValueError('Gebruiker niet toegevoegd: deze gebruiker was al project owner van dit project')
         project.users.append(user)
         db.session.commit()
     if subproject_id:
         subproject = Subproject.query.get(subproject_id)
+        if user in subproject.users:
+            raise ValueError('Gebruiker niet toegevoegd: deze gebruiker was al project owner van dit project')
         subproject.users.append(user)
         db.session.commit()
 

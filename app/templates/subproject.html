@@ -285,7 +285,7 @@
                       <td>
                         <div class="cell justify-content-end">
                           {% if payment.hidden %}
-                            <i>Deze transactie is verborgen</i>
+                            <i>Deze transactie is verborgen&nbsp;&nbsp;</i>
                           {% endif %}
                           {% if payment.amount_value >= 0 %}
                             <h1 class="text-blue text-right">+{{ payment.get_formatted_currency() }}</h1>

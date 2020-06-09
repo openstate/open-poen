@@ -269,15 +269,17 @@ def index():
             if f.type != 'SubmitField' and f.type != 'CSRFTokenField':
                 new_user_data[f.short_name] = f.data
 
-        util.add_user(**new_user_data)
-
-        flash(
-            '<span class="text-green">"%s" is uitgenodigd als admin of '
-            'project owner (of toegevoegd als admin of project owner als de '
-            'gebruiker al bestond)' % (
-                new_user_data['email']
+        try:
+            util.add_user(**new_user_data)
+            flash(
+                '<span class="text-green">"%s" is uitgenodigd als admin of '
+                'project owner (of toegevoegd als admin of project owner als de '
+                'gebruiker al bestond)' % (
+                    new_user_data['email']
+                )
             )
-        )
+        except ValueError as e:
+            flash(str(e))
 
         # redirect back to clear form data
         return redirect(url_for('index'))
@@ -915,15 +917,17 @@ def subproject(project_id, subproject_id):
             if f.type != 'SubmitField' and f.type != 'CSRFTokenField':
                 new_user_data[f.short_name] = f.data
 
-        util.add_user(**new_user_data)
-
-        flash(
-            '<span class="text-green">"%s" is uitgenodigd als initiatiefnemer '
-            '(of toegevoegd als initiatiefnemer als de gebruiker al '
-            'bestond)' % (
-                new_user_data['email']
+        try:
+            util.add_user(**new_user_data)
+            flash(
+                '<span class="text-green">"%s" is uitgenodigd als initiatiefnemer '
+                '(of toegevoegd als initiatiefnemer als de gebruiker al '
+                'bestond)' % (
+                    new_user_data['email']
+                )
             )
-        )
+        except ValueError as e:
+            flash(str(e))
 
         # redirect back to clear form data
         return redirect(
