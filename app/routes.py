@@ -211,7 +211,7 @@ def index():
 
     # Update project owner
     if edit_project_owner_form.validate_on_submit():
-        project_owners = User.query.filter_by(
+        edited_project_owner = User.query.filter_by(
             id=edit_project_owner_form.id.data
         )
         new_project_owner_data = {}
@@ -227,10 +227,13 @@ def index():
                     new_project_owner_data[f.short_name] = f.data
 
         # Update if the project owner exists
-        if len(project_owners.all()):
-            project_owners.update(new_project_owner_data)
+        if len(edited_project_owner.all()):
+            edited_project_owner.update(new_project_owner_data)
             if remove_from_project:
-                project_owners.first().projects.remove(
+                # We need to get the user using '.first()' otherwise we
+                # can't remove the project because of garbage collection
+                edited_project_owner = edited_project_owner.first()
+                edited_project_owner.projects.remove(
                     Project.query.get(remove_from_project_id)
                 )
 
@@ -876,7 +879,10 @@ def subproject(project_id, subproject_id):
         if len(users.all()):
             users.update(new_user_data)
             if remove_from_subproject:
-                users.first().subprojects.remove(
+                # We need to get the user using '.first()' otherwise we
+                # can't remove the project because of garbage collection
+                initiatiefnemer = users.first()
+                initiatiefnemer.subprojects.remove(
                     Subproject.query.get(remove_from_subproject_id)
                 )
 
