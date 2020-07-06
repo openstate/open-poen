@@ -122,9 +122,8 @@ def get_new_payments(project_id):
                 )
             except Exception as e:
                 app.logger.error(
-                    "Getting Bunq payments resulted in an exception:"
+                    "Getting Bunq payments resulted in an exception:\n" + repr(e)
                 )
-                app.logger.error(e)
                 new_payments = False
                 continue
 
@@ -138,9 +137,8 @@ def get_new_payments(project_id):
                     payment = _transform_payment(full_payment)
                 except Exception as e:
                     app.logger.error(
-                        "Transforming a Bunq payment resulted in an exception:"
+                        "Transforming a Bunq payment resulted in an exception:\n" + repr(e)
                     )
-                    app.logger.error(e)
                     new_payments = False
                     continue
                 try:
@@ -163,15 +161,16 @@ def get_new_payments(project_id):
                         if subproject:
                             payment['subproject_id'] = subproject.id
 
+                        del payment['scheduled_id']
+
                         p = Payment(**payment)
                         db.session.add(p)
                         db.session.commit()
                         new_payments_count += 1
                 except Exception as e:
                     app.logger.error(
-                        "Saving a Bunq payment resulted in an exception:"
+                        "Saving a Bunq payment resulted in an exception:\n" + repr(e)
                     )
-                    app.logger.error(e)
                     new_payments = False
                     continue
 
@@ -455,7 +454,7 @@ def process_payment_form(request, project_id=0, subproject_id=0):
                 )
         except IntegrityError as e:
             db.session().rollback()
-            app.logger.error(e)
+            app.logger.error(repr(e))
             flash(
                 '<span class="text-red">Transactie bijwerken mislukt<span>'
             )

@@ -377,7 +377,7 @@ def index():
                 )
         except IntegrityError as e:
             db.session().rollback()
-            app.logger.error(e)
+            app.logger.error(repr(e))
             flash(
                 '<span class="text-red">Project toevoegen/bijwerken mislukt: '
                 'naam "%s" en/of IBAN "%s" bestaan al, kies een andere naam '
@@ -619,7 +619,7 @@ def project(project_id):
             )
         except IntegrityError as e:
             db.session().rollback()
-            app.logger.error(e)
+            app.logger.error(repr(e))
             flash(
                 '<span class="text-red">Subproject toevoegen mislukt: naam '
                 '"%s" en/of IBAN "%s" bestaan al, kies een andere naam en/of '
@@ -803,7 +803,7 @@ def subproject(project_id, subproject_id):
                 )
         except IntegrityError as e:
             db.session().rollback()
-            app.logger.error(e)
+            app.logger.error(repr(e))
             flash(
                 '<span class="text-red">Subproject bijwerken mislukt: naam '
                 '"%s" en/of IBAN "%s" bestaan al, kies een andere naam en/of '
