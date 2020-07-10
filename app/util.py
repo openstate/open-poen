@@ -161,7 +161,8 @@ def get_new_payments(project_id):
                         if subproject:
                             payment['subproject_id'] = subproject.id
 
-                        del payment['scheduled_id']
+                        if 'scheduled_id' in payment:
+                            del payment['scheduled_id']
 
                         p = Payment(**payment)
                         db.session.add(p)
