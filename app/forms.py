@@ -31,11 +31,17 @@ class ResetPasswordForm(FlaskForm):
     # English
     Wachtwoord = PasswordField(
         'Wachtwoord',
-        validators=[DataRequired(), Length(min=12)]
+        validators=[DataRequired(), Length(min=12)],
+        render_kw={
+            'autocomplete': 'new-password'
+        }
     )
     Wachtwoord2 = PasswordField(
         'Herhaal wachtwoord',
-        validators=[DataRequired(), EqualTo('Wachtwoord')]
+        validators=[DataRequired(), EqualTo('Wachtwoord')],
+        render_kw={
+            'autocomplete': 'new-password'
+        }
     )
     submit = SubmitField(
         'Bevestig',
@@ -47,10 +53,15 @@ class ResetPasswordForm(FlaskForm):
 
 class LoginForm(FlaskForm):
     email = EmailField(
-        'E-mailadres', validators=[DataRequired(), Email(), Length(max=120)]
+        'E-mailadres',
+        validators=[DataRequired(), Email(), Length(max=120)]
     )
     Wachtwoord = PasswordField(
-        'Wachtwoord', validators=[DataRequired(), Length(min=12)]
+        'Wachtwoord',
+        validators=[DataRequired(), Length(min=12)],
+        render_kw={
+            'autocomplete': 'current-password'
+        }
     )
     submit = SubmitField(
         'Inloggen',
