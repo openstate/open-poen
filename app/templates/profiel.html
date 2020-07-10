@@ -8,10 +8,12 @@
 
 {% block content %}
   <div class="container">
+    <br>
     <h1>Profiel bewerken</h1>
 
     <br>
     <br>
+
     <form method="POST">
       {{ edit_profile_form.csrf_token }}
 
@@ -23,5 +25,12 @@
         {% endif %}
       {% endfor %}
     {{ edit_profile_form.submit }}
-  </div>
+
+    <br>
+    <br>
+    <br>
+
+    <div>
+      <p><a href="{{ url_for('reset_wachtwoord_verzoek') }}">Wachtwoord veranderen</a></p>
+    </div>
 {% endblock %}
