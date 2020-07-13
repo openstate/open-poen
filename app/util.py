@@ -267,8 +267,11 @@ def calculate_project_amounts(project_id):
             subproject_spent = 0
             for payment in subproject.payments:
                 if payment.amount_value < 0:
-                    if (not payment.counterparty_alias_value ==
-                            subproject.project.iban):
+                    # If the project contains an IBAN and the payment is to
+                    # that IBAN then don't count the payment
+                    if (subproject.project.iban == None or
+                            (not payment.counterparty_alias_value ==
+                            subproject.project.iban)):
                         subproject_spent += abs(payment.amount_value)
             amounts['spent'] += subproject_spent
     else:
@@ -325,9 +328,11 @@ def calculate_subproject_amounts(subproject_id):
     subproject_spent = 0
     for payment in subproject.payments:
         if payment.amount_value < 0:
-            # Don't add payments back the project IBAN
-            if (not payment.counterparty_alias_value ==
-                    subproject.project.iban):
+            # If the project contains an IBAN and the payment is to
+            # that IBAN then don't count the payment
+            if (subproject.project.iban == None or
+                    (not payment.counterparty_alias_value ==
+                    subproject.project.iban)):
                 subproject_spent += abs(payment.amount_value)
     amounts['spent'] += subproject_spent
 
