@@ -241,7 +241,7 @@
                   <th data-sortable="true" class="d-none d-md-table-cell">betaald door</th>
                   <th data-sortable="true" class="d-none d-sm-table-cell">omschrijving</th>
                   <th data-sortable="true" class="d-none d-xl-table-cell">datum</th>
-                  <th class="d-none">media</th>
+                  <th class="d-none d-xl-table-cell">media</th>
                   <th data-sortable="true" class="d-none">info</th>
                   <th>details</th>
                   {# The columns below are hidden, but need to be included to make their content searchable #}
@@ -300,8 +300,10 @@
                       </div>
                     </td>
                     <td>
-                      <div class="cell">
-                        TODO
+                      <div class="cell justify-content-center">
+                        {% if payment.attachments.all() %}
+                          <i class="fas fa-2x fa-camera"></i></center>
+                        {% endif %}
                       </div>
                     </td>
                     <td>
