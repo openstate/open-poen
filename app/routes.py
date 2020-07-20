@@ -986,7 +986,7 @@ def subproject(project_id, subproject_id):
         if remove_attachment_form.remove.data:
             File.query.filter_by(id=remove_attachment_form.id.data).delete()
             db.session.commit()
-            flash('<span class="text-green">Bijlage is verwijderd</span>')
+            flash('<span class="text-green">Media is verwijderd</span>')
             # redirect back to clear form data
             return redirect(
                 url_for(
