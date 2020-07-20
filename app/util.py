@@ -563,7 +563,7 @@ def process_remove_attachment_form(remove_attachment_form, project_id=0, subproj
     if remove_attachment_form.remove.data:
         File.query.filter_by(id=remove_attachment_form.id.data).delete()
         db.session.commit()
-        flash('<span class="text-green">Bijlage is verwijderd</span>')
+        flash('<span class="text-green">Media is verwijderd</span>')
 
         # redirect back to clear form data
         if subproject_id:
