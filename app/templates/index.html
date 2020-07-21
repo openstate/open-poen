@@ -269,7 +269,7 @@
                               </div>
                               <div class="modal-body text-left">
                                 <!-- Button trigger modal -->
-                                <button type="button" class="btn button-poen-small bg-grey-blue" data-toggle="modal" data-target="#project-owner-toevoegen">
+                                <button type="button" class="btn button-poen-small bg-grey" data-toggle="modal" data-target="#project-owner-toevoegen-{{ project['id'] }}">
                                   project owner toevoegen
                                 </button>
 
@@ -367,36 +367,36 @@
 
   {% if project_data %}
     {% for project in project_data %}
-      {% for project_owner_email, edit_project_owner_form in edit_project_owner_forms[project.id].items() %}
-        <!-- Modal -->
-        <div class="modal fade" id="project-owner-toevoegen" tabindex="-1" role="dialog" aria-labelledby="projectOwnerToevoegenLabel" aria-hidden="true">
-          <div class="modal-dialog" role="document">
-            <div class="modal-content">
-              <form method="POST">
-                <div class="modal-header">
-                  <h5 class="modal-title" id="projectOwnerToevoegenLabel">Project Owner Toevoegen</h5>
-                  <button type="button" class="close" data-dismiss="modal" aria-label="Annuleren">
-                    <span aria-hidden="true">&times;</span>
-                  </button>
-                </div>
-                <div class="modal-body">
-                  <p>Als er nog geen gebruiker bestaat met dit e-mailadres dan krijgt deze een uitnodigingsmail met daarin een link om een wachtwoord aan te maken. Als er wel al een gebruiker bestaat met dit e-mailadres dan krijgt deze gebruiker 'project owner'-rechten (er wordt daar geen e-mail over verstuurd).</p>
-                  <div>
-                    {{ add_user_form.csrf_token }}
+      <!-- Modal -->
+      <div class="modal fade" id="project-owner-toevoegen-{{ project.id }}" tabindex="-1" role="dialog" aria-labelledby="projectOwnerToevoegenLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <form method="POST">
+              <div class="modal-header">
+                <h5 class="modal-title" id="projectOwnerToevoegenLabel">Project Owner Toevoegen</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Annuleren">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <p>Als er nog geen gebruiker bestaat met dit e-mailadres dan krijgt deze een uitnodigingsmail met daarin een link om een wachtwoord aan te maken. Als er wel al een gebruiker bestaat met dit e-mailadres dan krijgt deze gebruiker 'project owner'-rechten (er wordt daar geen e-mail over verstuurd).</p>
+                <div>
+                  {{ add_user_form.csrf_token }}
 
-                    {{ add_user_form.email }}
-                    {{ add_user_form.project_id(**{'value': project.id}) }}
-                  </div>
+                  {{ add_user_form.email }}
+                  {{ add_user_form.project_id(**{'value': project.id}) }}
                 </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuleren</button>
-                  {{ add_user_form.submit }}
-                </div>
-              </form>
-            </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuleren</button>
+                {{ add_user_form.submit }}
+              </div>
+            </form>
           </div>
         </div>
+      </div>
 
+      {% for project_owner_email, edit_project_owner_form in edit_project_owner_forms[project.id].items() %}
         <!-- Modal -->
         <div class="modal fade" id="project-owner-bewerken-{{ edit_project_owner_form.id.data }}" tabindex="-1" role="dialog" aria-labelledby="projectOwnerBewerkenLabel" aria-hidden="true">
           <div class="modal-dialog" role="document">
