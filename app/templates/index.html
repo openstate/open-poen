@@ -272,7 +272,7 @@
                               </div>
                               <div class="modal-body text-left">
                                 <!-- Button trigger modal -->
-                                <button type="button" class="btn button-poen-small bg-grey-blue" data-toggle="modal" data-target="#project-owner-toevoegen">
+                                <button type="button" class="btn button-poen-small bg-grey" data-toggle="modal" data-target="#project-owner-toevoegen-{{ project['id'] }}">
                                   project owner toevoegen
                                 </button>
 
@@ -384,7 +384,7 @@
   {% if project_data %}
     {% for project in project_data %}
       <!-- Modal -->
-      <div class="modal fade" id="project-owner-toevoegen" tabindex="-1" role="dialog" aria-labelledby="projectOwnerToevoegenLabel" aria-hidden="true">
+      <div class="modal fade" id="project-owner-toevoegen-{{ project.id }}" tabindex="-1" role="dialog" aria-labelledby="projectOwnerToevoegenLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
           <div class="modal-content">
             <form method="POST">
