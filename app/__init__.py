@@ -54,7 +54,7 @@ if not app.debug:
             mailhost=(app.config['MAIL_SERVER'], app.config['MAIL_PORT']),
             fromaddr=app.config['FROM'],
             toaddrs=app.config['ADMINS'],
-            subject='[Open Poen Corona] website error',
+            subject='[Open Poen Amsterdam] website error',
             credentials=auth,
             secure=secure
         )
@@ -85,4 +85,4 @@ if app.debug:
     app.logger.setLevel(logging.DEBUG)
 else:
     app.logger.setLevel(logging.INFO)
-app.logger.info('Open Poen Corona startup')
+app.logger.info('Open Poen Amsterdam startup')
