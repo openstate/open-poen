@@ -20,7 +20,7 @@
               <ul class="card-small-list mx-auto my-auto">
               </ul>
             </div>
-            <button type="button" class="btn button-poen-small bg-grey-blue mx-auto">
+            <button type="button" class="btn button-poen-small bg-grey mx-auto">
               <a href="{{ url_for('project', project_id=subproject.project.id) }}">< terug</a>
             </button>
           </div>
@@ -128,7 +128,7 @@
           <div class="lead-side-col col-6 col-lg-3 col-xxl-4 order-9 d-flex flex-column justify-content-between">
 {#            {% if project_owner %}
               <!-- Button trigger modal -->
-              <button type="button" class="btn button-poen-small bg-grey-blue mx-auto" data-toggle="modal" data-target="#initiatiefnemers-beheren">initiatief&shy;nemers beheren ></button>
+              <button type="button" class="btn button-poen-small bg-grey mx-auto" data-toggle="modal" data-target="#initiatiefnemers-beheren">initiatief&shy;nemers beheren ></button>
 
               <!-- Modal -->
               <div class="modal fade" id="initiatiefnemers-beheren" tabindex="-1" role="dialog" aria-labelledby="initiatiefnemersBeherenLabel" aria-hidden="true">
@@ -143,7 +143,7 @@
                     <div class="modal-body">
                       <div>
                         <!-- Button trigger modal -->
-                        <button type="button" class="btn button-poen-small bg-grey-blue" data-toggle="modal" data-target="#initiatiefnemer-toevoegen">
+                        <button type="button" class="btn button-poen-small bg-grey" data-toggle="modal" data-target="#initiatiefnemer-toevoegen">
                           initiatiefnemer toevoegen
                         </button>
 
@@ -181,7 +181,7 @@
                         {% for user_email, edit_user_form in edit_user_forms.items() %}
                           <div>
                             <!-- Button trigger modal -->
-                            <button type="button" class="btn button-poen-small bg-grey-blue" data-toggle="modal" data-target="#initiatiefnemer-bewerken-{{ edit_user_form.id.data }}">
+                            <button type="button" class="btn button-poen-small bg-grey" data-toggle="modal" data-target="#initiatiefnemer-bewerken-{{ edit_user_form.id.data }}">
                               initiatiefnemer bewerken
                             </button>
                             {{ user_email }}
@@ -242,7 +242,7 @@
                 {% endfor %}
               </ul>
             </div>
-            <button type="button" class="btn button-poen-small bg-grey-blue mx-auto">initiatief&shy;nemers ></button>
+            <button type="button" class="btn button-poen-small bg-grey mx-auto">initiatief&shy;nemers ></button>
 #}
           </div>
         </div>

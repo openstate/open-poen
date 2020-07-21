@@ -2,7 +2,7 @@
 {% set active_page = "Home" %}
 {% block head %}
   <title>Open Poen</title>
-  <meta property="og:title" content="Open Poen" />
+  <meta property="og:title" content="Open Poen Amsterdam" />
   {{ super() }}
 {% endblock %}
 
@@ -14,7 +14,7 @@
   <div class="container poen-lead index-lead bg-grey-light">
     <div class="row">
       <div class="col-12 col-md-6 header-logo text-center">
-        <img class="index-lead-logo img-fluid" src="{{ url_for('static', filename='images/Open-Poen-Logo-2.svg') }}" alt="Open Poen logo">
+        <img class="index-lead-logo img-fluid" src="{{ url_for('static', filename='images/Open-Poen-Logo-Amsterdam.svg') }}" alt="Open Poen Amsterdam logo">
       </div>
       <div class="col-12 col-md-6 my-auto text-center text-md-left">
         <h5>TRANSPARANT <span class="text-red">ZAKEN </span> <span class="text-blue">DOEN</span></h5>
@@ -56,7 +56,7 @@
               <div class="row">
                 <div class="col-12">
                   <!-- Button trigger modal -->
-                  <button type="button" class="btn amounts-half-card w-100 bg-green-light text-white" data-toggle="modal" data-target="#admins-beheren">
+                  <button type="button" class="btn amounts-half-card w-100 bg-blue-dark text-white" data-toggle="modal" data-target="#admins-beheren">
                     <h1>admins beheren</h1>
                     <h5>+</h5>
                   </button>
@@ -74,7 +74,7 @@
                         <div class="modal-body">
                           <div>
                             <!-- Button trigger modal -->
-                            <button type="button" class="btn button-poen-small bg-grey-blue" data-toggle="modal" data-target="#admin-toevoegen">
+                            <button type="button" class="btn button-poen-small bg-grey" data-toggle="modal" data-target="#admin-toevoegen">
                               admin toevoegen
                             </button>
 
@@ -112,7 +112,7 @@
                             {% for admin_email, edit_admin_form in edit_admin_forms.items() %}
                               <div>
                                 <!-- Button trigger modal -->
-                                <button type="button" class="btn button-poen-small bg-grey-blue" data-toggle="modal" data-target="#admin-bewerken-{{ edit_admin_form.id.data }}">
+                                <button type="button" class="btn button-poen-small bg-grey" data-toggle="modal" data-target="#admin-bewerken-{{ edit_admin_form.id.data }}">
                                   admin bewerken
                                 </button>
                                 {{ admin_email }}
@@ -166,7 +166,7 @@
 
                 <div class="col-12">
                   <!-- Button trigger modal -->
-                  <button type="button" class="btn amounts-half-card w-100 bg-green-light text-white" data-toggle="modal" data-target="#project-toevoegen">
+                  <button type="button" class="btn amounts-half-card w-100 bg-blue-dark text-white" data-toggle="modal" data-target="#project-toevoegen">
                     <h1>project toevoegen</h1>
                     <h5>+</h5>
                   </button>
@@ -213,13 +213,13 @@
           {% if project_data %}
             {% for project in project_data %}
               <div class="col-12 col-md-6 col-xxl-4">
-                <div class="amounts-card bg-green-light">
+                <div class="amounts-card bg-blue-dark text-white">
                   {% if project.hidden %}
                     <p><i>Dit project is verborgen en dus niet te zien door het publiek</i><p>
                   {% endif %}
                   <div class="amounts-card-title">
                     <a href="{{ url_for('project', project_id=project.id) }}">
-                      <h1 class="text-center">{{ project.name }}</h1>
+                      <h1 class="text-center text-white">{{ project.name }}</h1>
                     </a>
                   </div>
                   <div class="row">
@@ -257,7 +257,7 @@
                       </button>
 
                       <!-- Modal -->
-                      <div class="modal fade" id="project-bewerken-{{ project['id'] }}" tabindex="-1" role="dialog" aria-labelledby="projectbewerkenLabel" aria-hidden="true">
+                      <div class="modal fade text-black" id="project-bewerken-{{ project['id'] }}" tabindex="-1" role="dialog" aria-labelledby="projectBewerkenLabel" aria-hidden="true">
                         <div class="modal-dialog" role="document">
                           <div class="modal-content">
                             <form method="POST">
@@ -278,7 +278,7 @@
                                 {% for project_owner_email, edit_project_owner_form in edit_project_owner_forms[project.id].items() %}
                                   <div>
                                     <!-- Button trigger modal -->
-                                    <button type="button" class="btn button-poen-small bg-grey-blue" data-toggle="modal" data-target="#project-owner-bewerken-{{ edit_project_owner_form.id.data }}">
+                                    <button type="button" class="btn button-poen-small bg-grey" data-toggle="modal" data-target="#project-owner-bewerken-{{ edit_project_owner_form.id.data }}">
                                       project owner bewerken
                                     </button>
                                     {{ project_owner_email }}

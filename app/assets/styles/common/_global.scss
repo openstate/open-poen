@@ -2,7 +2,7 @@ body {
   font-family: $font-family-lexend;
   font-size: 13px;
   line-height: 21px;
-  color: $blue-dark;
+  color: black;
   word-wrap: break-word;
   hyphens: manual;
 
@@ -70,8 +70,12 @@ hr {
   color: $blue-dark;
 }
 
+.text-black {
+  color: black;
+}
+
 .text-blue-dark {
-  color: $blue-dark;
+  color: black;
 }
 
 .text-blue {
@@ -94,6 +98,10 @@ hr {
   background-color: white;
 }
 
+.bg-blue-dark {
+  background-color: $blue-dark;
+}
+
 .bg-blue {
   background-color: $blue;
 }
@@ -106,16 +114,16 @@ hr {
   background-color: $green-light;
 }
 
+.bg-grey-dark {
+  background-color: $grey-dark;
+}
+
 .bg-grey {
   background-color: $grey;
 }
 
 .bg-grey-light {
   background-color: $grey-light;
-}
-
-.bg-grey-blue {
-  background-color: $grey-blue;
 }
 
 .abs-center-x {
