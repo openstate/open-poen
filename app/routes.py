@@ -438,7 +438,6 @@ def index():
             {
                 'id': project.id,
                 'name': project.name,
-                'description': project.description,
                 'hidden': project.hidden,
                 'project_owner': project_owner,
                 'already_authorized': already_authorized,
