@@ -39,6 +39,8 @@ services:
       - "POSTGRES_DB_FILE=/run/secrets/db_name"
       - "POSTGRES_USER_FILE=/run/secrets/db_user"
       - "POSTGRES_PASSWORD_FILE=/run/secrets/db_password"
+    # Give the db time to properly shutdown if needed (otherwise it might end up corrupted)
+    stop_grace_period: 120s
     working_dir: /docker-entrypoint-initdb.d/backups
     networks:
       - internal
