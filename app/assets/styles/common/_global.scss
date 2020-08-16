@@ -167,9 +167,13 @@ hr {
 }
 
 .poen-lead {
-  height: 510px;
+  min-height: 510px;
   border-bottom-left-radius: 115px;
   border-bottom-right-radius: 115px;
+
+  &.project-lead {
+    padding-bottom: 100px;
+  }
 }
 
 .poen-content {
@@ -218,7 +222,7 @@ hr {
   margin-top: 26px;
   margin-bottom: 26px;
   border-radius: 35px;
-  height: 184px;
+  min-height: 184px;
   width: 184px;
   padding: 5px;
 }
@@ -230,20 +234,21 @@ hr {
 
 @media (max-width: 1199px) {
   .poen-lead {
-    height: 420px;
+    min-height: 420px;
 
     &.project-lead {
-      height: 510px;
+      min-height: 510px;
     }
   }
 }
 
 @media (max-width: 991px) {
   .poen-lead {
-    height: 280px;
+    min-height: 280px;
 
     &.project-lead {
       min-height: 680px;
+      padding-bottom: 0;
     }
   }
 
@@ -306,9 +311,13 @@ hr {
   }
 
   .poen-lead {
-    height: 330px;
+    min-height: 330px;
     border-bottom-left-radius: 70px;
     border-bottom-right-radius: 70px;
+
+    &.project-lead {
+      min-height: 330px;
+    }
   }
 
   .card-small {
