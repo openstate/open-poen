@@ -234,19 +234,21 @@
               <thead>
                 <tr>
                   {# Hidden field required to make search work with the detailed view; NOTE: the id should always be the first column of the table #}
-                  <th class="d-none">id</th>
+                  <th data-force-hide="true" class="d-none">id</th>
                   <th data-sortable="true">waarvoor?</th>
                   <th data-sortable="true" data-sorter="customSort">bedrag €</th>
                   <th data-sortable="true" class="d-none d-sm-table-cell">ontvanger</th>
                   <th data-sortable="true" class="d-none d-md-table-cell">betaald door</th>
                   <th data-sortable="true" class="d-none d-sm-table-cell">omschrijving</th>
                   <th data-sortable="true" class="d-none d-xl-table-cell">datum</th>
-                  <th data-sortable="true" class="d-none d-xl-table-cell">media</th>
-                  <th data-sortable="true" class="d-none">info</th>
-                  <th>details</th>
+                  <th data-sortable="true" data-force-hide="true" class="d-none d-xl-table-cell">media</th>
+                  <th data-force-hide="true">details</th>
                   {# The columns below are hidden, but need to be included to make their content searchable #}
                   <th class="d-none">betaalomschrijving</th>
                   <th class="d-none">lange omschrijving</th>
+                  <th class="d-none">saldo na boeking €</th>
+                  {# Hidden column used to generate the detailed view #}
+                  <th data-force-hide="true" class="d-none">detail-view</th>
                 </tr>
               </thead>
               <tbody>
@@ -307,11 +309,6 @@
                       </div>
                     </td>
                     <td>
-                      <div class="cell">
-                        TODO
-                      </div>
-                    </td>
-                    <td>
                       <div class="cell last-cell justify-content-center">
                         <button type="button" class="btn button-detail"><i class="fas fa-chevron-down"></i></button>
                       </div>
@@ -326,7 +323,12 @@
                         {{ payment.long_user_description }}
                       </div>
                     </td>
-
+                    <td>
+                      <div class="cell">
+                        {{ payment.get_formatted_balance() }}
+                      </div>
+                    </td>
+                    <td>
                     <div id="detail-{{ payment.id }}" class="d-none">
                       <div class="detail-row">
                         <div class="row">
