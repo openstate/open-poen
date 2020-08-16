@@ -6,6 +6,8 @@ import 'bootstrap-table';
 import 'bootstrap-table/dist/locale/bootstrap-table-nl-NL.min.js';
 import 'bootstrap-table/dist/extensions/sticky-header/bootstrap-table-sticky-header.min.js';
 import 'bootstrap-table/dist/extensions/mobile/bootstrap-table-mobile.min.js';
+import 'tableexport.jquery.plugin/tableExport.min.js';
+import 'bootstrap-table/dist/extensions/export/bootstrap-table-export.min.js';
 import naturalSort from 'javascript-natural-sort';
 
 // Import local dependencies
@@ -16,10 +18,10 @@ import home from './routes/home';
 // Import the needed Font Awesome functionality
 import { config, library, dom } from '@fortawesome/fontawesome-svg-core';
 // Import required icons
-import { faBars, faChevronDown, faFile, faCamera } from '@fortawesome/free-solid-svg-icons';
+import { faBars, faChevronDown, faFile, faCamera, faDownload } from '@fortawesome/free-solid-svg-icons';
 
 // Add the imported icons to the library
-library.add(faBars, faChevronDown, faFile, faCamera);
+library.add(faBars, faChevronDown, faFile, faCamera, faDownload);
 
 // Tell FontAwesome to watch the DOM and add the SVGs when it detects icon markup
 dom.watch();
