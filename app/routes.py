@@ -21,8 +21,8 @@ from sqlalchemy.exc import IntegrityError
 from bunq.sdk.context.api_environment_type import ApiEnvironmentType
 
 from datetime import datetime
-from werkzeug.utils import secure_filename
 from time import time
+from werkzeug.utils import secure_filename
 import os
 import jwt
 import re
@@ -211,7 +211,7 @@ def index():
 
     # Update project owner
     if edit_project_owner_form.validate_on_submit():
-        project_owners = User.query.filter_by(
+        edited_project_owner = User.query.filter_by(
             id=edit_project_owner_form.id.data
         )
         new_project_owner_data = {}
@@ -227,10 +227,13 @@ def index():
                     new_project_owner_data[f.short_name] = f.data
 
         # Update if the project owner exists
-        if len(project_owners.all()):
-            project_owners.update(new_project_owner_data)
+        if len(edited_project_owner.all()):
+            edited_project_owner.update(new_project_owner_data)
             if remove_from_project:
-                project_owners.first().projects.remove(
+                # We need to get the user using '.first()' otherwise we
+                # can't remove the project because of garbage collection
+                edited_project_owner = edited_project_owner.first()
+                edited_project_owner.projects.remove(
                     Project.query.get(remove_from_project_id)
                 )
 
@@ -269,15 +272,17 @@ def index():
             if f.type != 'SubmitField' and f.type != 'CSRFTokenField':
                 new_user_data[f.short_name] = f.data
 
-        util.add_user(**new_user_data)
-
-        flash(
-            '<span class="text-green">"%s" is uitgenodigd als admin of '
-            'project owner (of toegevoegd als admin of project owner als de '
-            'gebruiker al bestond)' % (
-                new_user_data['email']
+        try:
+            util.add_user(**new_user_data)
+            flash(
+                '<span class="text-green">"%s" is uitgenodigd als admin of '
+                'project owner (of toegevoegd als admin of project owner als de '
+                'gebruiker al bestond)' % (
+                    new_user_data['email']
+                )
             )
-        )
+        except ValueError as e:
+            flash(str(e))
 
         # redirect back to clear form data
         return redirect(url_for('index'))
@@ -336,14 +341,20 @@ def index():
                 # If the IBAN changes, then link the correct payments
                 # to this project
                 project = projects.first()
+
+                # We don't allow editing of the 'contains_subprojects' value after a project is created
+                del new_project_data['contains_subprojects']
+
                 if project.iban != new_project_data['iban']:
                     for payment in project.payments:
                         payment.project_id = None
                     Payment.query.filter_by(
                         alias_value=new_project_data['iban']
                     ).update({'project_id': project.id})
+
                 projects.update(new_project_data)
                 db.session.commit()
+
                 flash(
                     '<span class="text-green">Project "%s" is '
                     'bijgewerkt</span>' % (
@@ -419,8 +430,13 @@ def index():
                 'name': project.name,
                 'description': project.description,
                 'hidden': project.hidden,
-                'id': project.id
+                'id': project.id,
+                'contains_subprojects': project.contains_subprojects
             })
+            # We don't allow editing of the 'contains_subprojects'
+            # value after a project is created, but we do need to pass the
+            # value in the form, so simply disable it
+            form.contains_subprojects.render_kw = {'disabled': ''}
 
             # If a bunq account is available, allow the user to select
             # an IBAN
@@ -438,6 +454,7 @@ def index():
             {
                 'id': project.id,
                 'name': project.name,
+                'description': project.description,
                 'hidden': project.hidden,
                 'project_owner': project_owner,
                 'already_authorized': already_authorized,
@@ -446,7 +463,8 @@ def index():
                 'iban_name': project.iban_name,
                 'bank_name': project.bank_name,
                 'amounts': amounts,
-                'form': form
+                'form': form,
+                'contains_subprojects': project.contains_subprojects
             }
         )
 
@@ -625,11 +643,49 @@ def project(project_id):
     if project.bunq_access_token:
         subproject_form.iban.choices = project.make_select_options()
 
+    # Process/create (filled in) payment form (only available when a project doesn't work with subprojects)
+    payment_forms = {}
+    transaction_attachment_form = ''
+    remove_attachment_form = ''
+    if project_owner and not project.contains_subprojects:
+        payment_form_return = util.process_payment_form(request, project.id)
+        if payment_form_return:
+            return payment_form_return
+
+        # Populate the payment forms which allows the user to edit it
+        payment_forms = util.create_payment_forms(project.payments, project_owner)
+
+        # Process transaction attachment form
+        transaction_attachment_form = TransactionAttachmentForm(
+            prefix="transaction_attachment_form"
+        )
+        transaction_attachment_form_return = util.process_transaction_attachment_form(
+            request,
+            transaction_attachment_form,
+            project.id
+        )
+        if transaction_attachment_form_return:
+            return transaction_attachment_form_return
+
+        # Process transaction attachment removal form
+        remove_attachment_form = RemoveAttachmentForm(
+            prefix="remove_attachment_form"
+        )
+        remove_attachment_form_return = util.process_remove_attachment_form(
+            remove_attachment_form,
+            project.id,
+        )
+        if remove_attachment_form_return:
+            return remove_attachment_form_return
+
     amounts = util.calculate_project_amounts(project_id)
 
     payments = []
-    for subproject in project.subprojects:
-        payments += subproject.payments
+    if project.contains_subprojects:
+        for subproject in project.subprojects:
+            payments += subproject.payments
+    else:
+        payments += project.payments
 
     return render_template(
         'project.html',
@@ -637,6 +693,9 @@ def project(project_id):
         amounts=amounts,
         payments=payments,
         subproject_form=subproject_form,
+        payment_forms=payment_forms,
+        transaction_attachment_form=transaction_attachment_form,
+        remove_attachment_form=remove_attachment_form,
         funder_forms=funder_forms,
         new_funder_form=FunderForm(prefix="funder_form"),
         project_owner=project_owner
@@ -783,62 +842,14 @@ def subproject(project_id, subproject_id):
         )
 
     # Process filled in payment form
-    payment_form = PaymentForm(prefix="payment_form")
-    if payment_form.validate_on_submit():
-        # Get data from the form
-        new_payment_data = {}
-        for f in payment_form:
-            if f.type != 'SubmitField' and f.type != 'CSRFTokenField':
-                new_payment_data[f.short_name] = f.data
+    payment_form_return = util.process_payment_form(request, subproject.project.id, subproject.id)
+    if payment_form_return:
+        return payment_form_return
 
-        try:
-            # Update if the payment already exists
-            payments = Payment.query.filter_by(
-                id=payment_form.id.data
-            )
-            if len(payments.all()):
-                payments.update(new_payment_data)
-                db.session.commit()
-                flash(
-                    '<span class="text-green">Transactie is bijgewerkt</span>'
-                )
-        except IntegrityError as e:
-            db.session().rollback()
-            app.logger.error(e)
-            flash(
-                '<span class="text-red">Transactie bijwerken mislukt<span>'
-            )
-        # redirect back to clear form data
-        return redirect(
-            url_for(
-                'subproject',
-                project_id=subproject.project.id,
-                subproject_id=subproject.id
-            )
-        )
-    else:
-        util.flash_form_errors(payment_form, request)
-
+    # Populate the payment forms which allows the user to edit it
     payment_forms = {}
     if project_owner or user_in_subproject:
-        # Populate the payment forms which allows the user to edit it
-        for payment in subproject.payments:
-            # Only allow project owners to hide a transaction
-            if project_owner:
-                payment_form = PaymentForm(prefix='payment_form', **{
-                    'short_user_description': payment.short_user_description,
-                    'long_user_description': payment.long_user_description,
-                    'hidden': payment.hidden,
-                    'id': payment.id
-                })
-            else:
-                payment_form = PaymentForm(prefix='payment_form', **{
-                    'short_user_description': payment.short_user_description,
-                    'long_user_description': payment.long_user_description,
-                    'id': payment.id
-                })
-
-            payment_forms[payment.id] = payment_form
+        payment_forms = util.create_payment_forms(subproject.payments, project_owner)
 
     amounts = util.calculate_subproject_amounts(subproject_id)
 
@@ -868,7 +879,10 @@ def subproject(project_id, subproject_id):
         if len(users.all()):
             users.update(new_user_data)
             if remove_from_subproject:
-                users.first().subprojects.remove(
+                # We need to get the user using '.first()' otherwise we
+                # can't remove the project because of garbage collection
+                initiatiefnemer = users.first()
+                initiatiefnemer.subprojects.remove(
                     Subproject.query.get(remove_from_subproject_id)
                 )
 
@@ -909,15 +923,17 @@ def subproject(project_id, subproject_id):
             if f.type != 'SubmitField' and f.type != 'CSRFTokenField':
                 new_user_data[f.short_name] = f.data
 
-        util.add_user(**new_user_data)
-
-        flash(
-            '<span class="text-green">"%s" is uitgenodigd als initiatiefnemer '
-            '(of toegevoegd als initiatiefnemer als de gebruiker al '
-            'bestond)' % (
-                new_user_data['email']
+        try:
+            util.add_user(**new_user_data)
+            flash(
+                '<span class="text-green">"%s" is uitgenodigd als initiatiefnemer '
+                '(of toegevoegd als initiatiefnemer als de gebruiker al '
+                'bestond)' % (
+                    new_user_data['email']
+                )
             )
-        )
+        except ValueError as e:
+            flash(str(e))
 
         # redirect back to clear form data
         return redirect(
@@ -930,70 +946,33 @@ def subproject(project_id, subproject_id):
     else:
         util.flash_form_errors(add_user_form, request)
 
-    # Process filled in transaction attachment form
     transaction_attachment_form = ''
     remove_attachment_form = ''
     if project_owner or user_in_subproject:
+        # Process transaction attachment form
         transaction_attachment_form = TransactionAttachmentForm(
             prefix="transaction_attachment_form"
         )
-        if transaction_attachment_form.validate_on_submit():
-            # Save attachment to disk
-            f = transaction_attachment_form.data_file.data
-            filename = secure_filename(f.filename)
-            filename = '%s_%s' % (
-                datetime.now().isoformat()[:19], filename
-            )
-            filepath = os.path.join(
-                os.path.abspath(
-                    os.path.join(
-                        app.instance_path, '../%s/transaction-attachment' % (
-                            app.config['UPLOAD_FOLDER']
-                        )
-                    )
-                ),
-                filename
-            )
-            f.save(filepath)
-            new_file = File(filename=filename, mimetype=f.headers[1][1])
-            db.session.add(new_file)
-            db.session.commit()
+        transaction_attachment_form_return = util.process_transaction_attachment_form(
+            request,
+            transaction_attachment_form,
+            subproject.project.id,
+            subproject.id
+        )
+        if transaction_attachment_form_return:
+            return transaction_attachment_form_return
 
-            # Link attachment to payment in the database
-            payment = Payment.query.get(
-                transaction_attachment_form.payment_id.data
-            )
-            payment.attachments.append(new_file)
-            db.session.commit()
-
-            # redirect back to clear form data
-            return redirect(
-                url_for(
-                    'subproject',
-                    project_id=subproject.project.id,
-                    subproject_id=subproject.id
-                )
-            )
-        else:
-            util.flash_form_errors(transaction_attachment_form, request)
-
-        # Process attachment removal form
+        # Process transaction attachment removal form
         remove_attachment_form = RemoveAttachmentForm(
             prefix="remove_attachment_form"
         )
-        # Remove attachment
-        if remove_attachment_form.remove.data:
-            File.query.filter_by(id=remove_attachment_form.id.data).delete()
-            db.session.commit()
-            flash('<span class="text-green">Media is verwijderd</span>')
-            # redirect back to clear form data
-            return redirect(
-                url_for(
-                    'subproject',
-                    project_id=subproject.project.id,
-                    subproject_id=subproject.id
-                )
-            )
+        remove_attachment_form_return = util.process_remove_attachment_form(
+            remove_attachment_form,
+            subproject.project.id,
+            subproject.id
+        )
+        if remove_attachment_form_return:
+            return remove_attachment_form_return
 
     return render_template(
         'subproject.html',
@@ -1002,9 +981,9 @@ def subproject(project_id, subproject_id):
         subproject_form=subproject_form,
         payment_forms=payment_forms,
         transaction_attachment_form=transaction_attachment_form,
+        remove_attachment_form=remove_attachment_form,
         edit_user_forms=edit_user_forms,
         add_user_form=AddUserForm(prefix='add_user_form'),
-        remove_attachment_form=remove_attachment_form,
         project_owner=project_owner,
         user_in_subproject=user_in_subproject
     )
