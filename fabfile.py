@@ -47,7 +47,7 @@ def deploy_poen(c):
     c.sudo('docker exec %s yarn prod' % (NODE_CONTAINER))
 
     # Upgrade database
-    #c.sudo('docker exec %s flask db upgrade' % (APP_CONTAINER))
+    c.sudo('docker exec %s flask db upgrade' % (APP_CONTAINER))
 
     # Reload app
     c.run('cd %s && touch uwsgi-touch-reload' % (DIR))
