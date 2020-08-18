@@ -277,13 +277,7 @@ def calculate_project_amounts(project_id):
     else:
         for payment in project.payments:
             if payment.amount_value < 0:
-                # If the project contains an IBAN and the payment is to
-                # that IBAN then don't count the payment
-                if (subproject.project.iban == None or
-                        (not payment.counterparty_alias_value ==
-                        subproject.project.iban)):
-                    subproject_spent += abs(payment.amount_value)
-        amounts['spent'] += subproject_spent
+                amounts['spent'] += abs(payment.amount_value)
 
     # Calculate percentage spent
     if amounts['awarded'] == 0:
