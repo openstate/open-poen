@@ -238,13 +238,13 @@
       <div class="col-12 col-lg-10 offset-lg-1 poen-content bg-white">
         <div class="row">
           <div class="col-12">
-            <table class="payment-table" data-locale="nl-NL" data-detail-view="true" data-detail-view-by-click="true" data-detail-view-icon="false" data-detail-formatter="detailFormatter" data-show-export="true" data-export-data-type="all" data-export-types="['csv', 'txt', 'json', 'xml', 'sql']">
+            <table class="payment-table" data-locale="nl-NL" data-detail-view="true" data-detail-view-by-click="true" data-detail-view-icon="false" data-detail-formatter="detailFormatter" data-show-export="true" data-export-data-type="all" data-export-types="['csv', 'txt', 'json', 'xml', 'sql']" data-export-options='{"fileName": "{{ timestamp }}-{{ project.name | replace(' ', '_') }}"}'>
               <thead>
                 <tr>
                   {# Hidden field required to make search work with the detailed view; NOTE: the id should always be the first column of the table #}
                   <th data-force-hide="true" class="d-none">id</th>
                   {% if project.contains_subprojects %}
-                    <th data-sortable="true">waarvoor?</th>
+                    <th data-sortable="true">initiatief</th>
                   {% endif %}
                   <th data-sortable="true" data-sorter="customSort">bedrag €</th>
                   <th data-sortable="true" class="d-none d-sm-table-cell">ontvanger</th>
@@ -253,7 +253,7 @@
                   <th data-sortable="true" class="d-none d-xl-table-cell">datum</th>
                   <th data-sortable="true" data-force-hide="true" class="d-none d-xl-table-cell">media</th>
                   <th data-force-hide="true">details</th>
-                  {# The columns below are hidden, but need to be included to make their content searchable #}
+                  {# The columns below are hidden, but need to be included to make their content exportable #}
                   <th class="d-none">betaalomschrijving</th>
                   <th class="d-none">lange omschrijving</th>
                   <th class="d-none">saldo na boeking €</th>
@@ -406,7 +406,7 @@
                             {% if payment.attachments.all() %}
                               <br>
                               <hr>
-                              <p>media</p>
+                              <b>Media</b>
                               <div class="row">
                                 {% for attachment in payment.attachments %}
                                   <div class="col-6 col-sm-4">
