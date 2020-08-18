@@ -699,7 +699,7 @@ def project(project_id):
         funder_forms=funder_forms,
         new_funder_form=FunderForm(prefix="funder_form"),
         project_owner=project_owner,
-        timestamp=datetime.now().isoformat()[:19].replace('-', '_').replace('T', '-').replace(':', '_')
+        timestamp=util.get_export_timestamp()
     )
 
 
@@ -987,7 +987,7 @@ def subproject(project_id, subproject_id):
         add_user_form=AddUserForm(prefix='add_user_form'),
         project_owner=project_owner,
         user_in_subproject=user_in_subproject,
-        timestamp=datetime.now().isoformat()[:19].replace('-', '_').replace('T', '-').replace(':', '_')
+        timestamp=util.get_export_timestamp()
     )
 
 @app.route("/over", methods=['GET', 'POST'])
