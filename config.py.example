@@ -1,5 +1,6 @@
 from bunq.sdk.context.api_environment_type import ApiEnvironmentType
 import os
+import pytz
 
 # On a new deployment (whether production or development) make
 # a copy of this file called 'config.py' and change 'False' for
@@ -30,6 +31,7 @@ class Config(object):
     MAX_CONTENT_LENGTH = 20 * 1024 * 1024
 
     BABEL_DEFAULT_LOCALE = 'nl'
+    TZ = pytz.timezone('Europe/Amsterdam')
 
     SQLALCHEMY_DATABASE_URI = 'postgresql://%s:%s@db:5432/%s' % (
         DB_USER, DB_PASSWORD, DB_NAME

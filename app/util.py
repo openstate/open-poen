@@ -514,7 +514,7 @@ def process_transaction_attachment_form(request, transaction_attachment_form, pr
         f = transaction_attachment_form.data_file.data
         filename = secure_filename(f.filename)
         filename = '%s_%s' % (
-            datetime.now().isoformat()[:19], filename
+            datetime.now(app.config['TZ']).isoformat()[:19], filename
         )
         filepath = os.path.join(
             os.path.abspath(
@@ -582,3 +582,8 @@ def process_remove_attachment_form(remove_attachment_form, project_id=0, subproj
                 project_id=project_id,
             )
         )
+
+def get_export_timestamp():
+    return datetime.now(
+        app.config['TZ']
+    ).isoformat()[:19].replace('-', '_').replace('T', '-').replace(':', '_')

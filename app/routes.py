@@ -698,7 +698,8 @@ def project(project_id):
         remove_attachment_form=remove_attachment_form,
         funder_forms=funder_forms,
         new_funder_form=FunderForm(prefix="funder_form"),
-        project_owner=project_owner
+        project_owner=project_owner,
+        timestamp=util.get_export_timestamp()
     )
 
 
@@ -985,7 +986,8 @@ def subproject(project_id, subproject_id):
         edit_user_forms=edit_user_forms,
         add_user_form=AddUserForm(prefix='add_user_form'),
         project_owner=project_owner,
-        user_in_subproject=user_in_subproject
+        user_in_subproject=user_in_subproject,
+        timestamp=util.get_export_timestamp()
     )
 
 @app.route("/over", methods=['GET', 'POST'])
