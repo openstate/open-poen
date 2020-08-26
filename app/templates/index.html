@@ -272,12 +272,16 @@
                                 </button>
                               </div>
                               <div class="modal-body text-left">
+                                <b>Project owners</b>
+                                <br>
+                                <br>
                                 <!-- Button trigger modal -->
                                 <button type="button" class="btn button-poen-small bg-grey" data-toggle="modal" data-target="#project-owner-toevoegen-{{ project['id'] }}">
                                   project owner toevoegen
                                 </button>
 
-                                <hr>
+                                <br>
+                                <br>
 
                                 {% for project_owner_email, edit_project_owner_form in edit_project_owner_forms[project.id].items() %}
                                   <div>
@@ -291,6 +295,35 @@
                                 {% endfor %}
 
                                 <hr>
+
+                                {% if not project['contains_subprojects'] %}
+                                  <b>Categoriën</b>
+                                  <br>
+                                  <br>
+                                  <!-- Button trigger modal -->
+                                  <button type="button" class="btn button-poen-small bg-grey" data-toggle="modal" data-target="#categorie-toevoegen-{{ project.category_form.project_id.data }}">
+                                    categorie toevoegen
+                                  </button>
+                                  <br>
+                                  <br>
+
+                                  {% for category_form in project.category_forms %}
+                                    <!-- Button trigger modal -->
+                                    <div>
+                                      <button type="button" class="btn button-poen-small bg-grey-blue" data-toggle="modal" data-target="#categorie-bewerken-{{ category_form.id.data }}">
+                                        categorie bewerken
+                                      </button>
+                                    {{ category_form.name.data }}
+                                    </div>
+                                    <br>
+                                  {% endfor %}
+
+                                  <hr>
+                                {% endif %}
+
+                                <b>Algemene projectinstellingen</b>
+                                <br>
+                                <br>
 
                                 <div>
                                   {{ project['form'].csrf_token }}
@@ -384,7 +417,7 @@
 
   {% if project_data %}
     {% for project in project_data %}
-      <!-- Modal -->
+      <!-- Modal for 'Project owner toevoegen' -->
       <div class="modal fade" id="project-owner-toevoegen-{{ project.id }}" tabindex="-1" role="dialog" aria-labelledby="projectOwnerToevoegenLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
           <div class="modal-content">
@@ -414,7 +447,7 @@
       </div>
 
       {% for project_owner_email, edit_project_owner_form in edit_project_owner_forms[project.id].items() %}
-        <!-- Modal -->
+        <!-- Modal for 'Project owner bewerken' -->
         <div class="modal fade" id="project-owner-bewerken-{{ edit_project_owner_form.id.data }}" tabindex="-1" role="dialog" aria-labelledby="projectOwnerBewerkenLabel" aria-hidden="true">
           <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -450,6 +483,102 @@
           </div>
         </div>
       {% endfor %}
+
+      {% if not project['contains_subprojects'] %}
+        <!-- Modal for 'Categorie toevoegen' -->
+        <div class="modal fade" id="categorie-toevoegen-{{ project.category_form.project_id.data }}" tabindex="-1" role="dialog" aria-labelledby="categorieToevoegenLabel" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <form method="POST">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="categorieToevoegenLabel">Categorie Toevoegen</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Annuleren">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <div>
+                    {{ project.category_form.csrf_token }}
+                    {{ project.category_form.name }}
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  {{ project.category_form.project_id }}
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuleren</button>
+                  {{ project.category_form.submit }}
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        {% for category_form in project.category_forms %}
+          <!-- Modal for categorie bewerken -->
+          <div class="modal fade" id="categorie-bewerken-{{ category_form.id.data }}" tabindex="-1" role="dialog" aria-labelledby="categorieBewerkenLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <form method="POST">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="categorieBewerkenLabel">Categorie Bewerken</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Annuleren">
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <div>
+                      {{ category_form.csrf_token }}
+
+                      {% for f in category_form %}
+                        {% if f.widget.input_type != 'hidden' and f.widget.input_type != 'submit' %}
+                          <div>
+                            {{ f }}
+                            {{ f.label }}
+                          </div>
+                        {% endif %}
+                      {% endfor %}
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    {{ category_form.id }}
+                    {{ category_form.project_id }}
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuleren</button>
+                    <!-- Button trigger modal -->
+                    <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#categorie-verwijder-{{ category_form.id.data }}">
+                      Verwijderen
+                    </button>
+
+                    <!-- Modal -->
+                    <div class="modal fade" id="categorie-verwijder-{{ category_form.id.data }}" tabindex="-1" role="dialog" aria-labelledby="categorieVerwijderLabel" aria-hidden="true">
+                      <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                          <form method="POST">
+                            <div class="modal-header">
+                              <h5 class="modal-title" id="categorieVerwijderLabel">Categorie Verwijderen</h5>
+                              <button type="button" class="close" data-dismiss="modal" aria-label="Annuleren">
+                                <span aria-hidden="true">&times;</span>
+                              </button>
+                            </div>
+                            <div class="modal-body">
+                              <div>
+                                <p>Weet u zeker dat u categorie "<b>{{ category_form.name.data }}</b>" wilt verwijderen? Hiermee wordt deze categorie ook weggehaald bij alle transacties waar de categorie aan toegevoegd is!</p>
+                              </div>
+                            </div>
+                            <div class="modal-footer">
+                              <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuleren</button>
+                              {{ category_form.remove }}
+                            </div>
+                          </form>
+                        </div>
+                      </div>
+                    </div>
+                    {{ category_form.submit }}
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      {% endif %}
     {% endfor %}
   {% endif %}
 {% endblock %}

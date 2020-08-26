@@ -257,6 +257,7 @@
                   <th class="d-none">betaalomschrijving</th>
                   <th class="d-none">lange omschrijving</th>
                   <th class="d-none">saldo na boeking €</th>
+                  <th class="d-none">categorie</th>
                   {# Hidden column used to generate the detailed view #}
                   <th data-force-hide="true" class="d-none">detail-view</th>
                 </tr>
@@ -341,6 +342,11 @@
                       </div>
                     </td>
                     <td>
+                      <div class="cell">
+                        {{ payment.category.name }}
+                      </div>
+                    </td>
+                    <td>
                     <div id="detail-{{ payment.id }}" class="d-none">
                       <div class="detail-row">
                         <div class="row">
@@ -388,18 +394,30 @@
                             {{ payment.counterparty_alias_name }}
                             <br>
                             <br>
+
+                            <b>Categorie</b>
+                            <br>
+                            {{ payment.category.name }}
+                            <br>
+                            <br>
+
                             {% if project.contains_subprojects %}
-                              <b>Waarvoor?</b>
+                              <b>Waarvoor</b>
                               <br>
                               <a href="{{ url_for('subproject', project_id=project.id, subproject_id=payment.subproject.id) }}"><i>{{ payment.subproject.name }}</i></a>
                               <br>
+                              <br>
                             {% endif %}
+
+                            <b>Omschrijving</b>
+                            <br>
                             {% if payment.long_user_description %}
                               {{ payment.long_user_description }}
+                            {% elif payment.short_user_description %}
+                              {{ payment.short_user_description }}
                             {% else %}
                               <i>er is nog geen beschrijving van deze transactie toegevoegd</i>
                             {% endif %}
-
                             <br>
                             <br>
 

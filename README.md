@@ -70,6 +70,8 @@ Use these after the database is in production and you need to change the databas
 
 - After changing the model: `flask db migrate -m <message>`
 - Apply the new migration to the database: `flask db upgrade`
+- If you need to downgrade: `flask db downgrade`
+
 
 ### Bunq commands
 

@@ -133,6 +133,7 @@ class PaymentForm(FlaskForm):
         'Lange beschrijving', validators=[Length(max=2000)]
     )
     hidden = BooleanField('Transactie verbergen')
+    category_id = SelectField('Categorie', validators=[Optional()], choices=[])
     id = IntegerField(widget=HiddenInput())
 
     submit = SubmitField(
@@ -281,5 +282,28 @@ class EditProfileForm(FlaskForm):
         'Opslaan',
         render_kw={
             'class': 'btn btn-info'
+        }
+    )
+
+
+class CategoryForm(FlaskForm):
+    name = StringField(
+        'Naam', validators=[DataRequired(), Length(max=120)]
+    )
+    id = IntegerField(widget=HiddenInput())
+    project_id = IntegerField(widget=HiddenInput())
+    subproject_id = IntegerField(widget=HiddenInput())
+
+    submit = SubmitField(
+        'Toevoegen',
+        render_kw={
+            'class': 'btn btn-info'
+        }
+    )
+
+    remove = SubmitField(
+        'Verwijderen',
+        render_kw={
+            'class': 'btn btn-danger'
         }
     )

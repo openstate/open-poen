@@ -219,6 +219,7 @@ class Project(db.Model):
         secondary=project_image,
         lazy='dynamic'
     )
+    categories = db.relationship('Category', backref='project', lazy='dynamic')
 
     def set_bank_name(self, bank_name):
         self.bank_name = bank_name
@@ -231,7 +232,13 @@ class Project(db.Model):
                 'Did not save Bunq access token, its length is not 64'
             )
 
-    # Create select option to be shown in a dropdown menu
+    # Returns true if the project is linked to the given user_id
+    def has_user(self, user_id):
+        return self.users.filter(
+            project_user.c.user_id == user_id
+        ).count() > 0
+
+    # Create select options to be shown in a dropdown menu
     def make_select_options(self):
         select_options = [('', '')]
         for iban in self.ibans:
@@ -239,11 +246,12 @@ class Project(db.Model):
             select_options.append((option, option))
         return select_options
 
-    # Returns true if the project is linked to the given user_id
-    def has_user(self, user_id):
-        return self.users.filter(
-            project_user.c.user_id == user_id
-        ).count() > 0
+    # Create category select options to be shown in a dropdown menu
+    def make_category_select_options(self):
+        select_options = [('', '')]
+        for category in Category.query.filter_by(project_id=self.id):
+            select_options.append((str(category.id), category.name))
+        return select_options
 
 
 class Subproject(db.Model):
@@ -253,7 +261,7 @@ class Subproject(db.Model):
     )
     iban = db.Column(db.String(34), index=True, unique=True)
     iban_name = db.Column(db.String(120), index=True)
-    name = db.Column(db.String(120), index=True, unique=True)
+    name = db.Column(db.String(120), index=True)
     description = db.Column(db.Text)
     hidden = db.Column(db.Boolean, default=False)
 
@@ -274,12 +282,25 @@ class Subproject(db.Model):
         secondary=subproject_image,
         lazy='dynamic'
     )
+    categories = db.relationship('Category', backref='subproject', lazy='dynamic')
+
+    # Subproject names must be unique within a project
+    __table_args__ = (
+        db.UniqueConstraint('project_id', 'name'),
+    )
 
     # Returns true if the subproject is linked to the given user_id
     def has_user(self, user_id):
         return self.users.filter(
             subproject_user.c.user_id == user_id
         ).count() > 0
+
+    # Create select options to be shown in a dropdown menu
+    def make_category_select_options(self):
+        select_options = [('', '')]
+        for category in Category.query.filter_by(subproject_id=self.id):
+            select_options.append((str(category.id), category.name))
+        return select_options
 
 
 class DebitCard(db.Model):
@@ -296,6 +317,9 @@ class Payment(db.Model):
     )
     project_id = db.Column(
         db.Integer, db.ForeignKey('project.id', ondelete='SET NULL')
+    )
+    category_id = db.Column(
+        db.Integer, db.ForeignKey('category.id', ondelete='SET NULL')
     )
 
     # Fields coming from the Bunq API
@@ -403,6 +427,23 @@ class File(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     filename = db.Column(db.String(255), index=True)
     mimetype = db.Column(db.String(255))
+
+
+class Category(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    subproject_id = db.Column(
+        db.Integer, db.ForeignKey('subproject.id', ondelete='CASCADE')
+    )
+    project_id = db.Column(
+        db.Integer, db.ForeignKey('project.id', ondelete='CASCADE')
+    )
+    name = db.Column(db.String(120), index=True)
+    payments = db.relationship('Payment', backref='category', lazy='dynamic')
+
+    # Category names must be unique within a (sub)project
+    __table_args__ = (
+        db.UniqueConstraint('project_id', 'subproject_id', 'name'),
+    )
 
 
 @login_manager.user_loader
