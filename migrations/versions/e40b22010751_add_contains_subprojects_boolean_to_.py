@@ -1,7 +1,7 @@
 """add "contains_subprojects" boolean to project model
 
 Revision ID: e40b22010751
-Revises: 
+Revises: 0c93a052495d
 Create Date: 2020-05-28 18:00:37.349682
 
 """
@@ -11,7 +11,7 @@ import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = 'e40b22010751'
-down_revision = None
+down_revision = '0c93a052495d'
 branch_labels = None
 depends_on = None
 
