@@ -16,6 +16,7 @@ from app.email import send_invite
 from app.forms import PaymentForm, TransactionAttachmentForm, RemoveAttachmentForm
 from app.models import Payment, Project, Subproject, IBAN, User, File
 
+from sqlalchemy.exc import IntegrityError
 from bunq.sdk.context.bunq_context import ApiContext
 from bunq.sdk.context.api_environment_type import ApiEnvironmentType
 from bunq.sdk.model.generated import endpoint
@@ -438,14 +439,24 @@ def add_user(email, admin=False, project_id=0, subproject_id=0):
         send_invite(user)
 
 # Process filled in payment form
-def process_payment_form(request, project_id=0, subproject_id=0):
+def process_payment_form(request, project_or_subproject, is_subproject):
     payment_form = PaymentForm(prefix="payment_form")
+    payment_form.category_id.choices = project_or_subproject.make_category_select_options()
+
     if payment_form.validate_on_submit():
         # Get data from the form
         new_payment_data = {}
         for f in payment_form:
             if f.type != 'SubmitField' and f.type != 'CSRFTokenField':
-                new_payment_data[f.short_name] = f.data
+                # If the category is edited to be empty again, make
+                # sure to set it to None instead of ''
+                if f.short_name == 'category_id':
+                    if f.data == '':
+                        new_payment_data[f.short_name] = None
+                    else:
+                        new_payment_data[f.short_name] = f.data
+                else:
+                    new_payment_data[f.short_name] = f.data
 
         try:
             # Update if the payment already exists
@@ -465,43 +476,46 @@ def process_payment_form(request, project_id=0, subproject_id=0):
                 '<span class="text-red">Transactie bijwerken mislukt<span>'
             )
 
-        if subproject_id:
+        if is_subproject:
             # redirect back to clear form data
             return redirect(
                 url_for(
                     'subproject',
-                    project_id=project_id,
-                    subproject_id=subproject_id
+                    project_id=project_or_subproject.project_id,
+                    subproject_id=project_or_subproject.id
                 )
             )
 
         return redirect(
             url_for(
                 'project',
-                project_id=project_id,
+                project_id=project_or_subproject.id,
             )
         )
     else:
         flash_form_errors(payment_form, request)
 
 # Populate the payment forms which allows the user to edit it
-def create_payment_forms(payments, project_owner):
+def create_payment_forms(payments, project_owner, select_options):
     payment_forms = {}
     for payment in payments:
+        # If a payment already contains a category, retrieve it to set
+        # this category as the selected category in the drop-down menu
+        selected_category = ''
+        if payment.category:
+            selected_category = payment.category.id
+        payment_form = PaymentForm(prefix='payment_form', **{
+            'short_user_description': payment.short_user_description,
+            'long_user_description': payment.long_user_description,
+            'id': payment.id,
+            'category_id': selected_category
+        })
+
+        payment_form.category_id.choices = select_options
+
         # Only allow project owners to hide a transaction
         if project_owner:
-            payment_form = PaymentForm(prefix='payment_form', **{
-                'short_user_description': payment.short_user_description,
-                'long_user_description': payment.long_user_description,
-                'hidden': payment.hidden,
-                'id': payment.id
-            })
-        else:
-            payment_form = PaymentForm(prefix='payment_form', **{
-                'short_user_description': payment.short_user_description,
-                'long_user_description': payment.long_user_description,
-                'id': payment.id
-            })
+            payment_form.hidden = payment.hidden
 
         payment_forms[payment.id] = payment_form
 

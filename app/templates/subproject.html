@@ -49,6 +49,7 @@
               <h3 class="text-center totaal">totaal {{ amounts.awarded_str }}</h3>
 
               {% if project_owner %}
+                <br>
                 <!-- Button trigger modal -->
                 <div class="text-center">
                   <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#subproject-bewerken">
@@ -68,6 +69,29 @@
                           </button>
                         </div>
                         <div class="modal-body">
+                          <b>Categoriën</b>
+                          <br>
+                          <br>
+                          <!-- Button trigger modal -->
+                          <button type="button" class="btn button-poen-small bg-grey" data-toggle="modal" data-target="#categorie-toevoegen">
+                            categorie toevoegen
+                          </button>
+                          <br>
+                          <br>
+
+                          {% for category_form in category_forms %}
+                            <!-- Button trigger modal -->
+                            <div>
+                              <button type="button" class="btn button-poen-small bg-grey-blue" data-toggle="modal" data-target="#categorie-bewerken-{{ category_form.id.data }}">
+                                categorie bewerken
+                              </button>
+                            {{ category_form.name.data }}
+                            </div>
+                            <br>
+                          {% endfor %}
+
+                          <hr>
+
                           <div>
                             {{ subproject_form.csrf_token }}
 
@@ -272,6 +296,7 @@
                   <th class="d-none">betaalomschrijving</th>
                   <th class="d-none">lange omschrijving</th>
                   <th class="d-none">saldo na boeking €</th>
+                  <th class="d-none">categorie</th>
                   {# Hidden column used to generate the detailed view #}
                   <th data-force-hide="true" class="d-none">detail-view</th>
                 </tr>
@@ -349,6 +374,11 @@
                         </div>
                       </td>
                       <td>
+                        <div class="cell">
+                          {{ payment.category.name }}
+                        </div>
+                      </td>
+                      <td>
                         <div id="detail-{{ payment.id }}">
                           <div class="detail-row">
                             <div class="row">
@@ -396,15 +426,24 @@
                                 {{ payment.counterparty_alias_name }}
                                 <br>
                                 <br>
-                                <b>Waarvoor?</b>
+
+                                <b>Categorie</b>
                                 <br>
-                                <p>
-                                  {% if payment.long_user_description %}
-                                    {{ payment.long_user_description }}
-                                  {% else %}
-                                    <i>er is door de initiatiefnemer nog geen beschrijving van deze transactie toegevoegd</i>
-                                  {% endif %}
-                                </p>
+                                {{ payment.category.name }}
+                                <br>
+                                <br>
+
+                                <b>Omschrijving</b>
+                                <br>
+                                {% if payment.long_user_description %}
+                                  {{ payment.long_user_description }}
+                                {% elif payment.short_user_description %}
+                                  {{ payment.short_user_description }}
+                                {% else %}
+                                  <i>er is door de initiatiefnemer nog geen beschrijving van deze transactie toegevoegd</i>
+                                {% endif %}
+                                <br>
+                                <br>
 
                                 {% if payment.attachments.all() %}
                                   <br>
@@ -471,6 +510,103 @@
       </div>
     </div>
   </div>
+
+  <!-- Modal for 'Categorie toevoegen' -->
+  <div class="modal fade" id="categorie-toevoegen" tabindex="-1" role="dialog" aria-labelledby="categorieToevoegenLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <form method="POST">
+          <div class="modal-header">
+            <h5 class="modal-title" id="categorieToevoegenLabel">Categorie Toevoegen</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Annuleren">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            {{ category_form.subproject_id }}
+            {{ category_form.project_id }}
+            <div>
+              {{ category_form.csrf_token }}
+
+              {{ category_form.name }}
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuleren</button>
+            {{ category_form.submit }}
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  {% for category_form in category_forms %}
+    <!-- Modal for categorie bewerken -->
+    <div class="modal fade" id="categorie-bewerken-{{ category_form.id.data }}" tabindex="-1" role="dialog" aria-labelledby="categorieBewerkenLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <form method="POST">
+            <div class="modal-header">
+              <h5 class="modal-title" id="categorieBewerkenLabel">Categorie Bewerken</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Annuleren">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <div>
+                {{ category_form.csrf_token }}
+
+                {% for f in category_form %}
+                  {% if f.widget.input_type != 'hidden' and f.widget.input_type != 'submit' %}
+                    <div>
+                      {{ f }}
+                      {{ f.label }}
+                    </div>
+                  {% endif %}
+                {% endfor %}
+              </div>
+            </div>
+            <div class="modal-footer">
+              {{ category_form.id }}
+              {{ category_form.subproject_id }}
+              {{ category_form.project_id }}
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuleren</button>
+              <!-- Button trigger modal -->
+              <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#categorie-verwijder-{{ category_form.id.data }}">
+                Verwijderen
+              </button>
+
+              <!-- Modal -->
+              <div class="modal fade" id="categorie-verwijder-{{ category_form.id.data }}" tabindex="-1" role="dialog" aria-labelledby="categorieVerwijderLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <form method="POST">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="categorieVerwijderLabel">Categorie Verwijderen</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Annuleren">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                      </div>
+                      <div class="modal-body">
+                        <div>
+                          <p>Weet u zeker dat u categorie "<b>{{ category_form.name.data }}</b>" wilt verwijderen? Hiermee wordt deze categorie ook weggehaald bij alle transacties waar de categorie aan toegevoegd is!</p>
+                        </div>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuleren</button>
+                        {{ category_form.remove }}
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+              {{ category_form.submit }}
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
 
   {# We can't put the modal code next to the button code, because it doesn't seem to work in combination with Bootstrap Table's detail view #}
   {% if payment_forms %}

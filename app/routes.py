@@ -7,15 +7,16 @@ from flask_login import login_required, login_user, logout_user, current_user
 from app import app, db
 from app.forms import (
     ResetPasswordRequestForm, ResetPasswordForm, LoginForm, ProjectForm,
-    SubprojectForm, PaymentForm, TransactionAttachmentForm,
+    SubprojectForm, TransactionAttachmentForm,
     RemoveAttachmentForm, FunderForm, AddUserForm, EditAdminForm,
-    EditProjectOwnerForm, EditUserForm, EditProfileForm
+    EditProjectOwnerForm, EditUserForm, EditProfileForm, CategoryForm
 )
 from app.email import send_password_reset_email
 from app.models import (
-    User, Project, Subproject, Payment, UserStory, IBAN, File, Funder
+    User, Project, Subproject, Payment, UserStory, IBAN, File, Funder, Category
 )
 from app import util
+from app.categories import process_category_form
 from sqlalchemy.exc import IntegrityError
 
 from bunq.sdk.context.api_environment_type import ApiEnvironmentType
@@ -195,7 +196,7 @@ def index():
 
     # Populate the edit admin forms which allows the user to edit it
     edit_admin_forms = {}
-    for admin in User.query.filter_by(admin=True):
+    for admin in User.query.filter_by(admin=True).order_by('email'):
         edit_admin_forms[admin.email] = EditAdminForm(
             prefix="edit_admin_form", **{
                 'admin': admin.admin,
@@ -306,8 +307,8 @@ def index():
 
     # Save or update project
     # Somehow we need to repopulate the iban.choices with the same
-    # values as used when the form was generated for this project. I
-    # thought this should happen automatically.
+    # values as used when the form was generated for this project.
+    # Probably to validate if the selected value is valid.
     if util.form_in_request(project_form, request):
         if request.method == 'POST' and project_form.name.data:
             projects = Project.query.filter_by(id=project_form.id.data)
@@ -391,6 +392,12 @@ def index():
     else:
         util.flash_form_errors(project_form, request)
 
+    # Process filled in category form
+    category_form = ''
+    category_form_return = process_category_form(request)
+    if category_form_return:
+        return category_form_return
+
     # Retrieve data for each project
     project_data = []
     for project in Project.query.all():
@@ -447,6 +454,22 @@ def index():
                     project.iban, project.iban_name
                 )
 
+        # Populate the category forms which allows the user to
+        # edit it
+        category_forms = []
+        if not project.contains_subprojects:
+            for category in Category.query.filter_by(
+                    project_id=project.id).order_by('name'):
+                category_forms.append(
+                    CategoryForm(
+                        prefix="category_form", **{
+                            'id': category.id,
+                            'name': category.name,
+                            'project_id': project.id
+                        }
+                    )
+                )
+
         # Retrieve the amounts for this project
         amounts = util.calculate_project_amounts(project.id)
 
@@ -464,7 +487,9 @@ def index():
                 'bank_name': project.bank_name,
                 'amounts': amounts,
                 'form': form,
-                'contains_subprojects': project.contains_subprojects
+                'contains_subprojects': project.contains_subprojects,
+                'category_forms': category_forms,
+                'category_form': CategoryForm(prefix="category_form", **{'project_id': project.id})
             }
         )
 
@@ -577,7 +602,7 @@ def project(project_id):
     # Save subproject
     # Somehow we need to repopulate the iban.choices with the same
     # values as used when the form was generated for this
-    # subproject. I thought this should happen automatically.
+    # subproject. Probably to validate if the selected value is valid.
     if util.form_in_request(subproject_form, request):
         if request.method == 'POST' and subproject_form.name.data:
             subproject_form.iban.choices = project.make_select_options()
@@ -648,12 +673,16 @@ def project(project_id):
     transaction_attachment_form = ''
     remove_attachment_form = ''
     if project_owner and not project.contains_subprojects:
-        payment_form_return = util.process_payment_form(request, project.id)
+        payment_form_return = util.process_payment_form(request, project, is_subproject=False)
         if payment_form_return:
             return payment_form_return
 
         # Populate the payment forms which allows the user to edit it
-        payment_forms = util.create_payment_forms(project.payments, project_owner)
+        payment_forms = util.create_payment_forms(
+            project.payments,
+            project_owner,
+            project.make_category_select_options()
+        )
 
         # Process transaction attachment form
         transaction_attachment_form = TransactionAttachmentForm(
@@ -754,8 +783,8 @@ def subproject(project_id, subproject_id):
 
     # Update subproject
     # Somehow we need to repopulate the iban.choices with the same
-    # values as used when the form was generated for this subproject. I
-    # thought this should happen automatically.
+    # values as used when the form was generated for this subproject.
+    # Probably to validate if the selected value is valid.
     if util.form_in_request(subproject_form, request):
         if request.method == 'POST' and subproject_form.name.data:
             subproject_form.iban.choices = (
@@ -843,14 +872,39 @@ def subproject(project_id, subproject_id):
         )
 
     # Process filled in payment form
-    payment_form_return = util.process_payment_form(request, subproject.project.id, subproject.id)
+    payment_form_return = util.process_payment_form(request, subproject, is_subproject=True)
     if payment_form_return:
         return payment_form_return
 
     # Populate the payment forms which allows the user to edit it
     payment_forms = {}
     if project_owner or user_in_subproject:
-        payment_forms = util.create_payment_forms(subproject.payments, project_owner)
+        payment_forms = util.create_payment_forms(
+            subproject.payments,
+            project_owner,
+            subproject.make_category_select_options()
+        )
+
+    # Process filled in category form
+    category_form_return = process_category_form(request)
+    if category_form_return:
+        return category_form_return
+
+    # Populate the category forms which allows the user to
+    # edit it
+    category_forms = []
+    for category in Category.query.filter_by(
+            subproject_id=subproject.id).order_by('name'):
+        category_forms.append(
+            CategoryForm(
+                prefix="category_form", **{
+                    'id': category.id,
+                    'name': category.name,
+                    'subproject_id': subproject.id,
+                    'project_id': subproject.project.id
+                }
+            )
+        )
 
     amounts = util.calculate_subproject_amounts(subproject_id)
 
@@ -987,7 +1041,15 @@ def subproject(project_id, subproject_id):
         add_user_form=AddUserForm(prefix='add_user_form'),
         project_owner=project_owner,
         user_in_subproject=user_in_subproject,
-        timestamp=util.get_export_timestamp()
+        timestamp=util.get_export_timestamp(),
+        category_forms=category_forms,
+        category_form=CategoryForm(
+            prefix="category_form",
+            **{
+                'subproject_id': subproject.id,
+                'project_id': subproject.project.id
+            }
+        )
     )
 
 @app.route("/over", methods=['GET', 'POST'])
