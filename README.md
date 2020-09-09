@@ -5,6 +5,7 @@ Publish transactions of government subsidized projects
 ## Requirements
 [Docker Compose](https://docs.docker.com/compose/install/)
 
+
 ## Run
 - Clone or download this project from GitHub
 - In the `docker` directory create the files `secrets-db-name.txt`, `secrets-db-user.txt` and `secrets-db-password.txt` and add the database name, user and password (either new values if starting from scratch or existing if importing a database) on the first line of the corresponding file
@@ -47,6 +48,7 @@ Publish transactions of government subsidized projects
    - Reload Nginx: `sudo docker exec poen_nginx_1 nginx -s reload`
    - Reload uWSGI (only for production as development environment doesn't use uWSGI and automatically reloads changes): `touch uwsgi-touch-reload`
 
+
 ## Compile assets
 - Install all packages (only need to run once after installation or when you change packages): `sudo docker exec poen_node_1 yarn`
 
@@ -57,15 +59,16 @@ Development
 - Build CSS/JS to static/dist directory (with map files): `sudo docker exec poen_node_1 yarn dev`
 - Automatically build CSS/JS when a file changes (simply refresh the page in your browser after a change): `sudo docker exec poen_node_1 yarn watch`
 
+
 ## CLI
 To access the CLI of the app run `sudo docker exec -it poen_app_1 bash` and run for example `flask` and `flask database` to see the available commands. Here are some CLI commands:
 
-### Database commands
 
+### Database commands
 - `flask database add-user --email <EMAIL_ADDRESS> --admin` adds an admin user (an admin user can create projects on openpoen.nl and can edit a project to connect it to a Bunq bank account)
 
-### Database migration commands
 
+### Database migration commands
 Use these after the database is in production and you need to change the database model.
 
 - After changing the model: `flask db migrate -m <message>`
@@ -74,8 +77,11 @@ Use these after the database is in production and you need to change the databas
 
 
 ### Bunq commands
-
 - `flask bunq get-new-payments-all` gets all payments from all IBANs belonging to all projects
+
 
 ## To enter the database
    - `sudo docker exec -it poen_db_1 psql -U <DB_USER> <DB_NAME>` retrieve database user and name from `docker/secrets-db-user.txt` and `docker/secrets-db-name.txt`
+
+## Database architecture
+To open the database architecture file `open_poen_architecture.drawio` open it via https://app.diagrams.net/ or via the [desktop app](https://github.com/jgraph/drawio-desktop)
