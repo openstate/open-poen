@@ -399,6 +399,8 @@ def index():
         return category_form_return
 
     # Retrieve data for each project
+    total_awarded = 0
+    total_spent = 0
     project_data = []
     for project in Project.query.all():
         project_owner = False
@@ -472,6 +474,8 @@ def index():
 
         # Retrieve the amounts for this project
         amounts = util.calculate_project_amounts(project.id)
+        total_awarded += amounts['awarded']
+        total_spent += amounts['spent']
 
         project_data.append(
             {
@@ -492,8 +496,6 @@ def index():
                 'category_form': CategoryForm(prefix="category_form", **{'project_id': project.id})
             }
         )
-
-    total_awarded, total_spent = util.calculate_total_amounts()
 
     return render_template(
         'index.html',
