@@ -6,29 +6,28 @@ import getpass
 GIT_REPO = 'open-poen'
 
 # Path of the directory
-DIR = '/home/projects/%s' % (GIT_REPO)
+DIR = '/home/projects/%s-fryslan' % (GIT_REPO)
 
 # Container used to compile the assets
-NODE_CONTAINER = 'poen_node_1'
+NODE_CONTAINER = 'openpoenfryslan_node_1'
 
 # App container
-APP_CONTAINER = 'poen_app_1'
+APP_CONTAINER = 'openpoenfryslan_app_1'
 
 # Server name
 SERVER = 'Oxygen'
 
 
 @task
-def deploy_poen(c):
+def deploy_fryslan(c):
     sudo_pass = getpass.getpass("Enter your sudo password on %s: " % SERVER)
     config = Config(overrides={'sudo': {'password': sudo_pass}})
     c = Connection(SERVER, config=config)
 
     # Pull from GitHub
     c.run(
-        'cd %s && git pull git@github.com:openstate/%s.git' % (
-            DIR,
-            GIT_REPO
+        'cd %s && git pull' % (
+            DIR
         )
     )
 
