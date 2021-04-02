@@ -1,7 +1,7 @@
 Beste mevrouw of meneer,
 
 
-Bij dezen nodigen wij u graag uit om deel te nemen aan het platform 'Open Poen'. Dit is het platform waar burgers laagdrempelig subisidies kunnen ontvangen en hun uitgaven publiekelijk kunnen delen en verantwoorden.
+Bij dezen nodigen wij u graag uit om deel te nemen aan het platform 'Open Poen Fryslân'. Dit is het platform waar burgers laagdrempelig subisidies kunnen ontvangen en hun uitgaven publiekelijk kunnen delen en verantwoorden.
 
 ** Hoe kan ik inloggen? **
 Er is al een account voor u aangemaakt met het e-mailadres {{ user.email }}. Om in te loggen hoeft u alleen nog een wachtwoord aan te maken voor uw account op volgende pagina:
@@ -11,4 +11,4 @@ Deze pagina komt over 24 uur te vervallen, dus maak alvast een account aan. Moch
 
 
 Met vriendelijke groet,
-openpoen.nl
+fryslan.openpoen.nl
