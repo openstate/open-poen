@@ -11,4 +11,4 @@ Deze pagina komt over 24 uur te vervallen, dus maak alvast een account aan. Moch
 
 
 Met vriendelijke groet,
-openpoen.nl
+{{ server_name }}
