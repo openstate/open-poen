@@ -23,6 +23,7 @@ class Config(object):
     # The server name is also used as the oAuth Redirect URL
     # Please note to set your server name in nginx too, see docker/nginx[-dev]/conf.d/default.conf
     SERVER_NAME = 'openpoen.nl'
+    WEBSITE_NAME = 'Open Poen'
     PREFERRED_URL_SCHEME = 'https'
     FORCE_HOST_FOR_REDIRECTS = 'openpoen.nl'
     USE_SESSION_FOR_NEXT = True
