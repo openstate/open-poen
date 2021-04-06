@@ -6,15 +6,16 @@ $navbar-dark-toggler-icon-bg: none;
 $navbar-light-toggler-icon-bg: none;
 
 // Colors
-$blue-dark: #000059;
-$blue: #265ed4;
-$blue-light: #33c1ea;
+$blue-dark: #244994;
+$blue: #1d60aa;
+$blue-light: #009bdf;
 
-$green-dark: #008786;
-$green: #4dabab;
-$green-light: #a6d5d5;
+// 'green' is red in Fryslan theme
+$green-dark: #91002d;
+$green: #aa0063;
+$green-light: lighten(#c73326, 50%);
 
-$red: #b82466;
+$red: #c73326;
 
 $grey: #e9eef1;
 $grey-light: #f0f3f5;

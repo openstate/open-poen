@@ -1,3 +1,26 @@
+.btn-info {
+  background-color: $blue;
+  border-color: $blue-dark;
+
+  &:hover {
+    background-color: lighten($blue, 10%);
+    border-color: lighten($blue-dark, 10%);
+  }
+
+  &:focus, &:active {
+    background-color: $blue-dark !important;
+    border-color: lighten($blue-dark, 5%) !important;
+  }
+}
+
+.btn-danger {
+  background-color: $red;
+
+  &:hover {
+    background-color: lighten($red, 10%);
+  }
+}
+
 .button-poen {
   border-radius: 999px;
   padding: 20px 30px;
