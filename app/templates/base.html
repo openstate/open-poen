@@ -93,6 +93,9 @@
 
   <footer>
     <div class="text-center">
+      <p>
+        {{ footer|safe }}
+      </p>
       <a href="/">
         <img class="logo-footer img-fluid" src="{{ url_for('static', filename='images/Open-Poen-Logo-Amsterdam.svg') }}" alt="Open Poen Amsterdam logo">
       </a>

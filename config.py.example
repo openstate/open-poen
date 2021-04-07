@@ -31,6 +31,9 @@ class Config(object):
     # Uploads can be 20MB max
     MAX_CONTENT_LENGTH = 20 * 1024 * 1024
 
+    # (Contact) info to display in the footer
+    FOOTER = ''
+
     BABEL_DEFAULT_LOCALE = 'nl'
     TZ = pytz.timezone('Europe/Amsterdam')
 
