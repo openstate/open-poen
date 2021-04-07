@@ -47,7 +47,7 @@ def before_request():
     # be logged out when it tries to make a new request.
     if current_user.is_authenticated and not current_user.is_active():
         flash(
-            '<span class="text-red">Deze gebruiker is niet meer '
+            '<span class="text-default-red">Deze gebruiker is niet meer '
             'actief</span>'
         )
         logout_user()
@@ -59,7 +59,7 @@ def before_request():
         if (not current_user.first_name
                 or not current_user.last_name or not current_user.biography):
             flash(
-                '<span class="text-red">Sommige velden in uw profiel zijn nog '
+                '<span class="text-default-red">Sommige velden in uw profiel zijn nog '
                 'niet ingevuld. Vul deze in om verder te kunnen gaan.</span>'
             )
             return redirect(url_for('profile'))
@@ -89,7 +89,7 @@ def index():
             )
         except Exception as e:
             flash(
-                '<span class="text-red">Bunq account koppelen aan het project '
+                '<span class="text-default-red">Bunq account koppelen aan het project '
                 ' is mislukt. Probeer het later nog een keer of neem contact '
                 'op met <a href="mailto:info@openpoen.nl>info@openpoen.nl</a>.'
             )
@@ -143,7 +143,7 @@ def index():
                         util.get_all_monetary_account_active_ibans(project.id)
 
                         flash(
-                            '<span class="text-green">Bunq account succesvol '
+                            '<span class="text-default-green">Bunq account succesvol '
                             'gekoppeld aan project "%s". De transacties '
                             'worden nu op de achtergrond binnengehaald. '
                             'Bewerk het nieuwe project om aan te geven welk '
@@ -155,7 +155,7 @@ def index():
                         )
                     else:
                         flash(
-                            '<span class="text-red">Bunq account koppelen aan '
+                            '<span class="text-default-red">Bunq account koppelen aan '
                             'het project is mislukt. Probeer het later nog '
                             'een keer of neem contact op met '
                             '<a href="mailto:info@openpoen.nl>info@openpoen.nl'
@@ -187,7 +187,7 @@ def index():
         if len(admins.all()):
             admins.update(new_admin_data)
             db.session.commit()
-            flash('<span class="text-green">gebruiker is bijgewerkt</span>')
+            flash('<span class="text-default-green">gebruiker is bijgewerkt</span>')
 
         # redirect back to clear form data
         return redirect(url_for('index'))
@@ -239,7 +239,7 @@ def index():
                 )
 
             db.session.commit()
-            flash('<span class="text-green">gebruiker is bijgewerkt</span>')
+            flash('<span class="text-default-green">gebruiker is bijgewerkt</span>')
 
         # redirect back to clear form data
         return redirect(url_for('index'))
@@ -276,7 +276,7 @@ def index():
         try:
             util.add_user(**new_user_data)
             flash(
-                '<span class="text-green">"%s" is uitgenodigd als admin of '
+                '<span class="text-default-green">"%s" is uitgenodigd als admin of '
                 'project owner (of toegevoegd als admin of project owner als de '
                 'gebruiker al bestond)' % (
                     new_user_data['email']
@@ -298,7 +298,7 @@ def index():
         Project.query.filter_by(id=project_form.id.data).delete()
         db.session.commit()
         flash(
-            '<span class="text-green">Project "%s" is verwijderd</span>' % (
+            '<span class="text-default-green">Project "%s" is verwijderd</span>' % (
                 project_form.name.data
             )
         )
@@ -357,7 +357,7 @@ def index():
                 db.session.commit()
 
                 flash(
-                    '<span class="text-green">Project "%s" is '
+                    '<span class="text-default-green">Project "%s" is '
                     'bijgewerkt</span>' % (
                         new_project_data['name']
                     )
@@ -371,7 +371,7 @@ def index():
                 db.session.add(project)
                 db.session.commit()
                 flash(
-                    '<span class="text-green">Project "%s" is '
+                    '<span class="text-default-green">Project "%s" is '
                     'toegevoegd</span>' % (
                         new_project_data['name']
                     )
@@ -380,7 +380,7 @@ def index():
             db.session().rollback()
             app.logger.error(repr(e))
             flash(
-                '<span class="text-red">Project toevoegen/bijwerken mislukt: '
+                '<span class="text-default-red">Project toevoegen/bijwerken mislukt: '
                 'naam "%s" en/of IBAN "%s" bestaan al, kies een andere naam '
                 'en/of IBAN<span>' % (
                     new_project_data['name'],
@@ -543,7 +543,7 @@ def project(project_id):
         Funder.query.filter_by(id=funder_form.id.data).delete()
         db.session.commit()
         flash(
-            '<span class="text-green">Sponsor "%s" is verwijderd</span>' % (
+            '<span class="text-default-green">Sponsor "%s" is verwijderd</span>' % (
                 funder_form.name.data
             )
         )
@@ -563,7 +563,7 @@ def project(project_id):
             funders.update(new_funder_data)
             db.session.commit()
             flash(
-                '<span class="text-green">Sponsor "%s" is '
+                '<span class="text-default-green">Sponsor "%s" is '
                 'bijgewerkt</span>' % (
                     new_funder_data['name']
                 )
@@ -575,7 +575,7 @@ def project(project_id):
             db.session.add(funder)
             db.session.commit()
             flash(
-                '<span class="text-green">Sponsor "%s" is '
+                '<span class="text-default-green">Sponsor "%s" is '
                 'toegevoegd</span>' % (
                     new_funder_data['name']
                 )
@@ -639,7 +639,7 @@ def project(project_id):
                 ).update({'subproject_id': subproject.id})
                 db.session.commit()
             flash(
-                '<span class="text-green">Subproject "%s" is '
+                '<span class="text-default-green">Subproject "%s" is '
                 'toegevoegd</span>' % (
                     new_subproject_data['name']
                 )
@@ -648,7 +648,7 @@ def project(project_id):
             db.session().rollback()
             app.logger.error(repr(e))
             flash(
-                '<span class="text-red">Subproject toevoegen mislukt: naam '
+                '<span class="text-default-red">Subproject toevoegen mislukt: naam '
                 '"%s" en/of IBAN "%s" bestaan al, kies een andere naam en/of '
                 'IBAN<span>' % (
                     new_subproject_data['name'],
@@ -771,7 +771,7 @@ def subproject(project_id, subproject_id):
         Subproject.query.filter_by(id=subproject_form.id.data).delete()
         db.session.commit()
         flash(
-            '<span class="text-green">Subproject "%s" is verwijderd</span>' % (
+            '<span class="text-default-green">Subproject "%s" is verwijderd</span>' % (
                 subproject_form.name.data
             )
         )
@@ -828,7 +828,7 @@ def subproject(project_id, subproject_id):
                 subprojects.update(new_subproject_data)
                 db.session.commit()
                 flash(
-                    '<span class="text-green">Subproject "%s" is '
+                    '<span class="text-default-green">Subproject "%s" is '
                     'bijgewerkt</span>' % (
                         new_subproject_data['name']
                     )
@@ -837,7 +837,7 @@ def subproject(project_id, subproject_id):
             db.session().rollback()
             app.logger.error(repr(e))
             flash(
-                '<span class="text-red">Subproject bijwerken mislukt: naam '
+                '<span class="text-default-red">Subproject bijwerken mislukt: naam '
                 '"%s" en/of IBAN "%s" bestaan al, kies een andere naam en/of '
                 'IBAN<span>' % (
                     new_subproject_data['name'],
@@ -944,7 +944,7 @@ def subproject(project_id, subproject_id):
                 )
 
             db.session.commit()
-            flash('<span class="text-green">gebruiker is bijgewerkt</span>')
+            flash('<span class="text-default-green">gebruiker is bijgewerkt</span>')
 
         # redirect back to clear form data
         return redirect(
@@ -983,7 +983,7 @@ def subproject(project_id, subproject_id):
         try:
             util.add_user(**new_user_data)
             flash(
-                '<span class="text-green">"%s" is uitgenodigd als initiatiefnemer '
+                '<span class="text-default-green">"%s" is uitgenodigd als initiatiefnemer '
                 '(of toegevoegd als initiatiefnemer als de gebruiker al '
                 'bestond)' % (
                     new_user_data['email']
@@ -1075,7 +1075,7 @@ def reset_wachtwoord_verzoek():
         if user:
             send_password_reset_email(user)
         flash(
-            '<span class="text-green">Er is een e-mail verzonden met '
+            '<span class="text-default-green">Er is een e-mail verzonden met '
             'instructies om het wachtwoord te veranderen</span>'
         )
         return redirect(url_for('login'))
@@ -1091,7 +1091,7 @@ def reset_wachtwoord(token):
     if form.validate_on_submit():
         user.set_password(form.Wachtwoord.data)
         db.session.commit()
-        flash('<span class="text-green">Uw wachtwoord is aangepast</span>')
+        flash('<span class="text-default-green">Uw wachtwoord is aangepast</span>')
         return redirect(url_for('login'))
     return render_template('reset-wachtwoord.html', form=form)
 
@@ -1106,7 +1106,7 @@ def login():
         user = User.query.filter_by(email=form.email.data).first()
         if user is None or not user.check_password(form.Wachtwoord.data):
             flash(
-                '<span class="text-red">Fout e-mailadres of wachtwoord</span>'
+                '<span class="text-default-red">Fout e-mailadres of wachtwoord</span>'
             )
             return(redirect(url_for('login')))
         login_user(user)
@@ -1143,7 +1143,7 @@ def profile():
         if len(users.all()):
             users.update(new_profile_data)
             db.session.commit()
-            flash('<span class="text-green">gebruiker is bijgewerkt</span>')
+            flash('<span class="text-default-green">gebruiker is bijgewerkt</span>')
 
         # redirect back to clear form data
         return redirect(
@@ -1169,7 +1169,7 @@ def profile():
 @app.errorhandler(413)
 def request_entity_too_large(error):
     flash(
-        '<span class="text-red">Het verstuurde bestand is te groot. Deze mag '
+        '<span class="text-default-red">Het verstuurde bestand is te groot. Deze mag '
         'maximaal %sMB zijn.</span>' % (
             app.config['MAX_CONTENT_LENGTH'] / 1024 / 1024
         )
