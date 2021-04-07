@@ -42,7 +42,7 @@ def process_category_form(request):
         Category.query.filter_by(id=category_form.id.data).delete()
         db.session.commit()
         flash(
-            '<span class="text-green">Categorie "%s" is verwijderd</span>' % (
+            '<span class="text-default-green">Categorie "%s" is verwijderd</span>' % (
                 category_form.name.data
             )
         )
@@ -55,7 +55,7 @@ def process_category_form(request):
             category.update({'name': category_form.name.data})
             db.session.commit()
             flash(
-                '<span class="text-green">Categorie is bijgewerkt</span>'
+                '<span class="text-default-green">Categorie is bijgewerkt</span>'
             )
         else:
             try:
@@ -72,14 +72,14 @@ def process_category_form(request):
                 db.session.add(category)
                 db.session.commit()
                 flash(
-                    '<span class="text-green">Categorie '
+                    '<span class="text-default-green">Categorie '
                     f'{category_form.name.data} is toegevoegd</span>'
                 )
             except IntegrityError as e:
                 db.session().rollback()
                 app.logger.error(repr(e))
                 flash(
-                    '<span class="text-red">Categorie toevoegen mislukt: naam '
+                    '<span class="text-default-red">Categorie toevoegen mislukt: naam '
                     f'"{category_form.name.data}" bestaat al, kies een '
                     'andere naam<span>'
                 )
