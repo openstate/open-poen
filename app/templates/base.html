@@ -65,7 +65,8 @@
     <div id="navbar" class="collapse navbar-collapse">
       {% set menu = [
           (url_for('index'), 'Home'),
-          (url_for('over'), 'Over')
+          (url_for('over'), 'Over'),
+          (url_for('meest_gestelde_vragen'), 'Meest gestelde vragen')
       ] %}
 
       {% if current_user.is_authenticated %}

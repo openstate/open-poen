@@ -1061,10 +1061,17 @@ def subproject(project_id, subproject_id):
         )
     )
 
-@app.route("/over", methods=['GET', 'POST'])
+@app.route("/over", methods=['GET'])
 def over():
     return render_template(
         'over.html',
+        footer=app.config['FOOTER']
+    )
+
+@app.route("/meest-gestelde-vragen", methods=['GET'])
+def meest_gestelde_vragen():
+    return render_template(
+        'meest-gestelde-vragen.html',
         footer=app.config['FOOTER']
     )
 
