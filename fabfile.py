@@ -19,7 +19,7 @@ SERVER = 'Oxygen'
 
 
 @task
-def deploy_fryslan(c):
+def deploy_corona(c):
     sudo_pass = getpass.getpass("Enter your sudo password on %s: " % SERVER)
     config = Config(overrides={'sudo': {'password': sudo_pass}})
     c = Connection(SERVER, config=config)
