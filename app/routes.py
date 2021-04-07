@@ -499,6 +499,7 @@ def index():
 
     return render_template(
         'index.html',
+        footer=app.config['FOOTER'],
         project_data=project_data,
         total_awarded_str=util.human_format(total_awarded),
         total_spent_str=util.human_format(total_spent),
@@ -519,7 +520,8 @@ def project(project_id):
 
     if not project:
         return render_template(
-            '404.html'
+            '404.html',
+            footer=app.config['FOOTER']
         )
 
     # A project owner is either an admin or a user that is part of the
@@ -532,7 +534,8 @@ def project(project_id):
 
     if project.hidden and not project_owner:
         return render_template(
-            '404.html'
+            '404.html',
+            footer=app.config['FOOTER']
         )
 
     # Process filled in funder form
@@ -720,6 +723,7 @@ def project(project_id):
 
     return render_template(
         'project.html',
+        footer=app.config['FOOTER'],
         project=project,
         amounts=amounts,
         payments=payments,
@@ -742,7 +746,8 @@ def subproject(project_id, subproject_id):
 
     if not subproject:
         return render_template(
-            '404.html'
+            '404.html',
+            footer=app.config['FOOTER']
         )
 
     # Check if the user is logged in and is part of this subproject
@@ -760,7 +765,8 @@ def subproject(project_id, subproject_id):
 
     if subproject.hidden and not project_owner:
         return render_template(
-            '404.html'
+            '404.html',
+            footer=app.config['FOOTER']
         )
 
     # Process filled in subproject form
@@ -1033,6 +1039,7 @@ def subproject(project_id, subproject_id):
 
     return render_template(
         'subproject.html',
+        footer=app.config['FOOTER'],
         subproject=subproject,
         amounts=amounts,
         subproject_form=subproject_form,
@@ -1058,6 +1065,7 @@ def subproject(project_id, subproject_id):
 def over():
     return render_template(
         'over.html',
+        footer=app.config['FOOTER']
     )
 
 @app.route('/upload/<filename>')
@@ -1079,7 +1087,11 @@ def reset_wachtwoord_verzoek():
             'instructies om het wachtwoord te veranderen</span>'
         )
         return redirect(url_for('login'))
-    return render_template('reset-wachtwoord-verzoek.html', form=form)
+    return render_template(
+        'reset-wachtwoord-verzoek.html',
+        footer=app.config['FOOTER'],
+        form=form
+    )
 
 
 @app.route("/reset-wachtwoord/<token>", methods=['GET', 'POST'])
@@ -1093,7 +1105,11 @@ def reset_wachtwoord(token):
         db.session.commit()
         flash('<span class="text-default-green">Uw wachtwoord is aangepast</span>')
         return redirect(url_for('login'))
-    return render_template('reset-wachtwoord.html', form=form)
+    return render_template(
+        'reset-wachtwoord.html',
+        footer=app.config['FOOTER'],
+        form=form
+    )
 
 
 @app.route("/login", methods=['GET', 'POST'])
@@ -1111,7 +1127,11 @@ def login():
             return(redirect(url_for('login')))
         login_user(user)
         return redirect(url_for('index'))
-    return render_template('login.html', form=form)
+    return render_template(
+        'login.html',
+        footer=app.config['FOOTER'],
+        form=form
+    )
 
 
 @app.route("/logout")
@@ -1163,7 +1183,11 @@ def profile():
             'biography': current_user.biography
         }
     )
-    return render_template('profiel.html', edit_profile_form=edit_profile_form)
+    return render_template(
+        'profiel.html',
+        footer=app.config['FOOTER'],
+        edit_profile_form=edit_profile_form
+    )
 
 
 @app.errorhandler(413)
