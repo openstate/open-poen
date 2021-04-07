@@ -399,7 +399,7 @@ def flash_form_errors(form, request):
     for f in form:
         for error in f.errors:
             flash(
-                '<span class="text-red">%s: %s</span>' % (f.label, error)
+                '<span class="text-default-red">%s: %s</span>' % (f.label, error)
             )
 
 
@@ -467,13 +467,13 @@ def process_payment_form(request, project_or_subproject, is_subproject):
                 payments.update(new_payment_data)
                 db.session.commit()
                 flash(
-                    '<span class="text-green">Transactie is bijgewerkt</span>'
+                    '<span class="text-default-green">Transactie is bijgewerkt</span>'
                 )
         except IntegrityError as e:
             db.session().rollback()
             app.logger.error(repr(e))
             flash(
-                '<span class="text-red">Transactie bijwerken mislukt<span>'
+                '<span class="text-default-red">Transactie bijwerken mislukt<span>'
             )
 
         if is_subproject:
@@ -577,7 +577,7 @@ def process_remove_attachment_form(remove_attachment_form, project_id=0, subproj
     if remove_attachment_form.remove.data:
         File.query.filter_by(id=remove_attachment_form.id.data).delete()
         db.session.commit()
-        flash('<span class="text-green">Media is verwijderd</span>')
+        flash('<span class="text-default-green">Media is verwijderd</span>')
 
         # redirect back to clear form data
         if subproject_id:
