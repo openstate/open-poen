@@ -6,8 +6,10 @@ from datetime import datetime
 from time import sleep
 from werkzeug.utils import secure_filename
 import json
+import jwt
 import locale
 import os
+import requests
 import socket
 import sys
 
@@ -23,6 +25,110 @@ from bunq.sdk.model.generated import endpoint
 
 sys.path.insert(0, abspath(join(dirname(__file__), '../tinker/tinker')))
 from libs.bunq_lib import BunqLib
+
+
+# Process Bunq OAuth callback (this will redirect to the project page)
+def process_bunq_oauth_callback(request, current_user):
+    base_url_token = 'https://api.oauth.bunq.com'
+    if app.config['BUNQ_ENVIRONMENT_TYPE'] == ApiEnvironmentType.SANDBOX:
+        base_url_token = 'https://api-oauth.sandbox.bunq.com'
+    authorization_code = ''
+    token = request.args.get('state')
+
+    # Check if JWT token is valid and retrieve info
+    token_info = ''
+    try:
+        token_info = jwt.decode(
+            token,
+            app.config['SECRET_KEY'],
+            algorithms='HS256'
+        )
+    except Exception as e:
+        flash(
+            '<span class="text-default-red">Bunq account koppelen aan het project '
+            ' is mislukt. Probeer het later nog een keer of neem contact '
+            'op met <a href="mailto:info@openpoen.nl>info@openpoen.nl</a>.'
+        )
+        app.logger.warn(
+            'Retrieved wrong token (used for retrieving Bunq '
+            'authorization code): %s' % e
+        )
+
+    if token_info:
+        print('2')
+        user_id = token_info['user_id']
+        project_id = token_info['project_id']
+        bank_name = token_info['bank_name']
+
+        # A project owner is either an admin or a user that is part
+        # of the project where this subproject belongs to
+        project_owner = False
+        project = Project.query.filter_by(id=project_id).first()
+        if current_user.is_authenticated and (
+            current_user.admin or project.has_user(current_user.id)
+        ):
+            project_owner = True
+
+        if project_owner:
+            # If authorization code, retrieve access token from Bunq
+            authorization_code = request.args.get('code')
+            print('3')
+            if authorization_code:
+                response = requests.post(
+                    '%s/v1/token?grant_type=authorization_code&code=%s'
+                    '&redirect_uri=https://%s/&client_id=%s'
+                    '&client_secret=%s' % (
+                        base_url_token,
+                        authorization_code,
+                        app.config['SERVER_NAME'],
+                        app.config['BUNQ_CLIENT_ID'],
+                        app.config['BUNQ_CLIENT_SECRET'],
+                    )
+                ).json()
+
+                # Add access token to the project in the database
+                if 'access_token' in response:
+                    bunq_access_token = response['access_token']
+                    project.set_bank_name(bank_name)
+                    project.set_bunq_access_token(bunq_access_token)
+                    db.session.commit()
+
+                    # Create Bunq API .conf file
+                    create_bunq_api_config(
+                        bunq_access_token, project.id
+                    )
+
+                    get_all_monetary_account_active_ibans(project.id)
+
+                    flash(
+                        '<span class="text-default-green">Bunq account succesvol '
+                        'gekoppeld aan project "%s". De transacties '
+                        'worden nu op de achtergrond binnengehaald. '
+                        'Bewerk het nieuwe project om aan te geven welk '
+                        'IBAN bij het project hoort. Maak nieuwe '
+                        'subprojecten aan en koppel ook daar de IBANs die '
+                        'daarbij horen.</span>' % (
+                            project.name
+                        )
+                    )
+                else:
+                    flash(
+                        '<span class="text-default-red">Bunq account koppelen aan '
+                        'het project is mislukt. Probeer het later nog '
+                        'een keer of neem contact op met '
+                        '<a href="mailto:info@openpoen.nl>info@openpoen.nl'
+                        '</a>.'
+                    )
+                    app.logger.error(
+                        'Retrieval of Bunq access token failed. Bunq '
+                        'Error: "%s". Bunq error description: "%s"' % (
+                            response['error'],
+                            response['error_description']
+                        )
+                    )
+
+        # redirect back to clear form data
+        return redirect(url_for('project', project_id=project.id))
 
 
 def create_bunq_api_config(bunq_access_token, project_id):

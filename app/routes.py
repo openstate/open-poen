@@ -16,7 +16,7 @@ from app.models import (
     User, Project, Subproject, Payment, UserStory, IBAN, File, Funder, Category
 )
 from app import util
-from app.categories import process_category_form
+from app.form_processing import process_category_form
 from sqlalchemy.exc import IntegrityError
 
 from bunq.sdk.context.api_environment_type import ApiEnvironmentType
@@ -27,7 +27,6 @@ from werkzeug.utils import secure_filename
 import os
 import jwt
 import re
-import requests
 
 
 # Add 'Cache-Control': 'private' header if users are logged in
@@ -67,110 +66,9 @@ def before_request():
 
 @app.route("/", methods=['GET', 'POST'])
 def index():
-    base_url_auth = ''
-    project_form = ''
-    # Process Bunq OAuth callback
-    base_url_auth = 'https://oauth.bunq.com'
-    base_url_token = 'https://api.oauth.bunq.com'
-    if app.config['BUNQ_ENVIRONMENT_TYPE'] == ApiEnvironmentType.SANDBOX:
-        base_url_auth = 'https://oauth.sandbox.bunq.com'
-        base_url_token = 'https://api-oauth.sandbox.bunq.com'
-    authorization_code = ''
+    # Process Bunq OAuth callback (this will redirect to the project page)
     if request.args.get('state'):
-        token = request.args.get('state')
-
-        # Check if JWT token is valid and retrieve info
-        token_info = ''
-        try:
-            token_info = jwt.decode(
-                token,
-                app.config['SECRET_KEY'],
-                algorithms='HS256'
-            )
-        except Exception as e:
-            flash(
-                '<span class="text-default-red">Bunq account koppelen aan het project '
-                ' is mislukt. Probeer het later nog een keer of neem contact '
-                'op met <a href="mailto:info@openpoen.nl>info@openpoen.nl</a>.'
-            )
-            app.logger.warn(
-                'Retrieved wrong token (used for retrieving Bunq '
-                'authorization code): %s' % e
-            )
-
-        if token_info:
-            user_id = token_info['user_id']
-            project_id = token_info['project_id']
-            bank_name = token_info['bank_name']
-
-            # A project owner is either an admin or a user that is part
-            # of the project where this subproject belongs to
-            project_owner = False
-            project = Project.query.filter_by(id=project_id).first()
-            if current_user.is_authenticated and (
-                current_user.admin or project.has_user(current_user.id)
-            ):
-                project_owner = True
-
-            if project_owner:
-                # If authorization code, retrieve access token from Bunq
-                authorization_code = request.args.get('code')
-                if authorization_code:
-                    response = requests.post(
-                        '%s/v1/token?grant_type=authorization_code&code=%s'
-                        '&redirect_uri=https://%s/&client_id=%s'
-                        '&client_secret=%s' % (
-                            base_url_token,
-                            authorization_code,
-                            app.config['SERVER_NAME'],
-                            app.config['BUNQ_CLIENT_ID'],
-                            app.config['BUNQ_CLIENT_SECRET'],
-                        )
-                    ).json()
-
-                    # Add access token to the project in the database
-                    if 'access_token' in response:
-                        bunq_access_token = response['access_token']
-                        project.set_bank_name(bank_name)
-                        project.set_bunq_access_token(bunq_access_token)
-                        db.session.commit()
-
-                        # Create Bunq API .conf file
-                        util.create_bunq_api_config(
-                            bunq_access_token, project.id
-                        )
-
-                        util.get_all_monetary_account_active_ibans(project.id)
-
-                        flash(
-                            '<span class="text-default-green">Bunq account succesvol '
-                            'gekoppeld aan project "%s". De transacties '
-                            'worden nu op de achtergrond binnengehaald. '
-                            'Bewerk het nieuwe project om aan te geven welk '
-                            'IBAN bij het project hoort. Maak nieuwe '
-                            'subprojecten aan en koppel ook daar de IBANs die '
-                            'daarbij horen.</span>' % (
-                                project.name
-                            )
-                        )
-                    else:
-                        flash(
-                            '<span class="text-default-red">Bunq account koppelen aan '
-                            'het project is mislukt. Probeer het later nog '
-                            'een keer of neem contact op met '
-                            '<a href="mailto:info@openpoen.nl>info@openpoen.nl'
-                            '</a>.'
-                        )
-                        app.logger.error(
-                            'Retrieval of Bunq access token failed. Bunq '
-                            'Error: "%s". Bunq error description: "%s"' % (
-                                response['error'],
-                                response['error_description']
-                            )
-                        )
-
-            # redirect back to clear form data
-            return redirect(url_for('index'))
+        return util.process_bunq_oauth_callback(request, current_user)
 
     # Process filled in edit admin form
     edit_admin_form = EditAdminForm(prefix="edit_admin_form")
@@ -205,64 +103,6 @@ def index():
             }
         )
 
-    # Process filled in edit project owner form
-    edit_project_owner_form = EditProjectOwnerForm(
-        prefix="edit_project_owner_form"
-    )
-
-    # Update project owner
-    if edit_project_owner_form.validate_on_submit():
-        edited_project_owner = User.query.filter_by(
-            id=edit_project_owner_form.id.data
-        )
-        new_project_owner_data = {}
-        remove_from_project = False
-        remove_from_project_id = 0
-        for f in edit_project_owner_form:
-            if f.type != 'SubmitField' and f.type != 'CSRFTokenField':
-                if f.short_name == 'remove_from_project' and f.data:
-                    remove_from_project = True
-                elif f.short_name == 'project_id' and f.data:
-                    remove_from_project_id = f.data
-                else:
-                    new_project_owner_data[f.short_name] = f.data
-
-        # Update if the project owner exists
-        if len(edited_project_owner.all()):
-            edited_project_owner.update(new_project_owner_data)
-            if remove_from_project:
-                # We need to get the user using '.first()' otherwise we
-                # can't remove the project because of garbage collection
-                edited_project_owner = edited_project_owner.first()
-                edited_project_owner.projects.remove(
-                    Project.query.get(remove_from_project_id)
-                )
-
-            db.session.commit()
-            flash('<span class="text-default-green">gebruiker is bijgewerkt</span>')
-
-        # redirect back to clear form data
-        return redirect(url_for('index'))
-    else:
-        util.flash_form_errors(edit_project_owner_form, request)
-
-    # Populate the edit project owner forms which allows the user to
-    # edit it
-    edit_project_owner_forms = {}
-    for project in Project.query.all():
-        temp_edit_project_owner_forms = {}
-        for project_owner in project.users:
-            temp_edit_project_owner_forms[project_owner.email] = (
-                EditProjectOwnerForm(
-                    prefix="edit_project_owner_form", **{
-                        'active': project_owner.active,
-                        'id': project_owner.id,
-                        'project_id': project.id
-                    }
-                )
-            )
-        edit_project_owner_forms[project.id] = temp_edit_project_owner_forms
-
     # Process filled in add user form
     add_user_form = AddUserForm(prefix="add_user_form")
 
@@ -293,110 +133,39 @@ def index():
     # Process filled in project form
     project_form = ProjectForm(prefix="project_form")
 
-    # Remove project
-    if project_form.remove.data:
-        Project.query.filter_by(id=project_form.id.data).delete()
-        db.session.commit()
-        flash(
-            '<span class="text-default-green">Project "%s" is verwijderd</span>' % (
-                project_form.name.data
-            )
-        )
-        # redirect back to clear form data
-        return redirect(url_for('index'))
-
-    # Save or update project
-    # Somehow we need to repopulate the iban.choices with the same
-    # values as used when the form was generated for this project.
-    # Probably to validate if the selected value is valid.
-    if util.form_in_request(project_form, request):
-        if request.method == 'POST' and project_form.name.data:
-            projects = Project.query.filter_by(id=project_form.id.data)
-            if len(projects.all()):
-                project_form.iban.choices = (
-                    projects.first().make_select_options()
-                )
-
+    # Save (i.e. create) project
     if project_form.validate_on_submit():
         new_project_data = {}
         for f in project_form:
             if f.type != 'SubmitField' and f.type != 'CSRFTokenField':
-                if f.short_name == 'iban':
-                    new_iban = None
-                    new_iban_name = None
-                    # New projects f.data is 'None', editing an existing
-                    # project with an IBAN to have no IBAN will make
-                    # f.data be ''
-                    if not f.data == '' and f.data != 'None':
-                        new_iban, new_iban_name = f.data.split(
-                            ' - ', maxsplit=1
-                        )
-                    new_project_data['iban'] = new_iban
-                    new_project_data['iban_name'] = new_iban_name
-                else:
-                    new_project_data[f.short_name] = f.data
+                new_project_data[f.short_name] = f.data
 
         try:
-            # Update if the project already exists
-            if len(projects.all()):
-                # If the IBAN changes, then link the correct payments
-                # to this project
-                project = projects.first()
-
-                # We don't allow editing of the 'contains_subprojects' value after a project is created
-                del new_project_data['contains_subprojects']
-
-                if project.iban != new_project_data['iban']:
-                    for payment in project.payments:
-                        payment.project_id = None
-                    Payment.query.filter_by(
-                        alias_value=new_project_data['iban']
-                    ).update({'project_id': project.id})
-
-                projects.update(new_project_data)
-                db.session.commit()
-
-                flash(
-                    '<span class="text-default-green">Project "%s" is '
-                    'bijgewerkt</span>' % (
-                        new_project_data['name']
-                    )
+            # IBAN can't be set during initial creation of a new
+            # project so remove it
+            new_project_data.pop('iban')
+            project = Project(**new_project_data)
+            db.session.add(project)
+            db.session.commit()
+            flash(
+                '<span class="text-default-green">Project "%s" is '
+                'toegevoegd</span>' % (
+                    new_project_data['name']
                 )
-            # Otherwise, save a new project
-            else:
-                # IBAN can't be set during initial creation of a new
-                # project so remove it
-                new_project_data.pop('iban')
-                project = Project(**new_project_data)
-                db.session.add(project)
-                db.session.commit()
-                flash(
-                    '<span class="text-default-green">Project "%s" is '
-                    'toegevoegd</span>' % (
-                        new_project_data['name']
-                    )
-                )
+            )
         except IntegrityError as e:
             db.session().rollback()
             app.logger.error(repr(e))
             flash(
-                '<span class="text-default-red">Project toevoegen/bijwerken mislukt: '
-                'naam "%s" en/of IBAN "%s" bestaan al, kies een andere naam '
-                'en/of IBAN<span>' % (
-                    new_project_data['name'],
-                    new_project_data['iban']
+                '<span class="text-default-red">Project toevoegen mislukt: '
+                'naam "%s" bestaat al, kies een andere naam <span>' % (
+                    new_project_data['name']
                 )
             )
         # redirect back to clear form data
         return redirect(url_for('index'))
     else:
         util.flash_form_errors(project_form, request)
-
-    # Process filled in category form
-    category_form = ''
-    category_form_return = process_category_form(request)
-    if category_form_return:
-        return category_form_return
 
     # Retrieve data for each project
     total_awarded = 0
@@ -412,66 +181,6 @@ def index():
         if project.hidden and not project_owner:
             continue
 
-        already_authorized = False
-        bunq_token = ''
-        form = ''
-
-        if project_owner:
-            if project.bunq_access_token and len(project.bunq_access_token):
-                already_authorized = True
-
-            # Always generate a token as the user can connect to Bunq
-            # again in order to allow access to new IBANs
-            bunq_token = jwt.encode(
-                {
-                    'user_id': current_user.id,
-                    'project_id': project.id,
-                    'bank_name': 'Bunq',
-                    'exp': time() + 1800
-                },
-                app.config['SECRET_KEY'],
-                algorithm='HS256'
-            ).decode('utf-8')
-
-            # Populate the project's form which allows the user to edit
-            # it
-            form = ProjectForm(prefix="project_form", **{
-                'name': project.name,
-                'description': project.description,
-                'hidden': project.hidden,
-                'id': project.id,
-                'contains_subprojects': project.contains_subprojects
-            })
-            # We don't allow editing of the 'contains_subprojects'
-            # value after a project is created, but we do need to pass the
-            # value in the form, so simply disable it
-            form.contains_subprojects.render_kw = {'disabled': ''}
-
-            # If a bunq account is available, allow the user to select
-            # an IBAN
-            if project.bunq_access_token:
-                form.iban.choices = project.make_select_options()
-                # Set default selected value
-                form.iban.data = '%s - %s' % (
-                    project.iban, project.iban_name
-                )
-
-        # Populate the category forms which allows the user to
-        # edit it
-        category_forms = []
-        if not project.contains_subprojects:
-            for category in Category.query.filter_by(
-                    project_id=project.id).order_by('name'):
-                category_forms.append(
-                    CategoryForm(
-                        prefix="category_form", **{
-                            'id': category.id,
-                            'name': category.name,
-                            'project_id': project.id
-                        }
-                    )
-                )
-
         # Retrieve the amounts for this project
         amounts = util.calculate_project_amounts(project.id)
         total_awarded += amounts['awarded']
@@ -481,19 +190,9 @@ def index():
             {
                 'id': project.id,
                 'name': project.name,
-                'description': project.description,
                 'hidden': project.hidden,
                 'project_owner': project_owner,
-                'already_authorized': already_authorized,
-                'bunq_token': bunq_token,
-                'iban': project.iban,
-                'iban_name': project.iban_name,
-                'bank_name': project.bank_name,
-                'amounts': amounts,
-                'form': form,
-                'contains_subprojects': project.contains_subprojects,
-                'category_forms': category_forms,
-                'category_form': CategoryForm(prefix="category_form", **{'project_id': project.id})
+                'amounts': amounts
             }
         )
 
@@ -506,11 +205,7 @@ def index():
         project_form=project_form,
         add_user_form=AddUserForm(prefix='add_user_form'),
         edit_admin_forms=edit_admin_forms,
-        edit_project_owner_forms=edit_project_owner_forms,
-        user_stories=UserStory.query.all(),
-        server_name=app.config['SERVER_NAME'],
-        bunq_client_id=app.config['BUNQ_CLIENT_ID'],
-        base_url_auth=base_url_auth
+        user_stories=UserStory.query.all()
     )
 
 
@@ -721,12 +416,301 @@ def project(project_id):
     else:
         payments += project.payments
 
+    # Process filled in edit project owner form
+    edit_project_owner_form = EditProjectOwnerForm(
+        prefix="edit_project_owner_form"
+    )
+
+    # Update project owner
+    if edit_project_owner_form.validate_on_submit():
+        edited_project_owner = User.query.filter_by(
+            id=edit_project_owner_form.id.data
+        )
+        new_project_owner_data = {}
+        remove_from_project = False
+        remove_from_project_id = 0
+        for f in edit_project_owner_form:
+            if f.type != 'SubmitField' and f.type != 'CSRFTokenField':
+                if f.short_name == 'remove_from_project' and f.data:
+                    remove_from_project = True
+                elif f.short_name == 'project_id' and f.data:
+                    remove_from_project_id = f.data
+                else:
+                    new_project_owner_data[f.short_name] = f.data
+
+        # Update if the project owner exists
+        if len(edited_project_owner.all()):
+            edited_project_owner.update(new_project_owner_data)
+            if remove_from_project:
+                # We need to get the user using '.first()' otherwise we
+                # can't remove the project because of garbage collection
+                edited_project_owner = edited_project_owner.first()
+                edited_project_owner.projects.remove(
+                    Project.query.get(remove_from_project_id)
+                )
+
+            db.session.commit()
+            flash('<span class="text-default-green">gebruiker is bijgewerkt</span>')
+
+        # redirect back to clear form data
+        return redirect(url_for('project', project_id=project.id))
+    else:
+        util.flash_form_errors(edit_project_owner_form, request)
+
+    # Populate the edit project owner forms which allows the user to
+    # edit it
+    edit_project_owner_forms = {}
+    temp_edit_project_owner_forms = {}
+    for project_owner in project.users:
+        temp_edit_project_owner_forms[project_owner.email] = (
+            EditProjectOwnerForm(
+                prefix="edit_project_owner_form", **{
+                    'active': project_owner.active,
+                    'id': project_owner.id,
+                    'project_id': project.id
+                }
+            )
+        )
+    edit_project_owner_forms[project.id] = temp_edit_project_owner_forms
+
+    # Process filled in add user form
+    add_user_form = AddUserForm(prefix="add_user_form")
+
+    # Add user (either admin or project owner)
+    if add_user_form.validate_on_submit():
+        new_user_data = {}
+        for f in add_user_form:
+            if f.type != 'SubmitField' and f.type != 'CSRFTokenField':
+                new_user_data[f.short_name] = f.data
+
+        try:
+            util.add_user(**new_user_data)
+            flash(
+                '<span class="text-default-green">"%s" is uitgenodigd als admin of '
+                'project owner (of toegevoegd als admin of project owner als de '
+                'gebruiker al bestond)' % (
+                    new_user_data['email']
+                )
+            )
+        except ValueError as e:
+            flash(str(e))
+
+        # redirect back to clear form data
+        return redirect(url_for('project', project_id=project.id))
+    else:
+        util.flash_form_errors(add_user_form, request)
+
+    # Process filled in project form
+    project_form = ProjectForm(prefix="project_form")
+
+    # Remove project
+    if project_form.remove.data:
+        Project.query.filter_by(id=project_form.id.data).delete()
+        db.session.commit()
+        flash(
+            '<span class="text-default-green">Project "%s" is verwijderd</span>' % (
+                project_form.name.data
+            )
+        )
+        # redirect back to clear form data
+        return redirect(url_for('index'))
+
+    # Save or update project
+    # Somehow we need to repopulate the iban.choices with the same
+    # values as used when the form was generated for this project.
+    # Probably to validate if the selected value is valid.
+    if util.form_in_request(project_form, request):
+        if request.method == 'POST' and project_form.name.data:
+            projects = Project.query.filter_by(id=project_form.id.data)
+            if len(projects.all()):
+                project_form.iban.choices = (
+                    projects.first().make_select_options()
+                )
+
+    if project_form.validate_on_submit():
+        new_project_data = {}
+        for f in project_form:
+            if f.type != 'SubmitField' and f.type != 'CSRFTokenField':
+                if f.short_name == 'iban':
+                    new_iban = None
+                    new_iban_name = None
+                    # New projects f.data is 'None', editing an existing
+                    # project with an IBAN to have no IBAN will make
+                    # f.data be ''
+                    if not f.data == '' and f.data != 'None':
+                        new_iban, new_iban_name = f.data.split(
+                            ' - ', maxsplit=1
+                        )
+                    new_project_data['iban'] = new_iban
+                    new_project_data['iban_name'] = new_iban_name
+                else:
+                    new_project_data[f.short_name] = f.data
+
+        try:
+            # Update if the project already exists
+            if len(projects.all()):
+                # If the IBAN changes, then link the correct payments
+                # to this project
+                changed_project = projects.first()
+
+                # We don't allow editing of the 'contains_subprojects' value after a project is created
+                del new_project_data['contains_subprojects']
+
+                if changed_project.iban != new_project_data['iban']:
+                    for payment in changed_project.payments:
+                        payment.project_id = None
+                    Payment.query.filter_by(
+                        alias_value=new_project_data['iban']
+                    ).update({'project_id': changed_project.id})
+
+                projects.update(new_project_data)
+                db.session.commit()
+
+                flash(
+                    '<span class="text-default-green">Project "%s" is '
+                    'bijgewerkt</span>' % (
+                        new_project_data['name']
+                    )
+                )
+            # Otherwise, save a new project
+            else:
+                # IBAN can't be set during initial creation of a new
+                # project so remove it
+                new_project_data.pop('iban')
+                new_project = Project(**new_project_data)
+                db.session.add(new_project)
+                db.session.commit()
+                flash(
+                    '<span class="text-default-green">Project "%s" is '
+                    'toegevoegd</span>' % (
+                        new_project_data['name']
+                    )
+                )
+        except IntegrityError as e:
+            db.session().rollback()
+            app.logger.error(repr(e))
+            flash(
+                '<span class="text-default-red">Project toevoegen/bijwerken mislukt: '
+                'naam "%s" en/of IBAN "%s" bestaan al, kies een andere naam '
+                'en/of IBAN<span>' % (
+                    new_project_data['name'],
+                    new_project_data['iban']
+                )
+            )
+        # redirect back to clear form data
+        return redirect(url_for('project', project_id=project.id))
+    else:
+        util.flash_form_errors(project_form, request)
+
+    # Process filled in category form
+    category_form = ''
+    category_form_return = process_category_form(request)
+    if category_form_return:
+        return category_form_return
+
+    # Retrieve data for each project
+    project_data = {}
+    project_owner = False
+    if current_user.is_authenticated and (
+        current_user.admin or project.has_user(current_user.id)
+    ):
+        project_owner = True
+
+    already_authorized = False
+    bunq_token = ''
+    form = ''
+
+    if project_owner:
+        if project.bunq_access_token and len(project.bunq_access_token):
+            already_authorized = True
+
+        # Always generate a token as the user can connect to Bunq
+        # again in order to allow access to new IBANs
+        bunq_token = jwt.encode(
+            {
+                'user_id': current_user.id,
+                'project_id': project.id,
+                'bank_name': 'Bunq',
+                'exp': time() + 1800
+            },
+            app.config['SECRET_KEY'],
+            algorithm='HS256'
+        ).decode('utf-8')
+
+        # Populate the project's form which allows the user to edit
+        # it
+        form = ProjectForm(prefix="project_form", **{
+            'name': project.name,
+            'description': project.description,
+            'hidden': project.hidden,
+            'id': project.id,
+            'contains_subprojects': project.contains_subprojects
+        })
+        # We don't allow editing of the 'contains_subprojects'
+        # value after a project is created, but we do need to pass the
+        # value in the form, so simply disable it
+        form.contains_subprojects.render_kw = {'disabled': ''}
+
+        # If a bunq account is available, allow the user to select
+        # an IBAN
+        if project.bunq_access_token:
+            form.iban.choices = project.make_select_options()
+            # Set default selected value
+            form.iban.data = '%s - %s' % (
+                project.iban, project.iban_name
+            )
+
+    # Populate the category forms which allows the user to
+    # edit it
+    category_forms = []
+    if not project.contains_subprojects:
+        for category in Category.query.filter_by(
+                project_id=project.id).order_by('name'):
+            category_forms.append(
+                CategoryForm(
+                    prefix="category_form", **{
+                        'id': category.id,
+                        'name': category.name,
+                        'project_id': project.id
+                    }
+                )
+            )
+
+    # Retrieve the amounts for this project
+    amounts = util.calculate_project_amounts(project.id)
+
+    project_data = {
+        'id': project.id,
+        'name': project.name,
+        'description': project.description,
+        'hidden': project.hidden,
+        'project_owner': project_owner,
+        'already_authorized': already_authorized,
+        'bunq_token': bunq_token,
+        'iban': project.iban,
+        'iban_name': project.iban_name,
+        'bank_name': project.bank_name,
+        'amounts': amounts,
+        'form': form,
+        'contains_subprojects': project.contains_subprojects,
+        'category_forms': category_forms,
+        'category_form': CategoryForm(prefix="category_form", **{'project_id': project.id})
+    }
+
+    base_url_auth = 'https://oauth.bunq.com'
+    if app.config['BUNQ_ENVIRONMENT_TYPE'] == ApiEnvironmentType.SANDBOX:
+        base_url_auth = 'https://oauth.sandbox.bunq.com'
+
     return render_template(
         'project.html',
         footer=app.config['FOOTER'],
         project=project,
+        project_data=project_data,
         amounts=amounts,
         payments=payments,
+        project_form=project_form,
+        edit_project_owner_forms=edit_project_owner_forms,
+        add_user_form=AddUserForm(prefix='add_user_form'),
         subproject_form=subproject_form,
         payment_forms=payment_forms,
         transaction_attachment_form=transaction_attachment_form,
@@ -734,7 +718,10 @@ def project(project_id):
         funder_forms=funder_forms,
         new_funder_form=FunderForm(prefix="funder_form"),
         project_owner=project_owner,
-        timestamp=util.get_export_timestamp()
+        timestamp=util.get_export_timestamp(),
+        server_name=app.config['SERVER_NAME'],
+        bunq_client_id=app.config['BUNQ_CLIENT_ID'],
+        base_url_auth=base_url_auth
     )
 
 
@@ -1061,10 +1048,17 @@ def subproject(project_id, subproject_id):
         )
     )
 
-@app.route("/over", methods=['GET', 'POST'])
+@app.route("/over", methods=['GET'])
 def over():
     return render_template(
         'over.html',
+        footer=app.config['FOOTER']
+    )
+
+@app.route("/meest-gestelde-vragen", methods=['GET'])
+def meest_gestelde_vragen():
+    return render_template(
+        'meest-gestelde-vragen.html',
         footer=app.config['FOOTER']
     )
 

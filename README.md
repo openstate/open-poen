@@ -14,7 +14,7 @@ Publish transactions of government subsidized projects
    - Specify email related information in order for the application to send emails
 - Production
    - Link a main Bunq account to Open Poen (you need to do this in order to link other Bunq accounts to projects using OAuth)
-      - Edit `config.py` and add values for `BUNQ_CLIENT_ID` and `BUNQ_CLIENT_SECRET`; you can obtain these from the Bunq app (you need a Bunq bank account) 'Profile > Security & Settings > Developers > OAuth > Show client details' and also make sure to add `https://openpoen.nl/` as redirect URL
+      - Edit `config.py` and add values for `BUNQ_CLIENT_ID` and `BUNQ_CLIENT_SECRET`; you can obtain these from the Bunq app (you need a Bunq bank account) 'Profile > Security & Settings > Developers > OAuth > Show client details' and also make sure to add `https://openpoen.nl/` as redirect URL (include the trailing slash!)
    - Make sure to copy the latest database backup from `docker/docker-entrypoint-initdb.d/backups` to `docker/docker-entrypoint-initdb.d` if you want to import it
    - `cd docker`
    - `sudo docker-compose up -d`
@@ -36,7 +36,7 @@ Publish transactions of government subsidized projects
       - If you want to use a Sandbox Bunq account: create a new Sandbox account and copy the telephone number and login code (its config is written to `bunq-sandbox.conf`; remove this config if you want generate a new Sandbox Bunq account): `docker exec -it poen_app_1 flask bunq create-sandbox-user`
          - Download and install the Bunq Sandbox Android app on your Android smartphone: https://appstore.bunq.com/api/android/builds/bunq-android-sandbox-master.apk
          - Login to your Bunq Sandbox account using the telephone number and login code (000000) which you retrieved using the steps above
-      - Edit `config.py` (if you want to use the Sandbox account: set `BUNQ_ENVIRONMENT_TYPE` to `ApiEnvironmentType.SANDBOX`) and add values for `BUNQ_CLIENT_ID` and `BUNQ_CLIENT_SECRET`; you can obtain these from the Bunq (Sandbox) app for Android via 'Profile > Security & Settings > Developers > OAuth > Show client details' and also make sure to add `https://openpoen.nl/` as redirect URL (yes make sure to use 'https' even in the dev/sandbox environment, even though you need to visit openpoen.nl via http:// yourself locally)
+      - Edit `config.py` (if you want to use the Sandbox account: set `BUNQ_ENVIRONMENT_TYPE` to `ApiEnvironmentType.SANDBOX`) and add values for `BUNQ_CLIENT_ID` and `BUNQ_CLIENT_SECRET`; you can obtain these from the Bunq (Sandbox) app for Android via 'Profile > Security & Settings > Developers > OAuth > Show client details' and also make sure to add `https://openpoen.nl/` as redirect URL (include the trailing slash! And yes make sure to use 'https' even in the dev/sandbox environment, even though you need to visit openpoen.nl via http:// yourself locally)
    - Compile the assets, see the section below
    - Retrieve the IP address of the nginx container `sudo docker inspect --format='{{.NetworkSettings.Networks.poen_internal.IPAddress}}' poen_nginx_1` and add it to your hosts file `/etc/hosts`: `<IP_address> openpoen.nl`
    - You can now visit http://openpoen.nl in your browser

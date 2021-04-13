@@ -20,7 +20,8 @@ def return_redirect(project_id, subproject_id):
 
     return redirect(
         url_for(
-            'index'
+            'project',
+            project_id=project_id
         )
     )
 
@@ -34,8 +35,6 @@ def process_category_form(request):
     subproject_id = 0
     if category_form.subproject_id.data:
         subproject_id = category_form.subproject_id.data
-    app.logger.info(project_id)
-    app.logger.info(subproject_id)
 
     # Remove category
     if category_form.remove.data:
