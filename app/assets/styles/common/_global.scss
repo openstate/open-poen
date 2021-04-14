@@ -222,7 +222,7 @@ hr {
   margin-bottom: 26px;
 
   &:hover {
-    color: $grey !important;
+    color: $grey-dark !important;
   }
 }
 
@@ -235,7 +235,7 @@ hr {
     color: inherit;
 
     h1 {
-      color: lighten($blue-dark, 30%);
+      color: $grey-dark;
     }
   }
 }
