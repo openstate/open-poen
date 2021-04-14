@@ -193,6 +193,7 @@ class Project(db.Model):
     description = db.Column(db.Text)
     contains_subprojects = db.Column(db.Boolean, default=True)
     hidden = db.Column(db.Boolean, default=False)
+    hidden_sponsors = db.Column(db.Boolean, default=False)
 
     subprojects = db.relationship(
         'Subproject',

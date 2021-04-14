@@ -82,6 +82,7 @@ class ProjectForm(FlaskForm):
         }
     )
     hidden = BooleanField('Project verbergen')
+    hidden_sponsors = BooleanField('Sponsoren verbergen')
     iban = SelectField('IBAN', validators=[Optional()], choices=[])
     id = IntegerField(widget=HiddenInput())
 

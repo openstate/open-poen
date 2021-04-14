@@ -643,6 +643,7 @@ def project(project_id):
             'name': project.name,
             'description': project.description,
             'hidden': project.hidden,
+            'hidden_sponsors': project.hidden_sponsors,
             'id': project.id,
             'contains_subprojects': project.contains_subprojects
         })
@@ -684,6 +685,7 @@ def project(project_id):
         'name': project.name,
         'description': project.description,
         'hidden': project.hidden,
+        'hidden_sponsors': project.hidden_sponsors,
         'project_owner': project_owner,
         'already_authorized': already_authorized,
         'bunq_token': bunq_token,
