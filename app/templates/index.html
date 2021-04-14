@@ -231,28 +231,28 @@
             {% for project in project_data %}
               <div class="col-12 col-md-6 col-xxl-4">
                 <a class="card-button" role="button" href="{{ url_for('project', project_id=project.id) }}">
-                <div class="amounts-card bg-green-light">
-                  {% if project.hidden %}
-                    <p><i>Dit project is verborgen en dus niet te zien door het publiek</i><p>
-                  {% endif %}
-                  <div class="amounts-card-title">
+                  <div class="amounts-card bg-green-light">
+                    {% if project.hidden %}
+                      <p><i>Dit project is verborgen en dus niet te zien door het publiek</i><p>
+                    {% endif %}
+                    <div class="amounts-card-title">
                       <h1 class="text-center">{{ project.name }}</h1>
+                    </div>
+                    <div class="row">
+                      <div class="col-4 text-right small-gutter">
+                        <h3 class="text-blue">resterend</h3>
+                        <h2>{{ project.amounts.left_str }}</h2>
+                      </div>
+                      <div class="col-4 text-center">
+                        <h2>{{ project.amounts.percentage_spent_str }}</h2>
+                      </div>
+                      <div class="col-4 small-gutter">
+                        <h3 class="text-red">uitgegeven</h3>
+                        <h2>{{ project.amounts.spent_str }}</h2>
+                      </div>
+                    </div>
+                    <h3 class="text-center totaal">totaal {{ project.amounts.awarded_str }}</h3>
                   </div>
-                  <div class="row">
-                    <div class="col-4 text-right small-gutter">
-                      <h3 class="text-blue">resterend</h3>
-                      <h2>{{ project.amounts.left_str }}</h2>
-                    </div>
-                    <div class="col-4 text-center">
-                      <h2>{{ project.amounts.percentage_spent_str }}</h2>
-                    </div>
-                    <div class="col-4 small-gutter">
-                      <h3 class="text-red">uitgegeven</h3>
-                      <h2>{{ project.amounts.spent_str }}</h2>
-                    </div>
-                  </div>
-                  <h3 class="text-center totaal">totaal {{ project.amounts.awarded_str }}</h3>
-                </div>
                 </a>
               </div>
             {% endfor %}

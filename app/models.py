@@ -134,6 +134,7 @@ class User(UserMixin, db.Model):
     first_name = db.Column(db.String(120), index=True)
     last_name = db.Column(db.String(120), index=True)
     biography = db.Column(db.String(1000))
+    hidden = db.Column(db.Boolean, default=False)
     active = db.Column(db.Boolean, default=True)
 
     debit_cards = db.relationship('DebitCard', backref='user', lazy='dynamic')
@@ -193,6 +194,7 @@ class Project(db.Model):
     description = db.Column(db.Text)
     contains_subprojects = db.Column(db.Boolean, default=True)
     hidden = db.Column(db.Boolean, default=False)
+    hidden_sponsors = db.Column(db.Boolean, default=False)
 
     subprojects = db.relationship(
         'Subproject',

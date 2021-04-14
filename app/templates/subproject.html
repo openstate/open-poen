@@ -15,11 +15,6 @@
       <div class="col-10 offset-1">
         <div class="row">
           <div class="lead-side-col col-6 col-lg-3 col-xxl-4 order-6 order-lg-1 d-flex flex-column justify-content-between">
-            <div class="d-none d-lg-block button-poen-small-hidden bg-blue-light mx-auto"></div>
-            <div class="card-small bg-white mx-auto d-flex">
-              <ul class="card-small-list mx-auto my-auto">
-              </ul>
-            </div>
             <button type="button" class="btn button-poen-small bg-grey-blue mx-auto">
               <a href="{{ url_for('project', project_id=subproject.project.id) }}">< terug</a>
             </button>
@@ -152,6 +147,18 @@
           </div>
 
           <div class="lead-side-col col-6 col-lg-3 col-xxl-4 order-9 d-flex flex-column justify-content-between">
+            <div class="button-poen-small bg-grey-blue mx-auto">initiatief&shy;nemers</div>
+
+            <div class="card-small bg-white mx-auto d-flex">
+              <ul class="card-small-list mx-auto my-auto">
+                {% for user in (subproject.project.users|list + subproject.users|list) | unique %}
+                  {% if user.first_name and not user.hidden %}
+                    <li>{{ user.first_name }} {{ user.last_name }}</li>
+                  {% endif %}
+                {% endfor %}
+              </ul>
+            </div>
+
             {% if project_owner %}
               <!-- Button trigger modal -->
               <button type="button" class="btn button-poen-small bg-grey-blue mx-auto" data-toggle="modal" data-target="#initiatiefnemers-beheren">initiatief&shy;nemers beheren ></button>
@@ -261,14 +268,6 @@
             {% else %}
               <div class="d-none d-lg-block button-poen-small-hidden bg-blue-light mx-auto"></div>
             {% endif %}
-            <div class="card-small bg-white mx-auto d-flex">
-              <ul class="card-small-list mx-auto my-auto">
-                {% for user in (subproject.project.users|list + subproject.users|list) | unique %}
-                  <li>{{ user.first_name }} {{ user.last_name }}</li>
-                {% endfor %}
-              </ul>
-            </div>
-            <button type="button" class="btn button-poen-small bg-grey-blue mx-auto">initiatief&shy;nemers ></button>
           </div>
         </div>
       </div>
