@@ -212,6 +212,24 @@ hr {
   border-radius: 35px;
   min-height: 150px;
   margin-bottom: 26px;
+
+  &:hover {
+    color: $grey !important;
+  }
+}
+
+.card-button {
+  color: inherit;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: none;
+    color: inherit;
+
+    h1 {
+      color: lighten($blue-dark, 30%);
+    }
+  }
 }
 
 .card-small {
