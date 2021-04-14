@@ -237,6 +237,7 @@ class EditAdminForm(FlaskForm):
 
 
 class EditProjectOwnerForm(FlaskForm):
+    hidden = BooleanField('Project owner verbergen in initiatiefnemersoverzicht')
     remove_from_project = BooleanField(
         'Verwijder project owner van dit project'
     )
@@ -253,6 +254,7 @@ class EditProjectOwnerForm(FlaskForm):
 
 
 class EditUserForm(FlaskForm):
+    hidden = BooleanField('Initiatiefnemer verbergen in initiatiefnemersoverzicht')
     remove_from_subproject = BooleanField(
         'Verwijder initiatiefnemer van dit project'
     )

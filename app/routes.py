@@ -431,9 +431,9 @@ def project(project_id):
         remove_from_project_id = 0
         for f in edit_project_owner_form:
             if f.type != 'SubmitField' and f.type != 'CSRFTokenField':
-                if f.short_name == 'remove_from_project' and f.data:
-                    remove_from_project = True
-                elif f.short_name == 'project_id' and f.data:
+                if f.short_name == 'remove_from_project':
+                    remove_from_project = f.data
+                elif f.short_name == 'project_id':
                     remove_from_project_id = f.data
                 else:
                     new_project_owner_data[f.short_name] = f.data
@@ -465,6 +465,7 @@ def project(project_id):
         temp_edit_project_owner_forms[project_owner.email] = (
             EditProjectOwnerForm(
                 prefix="edit_project_owner_form", **{
+                    'hidden': project_owner.hidden,
                     'active': project_owner.active,
                     'id': project_owner.id,
                     'project_id': project.id
@@ -920,9 +921,9 @@ def subproject(project_id, subproject_id):
         remove_from_subproject_id = 0
         for f in edit_user_form:
             if f.type != 'SubmitField' and f.type != 'CSRFTokenField':
-                if f.short_name == 'remove_from_subproject' and f.data:
-                    remove_from_subproject = True
-                elif f.short_name == 'subproject_id' and f.data:
+                if f.short_name == 'remove_from_subproject':
+                    remove_from_subproject = f.data
+                elif f.short_name == 'subproject_id':
                     remove_from_subproject_id = f.data
                 else:
                     new_user_data[f.short_name] = f.data
@@ -958,6 +959,7 @@ def subproject(project_id, subproject_id):
         edit_user_forms[user.email] = (
             EditUserForm(
                 prefix="edit_user_form", **{
+                    'hidden': user.hidden,
                     'active': user.active,
                     'id': user.id,
                     'subproject_id': subproject.id

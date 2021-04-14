@@ -152,7 +152,9 @@
             <div class="card-small bg-white mx-auto d-flex">
               <ul class="card-small-list mx-auto my-auto">
                 {% for user in (subproject.project.users|list + subproject.users|list) | unique %}
-                  <li>{{ user.first_name }} {{ user.last_name }}</li>
+                  {% if user.first_name and not user.hidden %}
+                    <li>{{ user.first_name }} {{ user.last_name }}</li>
+                  {% endif %}
                 {% endfor %}
               </ul>
             </div>
