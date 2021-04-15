@@ -16,7 +16,10 @@ from app.models import (
     User, Project, Subproject, Payment, UserStory, IBAN, File, Funder, Category
 )
 from app import util
-from app.form_processing import process_category_form
+from app.form_processing import (
+    process_category_form, process_payment_form, create_payment_forms,
+    process_transaction_attachment_form, process_remove_attachment_form
+)
 from sqlalchemy.exc import IntegrityError
 
 from bunq.sdk.context.api_environment_type import ApiEnvironmentType
@@ -373,12 +376,12 @@ def project(project_id):
     transaction_attachment_form = ''
     remove_attachment_form = ''
     if project_owner and not project.contains_subprojects:
-        payment_form_return = util.process_payment_form(request, project, is_subproject=False)
+        payment_form_return = process_payment_form(request, project, is_subproject=False)
         if payment_form_return:
             return payment_form_return
 
         # Populate the payment forms which allows the user to edit it
-        payment_forms = util.create_payment_forms(
+        payment_forms = create_payment_forms(
             project.payments,
             project_owner,
             project.make_category_select_options()
@@ -388,7 +391,7 @@ def project(project_id):
         transaction_attachment_form = TransactionAttachmentForm(
             prefix="transaction_attachment_form"
         )
-        transaction_attachment_form_return = util.process_transaction_attachment_form(
+        transaction_attachment_form_return = process_transaction_attachment_form(
             request,
             transaction_attachment_form,
             project.id
@@ -400,7 +403,7 @@ def project(project_id):
         remove_attachment_form = RemoveAttachmentForm(
             prefix="remove_attachment_form"
         )
-        remove_attachment_form_return = util.process_remove_attachment_form(
+        remove_attachment_form_return = process_remove_attachment_form(
             remove_attachment_form,
             project.id,
         )
@@ -870,14 +873,14 @@ def subproject(project_id, subproject_id):
         )
 
     # Process filled in payment form
-    payment_form_return = util.process_payment_form(request, subproject, is_subproject=True)
+    payment_form_return = process_payment_form(request, subproject, is_subproject=True)
     if payment_form_return:
         return payment_form_return
 
     # Populate the payment forms which allows the user to edit it
     payment_forms = {}
     if project_owner or user_in_subproject:
-        payment_forms = util.create_payment_forms(
+        payment_forms = create_payment_forms(
             subproject.payments,
             project_owner,
             subproject.make_category_select_options()
@@ -1007,7 +1010,7 @@ def subproject(project_id, subproject_id):
         transaction_attachment_form = TransactionAttachmentForm(
             prefix="transaction_attachment_form"
         )
-        transaction_attachment_form_return = util.process_transaction_attachment_form(
+        transaction_attachment_form_return = process_transaction_attachment_form(
             request,
             transaction_attachment_form,
             subproject.project.id,
@@ -1020,7 +1023,7 @@ def subproject(project_id, subproject_id):
         remove_attachment_form = RemoveAttachmentForm(
             prefix="remove_attachment_form"
         )
-        remove_attachment_form_return = util.process_remove_attachment_form(
+        remove_attachment_form_return = process_remove_attachment_form(
             remove_attachment_form,
             subproject.project.id,
             subproject.id
