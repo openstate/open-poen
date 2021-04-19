@@ -93,9 +93,29 @@ def process_category_form(request):
 
 
 # Process filled in payment form
-def process_payment_form(request, project_or_subproject, is_subproject):
+def process_payment_form(request, project_or_subproject, project_owner, user_subproject_ids, is_subproject):
     payment_form = PaymentForm(prefix="payment_form")
-    payment_form.category_id.choices = project_or_subproject.make_category_select_options()
+    # Somehow we need to repopulate the category_id.choices with the same
+    # values as used when the form was generated. Probably to validate
+    # if the selected value is valid. We don't know the subproject in the
+    # case of an edited payment on a project page which contains subprojects,
+    # so we need to retrieve this before running validate_on_submit
+    temppayment = Payment.query.filter_by(
+        id=payment_form.id.data
+    ).first()
+    if temppayment:
+        if temppayment.subproject:
+            payment_form.category_id.choices = temppayment.subproject.make_category_select_options()
+        else:
+            payment_form.category_id.choices = temppayment.project.make_category_select_options()
+
+        # Make sure the user is allowed to edit this payment
+        # (especially needed when a normal users edits a subproject
+        # payment on a project page)
+        if not project_owner and not temppayment.subproject.id in user_subproject_ids:
+            return
+    else:
+        return
 
     if payment_form.validate_on_submit():
         # Get data from the form
@@ -131,7 +151,7 @@ def process_payment_form(request, project_or_subproject, is_subproject):
             )
 
         if is_subproject:
-            # redirect back to clear form data
+            # Redirect back to clear form data
             return redirect(
                 url_for(
                     'subproject',
@@ -140,6 +160,7 @@ def process_payment_form(request, project_or_subproject, is_subproject):
                 )
             )
 
+        # Redirect back to clear form data
         return redirect(
             url_for(
                 'project',
@@ -151,7 +172,7 @@ def process_payment_form(request, project_or_subproject, is_subproject):
 
 
 # Populate the payment forms which allows the user to edit it
-def create_payment_forms(payments, project_owner, select_options):
+def create_payment_forms(payments, project_owner):
     payment_forms = {}
     for payment in payments:
         # If a payment already contains a category, retrieve it to set
@@ -163,10 +184,18 @@ def create_payment_forms(payments, project_owner, select_options):
             'short_user_description': payment.short_user_description,
             'long_user_description': payment.long_user_description,
             'id': payment.id,
+            'hidden': payment.hidden,
             'category_id': selected_category
         })
 
-        payment_form.category_id.choices = select_options
+        # A project with subprojects can contain multiple editable
+        # payments on the project page, so we need to retrieve the
+        # categories for each payment (could be made more efficient,
+        # but this is readable)
+        if payment.subproject:
+            payment_form.category_id.choices = payment.subproject.make_category_select_options()
+        else:
+            payment_form.category_id.choices = payment.project.make_category_select_options()
 
         # Only allow project owners to hide a transaction
         if project_owner:
@@ -176,9 +205,19 @@ def create_payment_forms(payments, project_owner, select_options):
 
     return payment_forms
 
+
 # Process filled in transaction attachment form
-def process_transaction_attachment_form(request, transaction_attachment_form, project_id=0, subproject_id=0):
+def process_transaction_attachment_form(request, transaction_attachment_form, project_owner, user_subproject_ids, project_id=0, subproject_id=0):
     if transaction_attachment_form.validate_on_submit():
+        payment = Payment.query.get(
+            transaction_attachment_form.payment_id.data
+        )
+        # Make sure the user is allowed to edit this payment
+        # (especially needed when a normal users edits a subproject
+        # payment on a project page)
+        if not project_owner and not payment.subproject.id in user_subproject_ids:
+            return
+
         # Save attachment to disk
         f = transaction_attachment_form.data_file.data
         filename = secure_filename(f.filename)
@@ -201,9 +240,6 @@ def process_transaction_attachment_form(request, transaction_attachment_form, pr
         db.session.commit()
 
         # Link attachment to payment in the database
-        payment = Payment.query.get(
-            transaction_attachment_form.payment_id.data
-        )
         payment.attachments.append(new_file)
         db.session.commit()
 
