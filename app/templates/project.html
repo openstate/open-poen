@@ -538,17 +538,14 @@
                             {% else %}
                               <h6 class="text-red">{{ payment.get_formatted_currency() }}</h6>
                             {% endif %}
-
-                            {% if payment.id in payment_forms %}
-                              <br>
-                              <!-- Button trigger modal -->
-                              <button type="button" class="btn button-poen-small bg-green-light text-white" data-toggle="modal" data-target="#transactie-bewerken-{{ payment.id }}">
-                                transactie bewerken
-                              </button>
-                            {% endif %}
-
                           </div>
                           <div class="col-7">
+                            {% if payment.id in payment_forms %}
+                              <form method="POST">
+                              {{ payment_forms[payment.id].csrf_token }}
+                              {{ payment_forms[payment.id].id }}
+                            {% endif %}
+
                             <b>Ontvanger</b>
                             <br>
                             {{ payment.counterparty_alias_name }}
@@ -557,7 +554,11 @@
 
                             <b>Categorie</b>
                             <br>
-                            {{ payment.category.name }}
+                            {% if payment.id in payment_forms %}
+                              {{ payment_forms[payment.id]['category_id'] }}
+                            {% else %}
+                              {{ payment.category.name }}
+                            {% endif %}
                             <br>
                             <br>
 
@@ -569,19 +570,44 @@
                               <br>
                             {% endif %}
 
-                            <b>Omschrijving</b>
-                            <br>
-                            {% if payment.long_user_description %}
-                              {{ payment.long_user_description }}
-                            {% elif payment.short_user_description %}
-                              {{ payment.short_user_description }}
-                            {% else %}
-                              <i>er is door de initiatiefnemer nog geen beschrijving van deze transactie toegevoegd</i>
-                            {% endif %}
-                            <br>
-                            <br>
+                            {# Show either the short or long description to not logged in visitors, otherwise allow a logger in user with access to this payment to edit the short and long descriptions #}
+                            {% if payment.id in payment_forms %}
+                              <b>Korte omschrijving</b>
+                              <br>
+                              {{ payment_forms[payment.id]['short_user_description'] }}
+                              <br>
+                              <br>
 
-                            {% if payment.attachments.all() %}
+                              <b>Lange omschrijving</b>
+                              <br>
+                              {{ payment_forms[payment.id]['long_user_description'] }}
+                              <br>
+                              <br>
+                            {% else %}
+                              <b>Omschrijving</b>
+                              <br>
+                              {% if payment.long_user_description %}
+                                {{ payment.long_user_description }}
+                              {% elif payment.short_user_description %}
+                                {{ payment.short_user_description }}
+                              {% else %}
+                                <i>er is door de initiatiefnemer nog geen beschrijving van deze transactie toegevoegd</i>
+                              {% endif %}
+                              <br>
+                              <br>
+                            {% endif %}
+
+                            {% if payment.id in payment_forms %}
+                              {% if project_owner %}
+                                {{ payment_forms[payment.id]['hidden'].label }}
+                                {{ payment_forms[payment.id]['hidden'] }}
+                                <br>
+                              {% endif %}
+                              {{ payment_forms[payment.id].submit }}
+                              </form>
+                            {% endif %}
+
+                            {% if payment.attachments.all() or project_owner or payment.id in payment_forms %}
                               <br>
                               <hr>
                               <b>Media</b>
@@ -651,15 +677,6 @@
       </div>
     </div>
   </div>
-
-  {# We can't put the modal code next to the button code, because it doesn't seem to work in combination with Bootstrap Table's detail view #}
-  {% if payment_forms %}
-    {% for payment in payments %}
-      {% if payment.id in payment_forms %}
-        {% include 'partials/payment_form.html' %}
-      {% endif %}
-    {% endfor %}
-  {% endif %}
 
   {# We can't put the modal code next to the button code, because it doesn't seem to work in combination with Bootstrap Table's detail view #}
   {% if remove_attachment_form %}
