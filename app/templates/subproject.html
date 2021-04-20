@@ -279,7 +279,7 @@
       <div class="col-12 col-lg-10 offset-lg-1 poen-content bg-white">
         <div class="row">
           <div class="col-12">
-                  <table class="payment-table" data-locale="nl-NL" data-detail-view="true" data-detail-view-by-click="true" data-detail-view-icon="false" data-detail-formatter="detailFormatter" data-show-export="true" data-export-data-type="all" data-export-types="['csv', 'txt', 'json', 'xml', 'sql']" data-export-options='{"fileName": "{{ timestamp }}-{{ subproject.project.name | replace(' ', '_') }}-{{ subproject.name | replace(' ', '_')  }}"}'>
+            <table class="payment-table" data-locale="nl-NL" data-detail-view="true" data-detail-view-by-click="true" data-detail-view-icon="false" data-detail-formatter="detailFormatter" data-show-export="true" data-export-data-type="all" data-export-types="['csv', 'txt', 'json', 'xml', 'sql']" data-export-options='{"fileName": "{{ timestamp }}-{{ subproject.project.name | replace(' ', '_') }}-{{ subproject.name | replace(' ', '_')  }}"}'>
               <thead>
                 <tr>
                   {# Hidden column used to make search work with the detailed view; NOTE: the id should always be the first column of the table #}
@@ -409,17 +409,14 @@
                                 {% else %}
                                   <h6 class="text-red">{{ payment.get_formatted_currency() }}</h6>
                                 {% endif %}
-
-                                {% if payment_forms %}
-                                  <br>
-                                  <!-- Button trigger modal -->
-                                  <button type="button" class="btn button-poen-small bg-green-light text-white" data-toggle="modal" data-target="#transactie-bewerken-{{ payment.id }}">
-                                    transactie bewerken
-                                  </button>
-                                {% endif %}
-
                               </div>
                               <div class="col-7">
+                                {% if payment_forms %}
+                                  <form method="POST">
+                                  {{ payment_forms[payment.id].csrf_token }}
+                                  {{ payment_forms[payment.id].id }}
+                                {% endif %}
+
                                 <b>Ontvanger</b>
                                 <br>
                                 {{ payment.counterparty_alias_name }}
@@ -428,23 +425,52 @@
 
                                 <b>Categorie</b>
                                 <br>
-                                {{ payment.category.name }}
-                                <br>
-                                <br>
-
-                                <b>Omschrijving</b>
-                                <br>
-                                {% if payment.long_user_description %}
-                                  {{ payment.long_user_description }}
-                                {% elif payment.short_user_description %}
-                                  {{ payment.short_user_description }}
+                                {% if payment_forms %}
+                                  {{ payment_forms[payment.id]['category_id'] }}
                                 {% else %}
-                                  <i>er is door de initiatiefnemer nog geen beschrijving van deze transactie toegevoegd</i>
+                                  {{ payment.category.name }}
                                 {% endif %}
                                 <br>
                                 <br>
 
-                                {% if payment.attachments.all() %}
+                                {# Show either the short or long description to not logged in visitors, otherwise allow a logger in user with access to this payment to edit the short and long descriptions #}
+                                {% if payment_forms %}
+                                  <b>Korte omschrijving</b>
+                                  <br>
+                                  {{ payment_forms[payment.id]['short_user_description'] }}
+                                  <br>
+                                  <br>
+
+                                  <b>Lange omschrijving</b>
+                                  <br>
+                                  {{ payment_forms[payment.id]['long_user_description'] }}
+                                  <br>
+                                  <br>
+                                {% else %}
+                                  <b>Omschrijving</b>
+                                  <br>
+                                  {% if payment.long_user_description %}
+                                    {{ payment.long_user_description }}
+                                  {% elif payment.short_user_description %}
+                                    {{ payment.short_user_description }}
+                                  {% else %}
+                                    <i>er is door de initiatiefnemer nog geen beschrijving van deze transactie toegevoegd</i>
+                                  {% endif %}
+                                  <br>
+                                  <br>
+                                {% endif %}
+
+                                {% if payment_forms %}
+                                  {% if project_owner %}
+                                    {{ payment_forms[payment.id]['hidden'].label }}
+                                    {{ payment_forms[payment.id]['hidden'] }}
+                                    <br>
+                                  {% endif %}
+                                  {{ payment_forms[payment.id].submit }}
+                                  </form>
+                                {% endif %}
+
+                                {% if payment.attachments.all() or project_owner or user_in_subproject %}
                                   <br>
                                   <hr>
                                   <b>Media</b>
@@ -606,13 +632,6 @@
           </div>
         </div>
       </div>
-    {% endfor %}
-  {% endif %}
-
-  {# We can't put the modal code next to the button code, because it doesn't seem to work in combination with Bootstrap Table's detail view #}
-  {% if payment_forms %}
-    {% for payment in subproject.payments %}
-      {% include 'partials/payment_form.html' %}
     {% endfor %}
   {% endif %}
 
