@@ -172,7 +172,7 @@
               </div>
               <h3 class="text-center totaal">totaal {{ amounts.awarded_str }}</h3>
 
-                  {% if project_data.project_owner %}
+                  {% if project_owner %}
                     <div class="text-center">
                       {% if project_data['already_authorized'] and project_data['iban'] %}
                       <p>Rekening {{ project_data['iban'] }} - {{ project_data['iban_name'] }} ({{ project_data['bank_name'] }}) is gekoppeld aan dit project</p>
@@ -424,7 +424,7 @@
               </thead>
               <tbody>
                 {% for payment in payments|sort(attribute='created', reverse=true) %}
-                  {% if not payment.hidden or (project_owner or user_in_subproject) %}
+                  {% if not payment.hidden or (project_owner or payment.subproject.id in user_subproject_ids) %}
                   <tr>
                     <td>
                       <div class="cell">
@@ -539,7 +539,7 @@
                               <h6 class="text-red">{{ payment.get_formatted_currency() }}</h6>
                             {% endif %}
 
-                            {% if payment_forms %}
+                            {% if payment.id in payment_forms %}
                               <br>
                               <!-- Button trigger modal -->
                               <button type="button" class="btn button-poen-small bg-green-light text-white" data-toggle="modal" data-target="#transactie-bewerken-{{ payment.id }}">
@@ -589,11 +589,13 @@
                                 {% for attachment in payment.attachments %}
                                   <div class="col-6 col-sm-4">
                                     <div class="attachment-div">
-                                      {% if remove_attachment_form %}
-                                        <!-- Button trigger modal -->
-                                        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#bijlage-verwijder-{{ attachment.id }}">
-                                          Verwijderen
-                                        </button>
+                                      {% if project_owner or payment.subproject.id in user_subproject_ids %}
+                                        {% if remove_attachment_form %}
+                                          <!-- Button trigger modal -->
+                                          <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#bijlage-verwijder-{{ attachment.id }}">
+                                            Verwijderen
+                                          </button>
+                                        {% endif %}
                                       {% endif %}
                                       {% if attachment.mimetype in ['image/jpeg', 'image/jpg', 'image/png'] %}
                                         <a class="embed-responsive embed-responsive-1by1" href="{{ url_for('upload', filename='transaction-attachment/' + attachment.filename) }}" data-toggle="lightbox" data-gallery="transaction-gallery-{{ payment.id }}">
@@ -613,23 +615,26 @@
                               </div>
                             {% endif %}
 
-                            {% if transaction_attachment_form %}
-                              <form method="POST" enctype="multipart/form-data">
-                                {{ transaction_attachment_form.csrf_token }}
-                                {% for f in transaction_attachment_form %}
-                                  {% if f.widget.input_type != 'hidden' and f.widget.input_type != 'submit' %}
-                                    <div>
-                                      {{ f.label }}
-                                      {{ f }}
-                                      {% for error in f.errors %}
-                                        <span style="color: red;">- {{ error }}</span>
-                                      {% endfor %}
-                                    </div>
-                                  {% endif %}
-                                {% endfor %}
-                                {{ transaction_attachment_form.payment_id(**{'value': payment.id}) }}
-                                {{ transaction_attachment_form.submit() }}
-                              </form>
+                            {# Make sure the user is allowed to edit this payment (especially needed when a normal users edits a subproject payment on a project page #}
+                            {% if project_owner or payment.subproject.id in user_subproject_ids %}
+                              {% if transaction_attachment_form %}
+                                <form method="POST" enctype="multipart/form-data">
+                                  {{ transaction_attachment_form.csrf_token }}
+                                  {% for f in transaction_attachment_form %}
+                                    {% if f.widget.input_type != 'hidden' and f.widget.input_type != 'submit' %}
+                                      <div>
+                                        {{ f.label }}
+                                        {{ f }}
+                                        {% for error in f.errors %}
+                                          <span style="color: red;">- {{ error }}</span>
+                                        {% endfor %}
+                                      </div>
+                                    {% endif %}
+                                  {% endfor %}
+                                  {{ transaction_attachment_form.payment_id(**{'value': payment.id}) }}
+                                  {{ transaction_attachment_form.submit() }}
+                                </form>
+                              {% endif %}
                             {% endif %}
                           </div>
                         </div>
@@ -649,19 +654,23 @@
 
   {# We can't put the modal code next to the button code, because it doesn't seem to work in combination with Bootstrap Table's detail view #}
   {% if payment_forms %}
-    {% for payment in project.payments %}
-      {% include 'partials/payment_form.html' %}
+    {% for payment in payments %}
+      {% if payment.id in payment_forms %}
+        {% include 'partials/payment_form.html' %}
+      {% endif %}
     {% endfor %}
   {% endif %}
 
   {# We can't put the modal code next to the button code, because it doesn't seem to work in combination with Bootstrap Table's detail view #}
   {% if remove_attachment_form %}
-    {% for payment in project.payments %}
-      {% include 'partials/remove_attachment_form.html' %}
+    {% for payment in payments %}
+      {% if project_owner or payment.subproject.id in user_subproject_ids %}
+        {% include 'partials/remove_attachment_form.html' %}
+      {% endif %}
     {% endfor %}
   {% endif %}
 
-  {% if project_data %}
+  {% if project_data and project_owner %}
     <!-- Modal for 'Project owner toevoegen' -->
     <div class="modal fade" id="project-owner-toevoegen-{{ project_data.id }}" tabindex="-1" role="dialog" aria-labelledby="projectOwnerToevoegenLabel" aria-hidden="true">
       <div class="modal-dialog" role="document">

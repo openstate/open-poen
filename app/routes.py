@@ -16,7 +16,10 @@ from app.models import (
     User, Project, Subproject, Payment, UserStory, IBAN, File, Funder, Category
 )
 from app import util
-from app.form_processing import process_category_form
+from app.form_processing import (
+    process_category_form, process_payment_form, create_payment_forms,
+    process_transaction_attachment_form, process_remove_attachment_form
+)
 from sqlalchemy.exc import IntegrityError
 
 from bunq.sdk.context.api_environment_type import ApiEnvironmentType
@@ -368,29 +371,52 @@ def project(project_id):
     if project.bunq_access_token:
         subproject_form.iban.choices = project.make_select_options()
 
-    # Process/create (filled in) payment form (only available when a project doesn't work with subprojects)
+    # Retrieve any subprojects a normal logged in user is part of
+    user_subproject_ids = []
+    if project.contains_subprojects and current_user.is_authenticated and not project_owner:
+        for subproject in project.subprojects:
+            if subproject.has_user(current_user.id):
+                user_subproject_ids.append(subproject.id)
+
+    # Process/create (filled in) payment form
     payment_forms = {}
     transaction_attachment_form = ''
     remove_attachment_form = ''
-    if project_owner and not project.contains_subprojects:
-        payment_form_return = util.process_payment_form(request, project, is_subproject=False)
+    if project_owner or user_subproject_ids:
+        # Process filled in payment form
+        payment_form_return = process_payment_form(request, project, project_owner, user_subproject_ids, is_subproject=False)
         if payment_form_return:
             return payment_form_return
 
         # Populate the payment forms which allows the user to edit it
-        payment_forms = util.create_payment_forms(
-            project.payments,
-            project_owner,
-            project.make_category_select_options()
+        editable_payments = []
+        if project.contains_subprojects:
+            for subproject in project.subprojects:
+                if project_owner:
+                    editable_payments += subproject.payments
+                # If the user is not an admin/project owner then only allow it
+                # to edit payments from its subprojects
+                elif user_subproject_ids:
+                    for payment in subproject.payments:
+                        if payment.subproject_id in user_subproject_ids:
+                            editable_payments.append(payment)
+        else:
+            editable_payments = project.payments
+
+        payment_forms = create_payment_forms(
+            editable_payments,
+            project_owner
         )
 
         # Process transaction attachment form
         transaction_attachment_form = TransactionAttachmentForm(
             prefix="transaction_attachment_form"
         )
-        transaction_attachment_form_return = util.process_transaction_attachment_form(
+        transaction_attachment_form_return = process_transaction_attachment_form(
             request,
             transaction_attachment_form,
+            project_owner,
+            user_subproject_ids,
             project.id
         )
         if transaction_attachment_form_return:
@@ -400,7 +426,7 @@ def project(project_id):
         remove_attachment_form = RemoveAttachmentForm(
             prefix="remove_attachment_form"
         )
-        remove_attachment_form_return = util.process_remove_attachment_form(
+        remove_attachment_form_return = process_remove_attachment_form(
             remove_attachment_form,
             project.id,
         )
@@ -687,7 +713,6 @@ def project(project_id):
         'description': project.description,
         'hidden': project.hidden,
         'hidden_sponsors': project.hidden_sponsors,
-        'project_owner': project_owner,
         'already_authorized': already_authorized,
         'bunq_token': bunq_token,
         'iban': project.iban,
@@ -721,6 +746,7 @@ def project(project_id):
         funder_forms=funder_forms,
         new_funder_form=FunderForm(prefix="funder_form"),
         project_owner=project_owner,
+        user_subproject_ids=user_subproject_ids,
         timestamp=util.get_export_timestamp(),
         server_name=app.config['SERVER_NAME'],
         bunq_client_id=app.config['BUNQ_CLIENT_ID'],
@@ -869,18 +895,23 @@ def subproject(project_id, subproject_id):
             subproject.iban, subproject.iban_name
         )
 
+    # Retrieve the subproject id a normal logged in user is part of
+    user_subproject_ids = []
+    if current_user.is_authenticated and not project_owner:
+        if subproject.has_user(current_user.id):
+            user_subproject_ids.append(subproject.id)
+
     # Process filled in payment form
-    payment_form_return = util.process_payment_form(request, subproject, is_subproject=True)
+    payment_form_return = process_payment_form(request, subproject, project_owner, user_subproject_ids, is_subproject=True)
     if payment_form_return:
         return payment_form_return
 
     # Populate the payment forms which allows the user to edit it
     payment_forms = {}
     if project_owner or user_in_subproject:
-        payment_forms = util.create_payment_forms(
+        payment_forms = create_payment_forms(
             subproject.payments,
-            project_owner,
-            subproject.make_category_select_options()
+            project_owner
         )
 
     # Process filled in category form
@@ -1007,9 +1038,11 @@ def subproject(project_id, subproject_id):
         transaction_attachment_form = TransactionAttachmentForm(
             prefix="transaction_attachment_form"
         )
-        transaction_attachment_form_return = util.process_transaction_attachment_form(
+        transaction_attachment_form_return = process_transaction_attachment_form(
             request,
             transaction_attachment_form,
+            project_owner,
+            user_subproject_ids,
             subproject.project.id,
             subproject.id
         )
@@ -1020,7 +1053,7 @@ def subproject(project_id, subproject_id):
         remove_attachment_form = RemoveAttachmentForm(
             prefix="remove_attachment_form"
         )
-        remove_attachment_form_return = util.process_remove_attachment_form(
+        remove_attachment_form_return = process_remove_attachment_form(
             remove_attachment_form,
             subproject.project.id,
             subproject.id
