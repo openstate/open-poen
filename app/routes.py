@@ -170,10 +170,18 @@ def index():
     else:
         util.flash_form_errors(project_form, request)
 
-    # Retrieve data for each project
+    # Calculate amounts awarded and spent
+    # total_awarded = all current project balances
+    #               + abs(all spent project amounts)
+    #               - all amounts received from own subprojects (in the
+    #                 case the didn't spend all their money and gave it
+    #                 back)
+    # total_spent = abs(all spend subproject amounts)
+    #             - all amounts paid back by suprojects to their project
     total_awarded = 0
     total_spent = 0
     project_data = []
+    # Retrieve data for each project
     for project in Project.query.all():
         project_owner = False
         if current_user.is_authenticated and (
