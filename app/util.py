@@ -462,25 +462,6 @@ def calculate_subproject_amounts(subproject_id):
     return amounts
 
 
-def calculate_total_amounts():
-    # Calculate amounts awarded and spent
-    # total_awarded = all current project balances
-    #               + abs(all spent project amounts)
-    #               - all amounts received from own subprojects (in the
-    #                 case the didn't spend all their money and gave it
-    #                 back)
-    # total_spent = abs(all spend subproject amounts)
-    #             - all amounts paid back by suprojects to their project
-    total_awarded = 0
-    total_spent = 0
-    for project in Project.query.all():
-        amounts = calculate_project_amounts(project.id)
-        total_awarded += amounts['awarded']
-        total_spent += amounts['spent']
-
-    return total_awarded, total_spent
-
-
 # Check if the given form is in the request
 def form_in_request(form, request):
     if not request.form:
