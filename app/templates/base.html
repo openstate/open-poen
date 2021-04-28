@@ -47,7 +47,9 @@
     <nav class="navbar navbar-fixed-top my-auto">
       <div class="col-4">
         {% if current_user.is_authenticated %}
-          <h1>{{ current_user.first_name }} {{ current_user.last_name }}</h1>
+          <a class="text-blue-dark" href="{{ url_for('profile')}}">
+            <h1>{{ current_user.first_name }} {{ current_user.last_name }}</h1>
+          </a>
         {% endif %}
       </div>
 
