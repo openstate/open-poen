@@ -153,7 +153,7 @@
               <ul class="card-small-list mx-auto my-auto">
                 {% for user in (subproject.project.users|list + subproject.users|list) | unique %}
                   {% if user.first_name and not user.hidden %}
-                    <li>{{ user.first_name }} {{ user.last_name }}</li>
+                    <li><a href="{{ url_for('profile', user_id=user.id) }}">{{ user.first_name }} {{ user.last_name }}</a></li>
                   {% endif %}
                 {% endfor %}
               </ul>
@@ -638,7 +638,9 @@
   {# We can't put the modal code next to the button code, because it doesn't seem to work in combination with Bootstrap Table's detail view #}
   {% if remove_attachment_form %}
     {% for payment in subproject.payments %}
-      {% include 'partials/remove_attachment_form.html' %}
+      {% for attachment in payment.attachments %}
+        {% include 'partials/remove_attachment_form.html' %}
+      {% endfor %}
     {% endfor %}
   {% endif %}
 
