@@ -51,21 +51,6 @@ payment_attachment = db.Table(
 )
 
 
-# Assocation table between User and File for images
-user_image = db.Table(
-    'user_image',
-    db.Column(
-        'user_id', db.Integer, db.ForeignKey(
-            'user.id', ondelete='CASCADE'
-        )
-    ),
-    db.Column(
-        'file_id', db.Integer, db.ForeignKey('file.id', ondelete='CASCADE')
-    ),
-    db.PrimaryKeyConstraint('user_id', 'file_id')
-)
-
-
 # Assocation table between Project and File for images
 project_image = db.Table(
     'project_image',
@@ -136,14 +121,10 @@ class User(UserMixin, db.Model):
     biography = db.Column(db.String(1000))
     hidden = db.Column(db.Boolean, default=False)
     active = db.Column(db.Boolean, default=True)
+    image = db.Column(db.Integer, db.ForeignKey('file.id', ondelete='SET NULL'))
 
     debit_cards = db.relationship('DebitCard', backref='user', lazy='dynamic')
     payments = db.relationship('Payment', backref='user', lazy='dynamic')
-    images = db.relationship(
-        'File',
-        secondary=user_image,
-        lazy='dynamic'
-    )
 
     def is_active(self):
         return self.active

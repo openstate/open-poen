@@ -6,7 +6,7 @@ import os
 
 from app import app, db
 from app.forms import CategoryForm, PaymentForm
-from app.models import Category, Payment, File
+from app.models import Category, Payment, File, User
 from app.util import flash_form_errors
 
 
@@ -206,6 +206,39 @@ def create_payment_forms(payments, project_owner):
     return payment_forms
 
 
+# Save attachment to disk
+def save_attachment(f, db_object, folder):
+    filename = secure_filename(f.filename)
+    filename = '%s_%s' % (
+        datetime.now(app.config['TZ']).isoformat()[:19], filename
+    )
+    filepath = os.path.join(
+        os.path.abspath(
+            os.path.join(
+                app.instance_path, '../%s/%s' % (
+                    app.config['UPLOAD_FOLDER'],
+                    folder
+                )
+            )
+        ),
+        filename
+    )
+    f.save(filepath)
+    new_file = File(filename=filename, mimetype=f.headers[1][1])
+    db.session.add(new_file)
+    db.session.commit()
+
+    # Link attachment to payment in the database
+    # If the db object is a User, then save as FK and store the id
+    if isinstance(db_object, User):
+        db_object.image = new_file.id
+        db.session.commit()
+    # Elif this is a Payment, then save as many-to-many and we need to append
+    elif isinstance(db_object, Payment):
+        db_object.attachments.append(new_file)
+        db.session.commit()
+
+
 # Process filled in transaction attachment form
 def process_transaction_attachment_form(request, transaction_attachment_form, project_owner, user_subproject_ids, project_id=0, subproject_id=0):
     if transaction_attachment_form.validate_on_submit():
@@ -218,30 +251,7 @@ def process_transaction_attachment_form(request, transaction_attachment_form, pr
         if not project_owner and not payment.subproject.id in user_subproject_ids:
             return
 
-        # Save attachment to disk
-        f = transaction_attachment_form.data_file.data
-        filename = secure_filename(f.filename)
-        filename = '%s_%s' % (
-            datetime.now(app.config['TZ']).isoformat()[:19], filename
-        )
-        filepath = os.path.join(
-            os.path.abspath(
-                os.path.join(
-                    app.instance_path, '../%s/transaction-attachment' % (
-                        app.config['UPLOAD_FOLDER']
-                    )
-                )
-            ),
-            filename
-        )
-        f.save(filepath)
-        new_file = File(filename=filename, mimetype=f.headers[1][1])
-        db.session.add(new_file)
-        db.session.commit()
-
-        # Link attachment to payment in the database
-        payment.attachments.append(new_file)
-        db.session.commit()
+        save_attachment(transaction_attachment_form.data_file.data, payment, 'transaction-attachment')
 
         # redirect back to clear form data
         if subproject_id:

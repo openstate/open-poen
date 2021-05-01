@@ -682,7 +682,9 @@
   {% if remove_attachment_form %}
     {% for payment in payments %}
       {% if project_owner or payment.subproject.id in user_subproject_ids %}
-        {% include 'partials/remove_attachment_form.html' %}
+        {% for attachment in payment.attachments %}
+          {% include 'partials/remove_attachment_form.html' %}
+        {% endfor %}
       {% endif %}
     {% endfor %}
   {% endif %}
