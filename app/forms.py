@@ -281,6 +281,24 @@ class EditProfileForm(FlaskForm):
         'Beschrijving', validators=[DataRequired(), Length(max=1000)]
     )
 
+    allowed_extensions = [
+        'jpg', 'jpeg', 'png'
+    ]
+    data_file = FileField(
+        'Profielfoto (als u al een profielfoto heeft en een nieuwe toevoegt dan wordt de oude verwijderd)',
+        validators=[
+            FileAllowed(
+                allowed_extensions,
+                (
+                    'bestandstype niet toegstaan. Enkel de volgende '
+                    'bestandstypen worden geaccepteerd: %s' % ', '.join(
+                        allowed_extensions
+                    )
+                )
+            )
+        ]
+    )
+
     submit = SubmitField(
         'Opslaan',
         render_kw={

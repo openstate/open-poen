@@ -18,7 +18,8 @@ from app.models import (
 from app import util
 from app.form_processing import (
     process_category_form, process_payment_form, create_payment_forms,
-    process_transaction_attachment_form, process_remove_attachment_form
+    process_transaction_attachment_form, process_remove_attachment_form,
+    save_attachment
 )
 from sqlalchemy.exc import IntegrityError
 
@@ -1180,13 +1181,42 @@ def logout():
     return redirect(url_for('index'))
 
 
-@app.route("/profiel", methods=['GET', 'POST'])
+@app.route("/profiel/<user_id>", methods=['GET'])
+def profile(user_id):
+    user = User.query.filter_by(id=user_id).first()
+
+    return render_template(
+        'profiel.html',
+        user=user,
+        image=File.query.filter_by(id=user.image).first(),
+        footer=app.config['FOOTER']
+    )
+
+
+@app.route("/profiel-bewerken", methods=['GET', 'POST'])
 @login_required
-def profile():
+def profile_edit():
     # Process filled in edit profile form
     edit_profile_form = EditProfileForm(
         prefix="edit_profile_form"
     )
+
+    # Process image removal form
+    remove_attachment_form = RemoveAttachmentForm(
+        prefix="remove_attachment_form"
+    )
+    if remove_attachment_form.remove.data:
+        File.query.filter_by(id=remove_attachment_form.id.data).delete()
+        db.session.commit()
+        flash('<span class="text-default-green">Media is verwijderd</span>')
+
+        # redirect back to clear form data
+        return redirect(
+            url_for(
+                'profile',
+                user_id=current_user.id
+            )
+        )
 
     # Update profile
     if edit_profile_form.validate_on_submit():
@@ -1195,20 +1225,24 @@ def profile():
         )
         new_profile_data = {}
         for f in edit_profile_form:
-            if f.type != 'SubmitField' and f.type != 'CSRFTokenField':
+            if f.type != 'SubmitField' and f.type != 'CSRFTokenField' and f.short_name != 'data_file':
                 new_profile_data[f.short_name] = f.data
 
         # Update if the user exists
         if len(users.all()):
             users.update(new_profile_data)
             db.session.commit()
+
+            if edit_profile_form.data_file.data:
+                save_attachment(edit_profile_form.data_file.data, users[0], 'user-image')
+
             flash('<span class="text-default-green">gebruiker is bijgewerkt</span>')
 
         # redirect back to clear form data
         return redirect(
             url_for(
                 'profile',
-                id=current_user.id
+                user_id=current_user.id
             )
         )
     else:
@@ -1223,9 +1257,11 @@ def profile():
         }
     )
     return render_template(
-        'profiel.html',
+        'profiel-bewerken.html',
         footer=app.config['FOOTER'],
-        edit_profile_form=edit_profile_form
+        edit_profile_form=edit_profile_form,
+        remove_attachment_form=remove_attachment_form,
+        image=File.query.filter_by(id=current_user.image).first()
     )
 
 

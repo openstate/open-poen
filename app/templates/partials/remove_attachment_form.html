@@ -1,28 +1,26 @@
-{% for attachment in payment.attachments %}
-  <!-- Modal -->
-  <div class="modal fade" id="bijlage-verwijder-{{ attachment.id }}" tabindex="-1" role="dialog" aria-labelledby="bijlageVerwijderLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <form method="POST">
-          {{ remove_attachment_form.csrf_token }}
-          {{ remove_attachment_form.id(**{'value': attachment.id}) }}
-          <div class="modal-header">
-            <h5 class="modal-title" id="bijlageVerwijderLabel">Media Verwijderen</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Annuleren">
-              <span aria-hidden="true">&times;</span>
-            </button>
+<!-- Modal -->
+<div class="modal fade" id="bijlage-verwijder-{{ attachment.id }}" tabindex="-1" role="dialog" aria-labelledby="bijlageVerwijderLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <form method="POST">
+        {{ remove_attachment_form.csrf_token }}
+        {{ remove_attachment_form.id(**{'value': attachment.id}) }}
+        <div class="modal-header">
+          <h5 class="modal-title" id="bijlageVerwijderLabel">Media Verwijderen</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Annuleren">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div>
+            <p>Weet u zeker dat u deze media wilt verwijderen?</p>
           </div>
-          <div class="modal-body">
-            <div>
-              <p>Weet u zeker dat u deze media wilt verwijderen?</p>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuleren</button>
-            {{ remove_attachment_form.remove() }}
-          </div>
-        </form>
-      </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuleren</button>
+          {{ remove_attachment_form.remove() }}
+        </div>
+      </form>
     </div>
   </div>
-{% endfor %}
+</div>
