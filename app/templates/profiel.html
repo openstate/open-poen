@@ -53,7 +53,7 @@
             <b>Projecten</b>
             <ul>
             {% for project in user.projects %}
-              {% if not project.hidden %}
+              {% if not project.hidden or current_user.admin or current_user == user.id %}
                 <li><a href="{{ url_for('project', project_id=project.id) }}">{{ project.name }}</a></li>
               {% endif %}
             {% endfor %}
@@ -65,7 +65,7 @@
             <b>Initiatieven</b>
             <ul>
             {% for subproject in user.subprojects %}
-              {% if not subproject.project.hidden and not subproject.hidden %}
+              {% if (not subproject.project.hidden and not subproject.hidden) or current_user.admin or current_user == user.id %}
                 <li><a href="{{ url_for('subproject', project_id=subproject.project.id, subproject_id=subproject.id) }}">{{ subproject.project.name }} > {{ subproject.name }}</a></li>
               {% endif %}
             {% endfor %}
