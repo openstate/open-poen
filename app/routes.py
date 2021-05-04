@@ -58,14 +58,14 @@ def before_request():
 
     # If the current user has no first name, last name or biography then
     # send them to their profile page where they can add them
-    if current_user.is_authenticated and request.path != '/profiel':
+    if current_user.is_authenticated and request.path != '/profiel-bewerken':
         if (not current_user.first_name
                 or not current_user.last_name or not current_user.biography):
             flash(
                 '<span class="text-default-red">Sommige velden in uw profiel zijn nog '
                 'niet ingevuld. Vul deze in om verder te kunnen gaan.</span>'
             )
-            return redirect(url_for('profile'))
+            return redirect(url_for('profile-edit'))
 
 
 @app.route("/", methods=['GET', 'POST'])
