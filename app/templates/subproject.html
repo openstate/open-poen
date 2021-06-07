@@ -41,7 +41,12 @@
                   <h2>{{ amounts.spent_str }}</h2>
                 </div>
               </div>
-              <h3 class="text-center totaal">totaal {{ amounts.awarded_str }}</h3>
+              {% if budget %}
+                <h3 class="text-center totaal">totaal {{ budget }}</h3>
+                <p class="text-center">banksaldo {{ amounts.awarded_str }}</p>
+              {% else %}
+                <h3 class="text-center totaal">totaal {{ amounts.awarded_str }}</h3>
+              {% endif %}
 
               {% if project_owner %}
                 <br>

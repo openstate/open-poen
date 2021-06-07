@@ -176,6 +176,7 @@ class Project(db.Model):
     contains_subprojects = db.Column(db.Boolean, default=True)
     hidden = db.Column(db.Boolean, default=False)
     hidden_sponsors = db.Column(db.Boolean, default=False)
+    budget = db.Column(db.Integer)
 
     subprojects = db.relationship(
         'Subproject',
@@ -247,6 +248,7 @@ class Subproject(db.Model):
     name = db.Column(db.String(120), index=True)
     description = db.Column(db.Text)
     hidden = db.Column(db.Boolean, default=False)
+    budget = db.Column(db.Integer)
 
     users = db.relationship(
         'User',
