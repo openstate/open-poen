@@ -251,7 +251,12 @@
                         <h2>{{ project.amounts.spent_str }}</h2>
                       </div>
                     </div>
-                    <h3 class="text-center totaal">totaal {{ project.amounts.awarded_str }}</h3>
+                    {% if project.budget %}
+                      <h3 class="text-center totaal">totaal {{ project.budget }}</h3>
+                      <p class="text-center">banksaldo {{ project.amounts.awarded_str }}</p>
+                    {% else %}
+                      <h3 class="text-center totaal">totaal {{ project.amounts.awarded_str }}</h3>
+                    {% endif %}
                   </div>
                 </a>
               </div>
