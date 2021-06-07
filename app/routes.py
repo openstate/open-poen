@@ -197,6 +197,9 @@ def index():
         amounts = util.calculate_project_amounts(project.id)
         total_awarded += amounts['awarded']
         total_spent += amounts['spent']
+        budget = ''
+        if project.budget:
+            budget = util.format_currency(project.budget)
 
         project_data.append(
             {
@@ -204,7 +207,8 @@ def index():
                 'name': project.name,
                 'hidden': project.hidden,
                 'project_owner': project_owner,
-                'amounts': amounts
+                'amounts': amounts,
+                'budget': budget
             }
         )
 
@@ -680,6 +684,7 @@ def project(project_id):
             'description': project.description,
             'hidden': project.hidden,
             'hidden_sponsors': project.hidden_sponsors,
+            'budget': project.budget,
             'id': project.id,
             'contains_subprojects': project.contains_subprojects
         })
@@ -738,12 +743,17 @@ def project(project_id):
     if app.config['BUNQ_ENVIRONMENT_TYPE'] == ApiEnvironmentType.SANDBOX:
         base_url_auth = 'https://oauth.sandbox.bunq.com'
 
+    budget = ''
+    if project.budget:
+        budget = util.format_currency(project.budget)
+
     return render_template(
         'project.html',
         footer=app.config['FOOTER'],
         project=project,
         project_data=project_data,
         amounts=amounts,
+        budget=budget,
         payments=payments,
         project_form=project_form,
         edit_project_owner_forms=edit_project_owner_forms,
@@ -891,6 +901,7 @@ def subproject(project_id, subproject_id):
         'name': subproject.name,
         'description': subproject.description,
         'hidden': subproject.hidden,
+        'budget': subproject.budget,
         'project_id': subproject.project.id,
         'id': subproject.id
     })
@@ -1070,11 +1081,15 @@ def subproject(project_id, subproject_id):
         if remove_attachment_form_return:
             return remove_attachment_form_return
 
+    budget = ''
+    if subproject.budget:
+        budget = util.format_currency(subproject.budget)
     return render_template(
         'subproject.html',
         footer=app.config['FOOTER'],
         subproject=subproject,
         amounts=amounts,
+        budget=budget,
         subproject_form=subproject_form,
         payment_forms=payment_forms,
         transaction_attachment_form=transaction_attachment_form,

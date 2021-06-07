@@ -83,6 +83,7 @@ class ProjectForm(FlaskForm):
     )
     hidden = BooleanField('Project verbergen')
     hidden_sponsors = BooleanField('Sponsoren verbergen')
+    budget = IntegerField('Budget voor dit project', validators=[Optional()])
     iban = SelectField('IBAN', validators=[Optional()], choices=[])
     id = IntegerField(widget=HiddenInput())
 
@@ -105,6 +106,7 @@ class SubprojectForm(FlaskForm):
     name = StringField('Naam', validators=[DataRequired(), Length(max=120)])
     description = TextAreaField('Beschrijving', validators=[DataRequired()])
     hidden = BooleanField('Initiatief verbergen')
+    budget = IntegerField('Budget voor dit initiatief', validators=[Optional()])
     iban = SelectField(
         'IBAN', validators=[Optional()], choices=[]
     )
