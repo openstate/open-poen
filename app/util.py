@@ -325,7 +325,10 @@ def calculate_project_amounts(project_id):
     # Calculate amounts awarded
     subproject_ibans = [s.iban for s in project.subprojects]
     project_awarded = 0
-    if len(list(project.payments)) > 0:
+    # If the project has a manually set budget, then use that
+    if project.budget:
+        project_awarded = project.budget
+    elif len(list(project.payments)) > 0:
         # Initialize the project_awarded amount to the most recent payment
         # with a balance_after_mutation_value (manually added payments don't
         # have this value)
@@ -333,7 +336,7 @@ def calculate_project_amounts(project_id):
             Payment.created.desc()
         )
         for payment in payments:
-            if payment.balance_after_mutation_value:
+            if not payment.balance_after_mutation_value == None:
                 project_awarded = payment.balance_after_mutation_value
                 break
 
@@ -348,7 +351,7 @@ def calculate_project_amounts(project_id):
             else:
                 project_awarded += abs(payment.amount_value)
     else:
-        # If we have not project payments (e.g. because we don't
+        # If we don't have project payments (e.g. because we don't
         # have a main IBAN), use the incomming ammounts of the sub
         # accounts
         subprojects = Subproject.query.filter_by(project_id=project_id).all()
@@ -429,7 +432,10 @@ def calculate_subproject_amounts(subproject_id):
 
     # Calculate amounts awarded
     subproject_awarded = 0
-    if len(list(subproject.payments)) > 0:
+    # If the subproject has a manually set budget, then use that
+    if subproject.budget:
+        subproject_awarded = subproject.budget
+    elif len(list(subproject.payments)) > 0:
         # Initialize the subproject_awarded amount to the most recent payment
         # with a balance_after_mutation_value (manually added payments don't
         # have this value)
@@ -437,7 +443,7 @@ def calculate_subproject_amounts(subproject_id):
             Payment.created.desc()
         )
         for payment in payments:
-            if payment.balance_after_mutation_value:
+            if not payment.balance_after_mutation_value == None:
                 subproject_awarded = payment.balance_after_mutation_value
                 break
 

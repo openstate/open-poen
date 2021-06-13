@@ -374,7 +374,7 @@ class Payment(db.Model):
         return_value = ''
         # Manually added payments don't have the balance_after_mutation_value
         # field
-        if self.balance_after_mutation_value:
+        if not self.balance_after_mutation_value == None:
             return_value = locale.format(
                 "%.2f",
                 self.balance_after_mutation_value,
