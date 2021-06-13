@@ -5,6 +5,10 @@
   {{ super() }}
 {% endblock %}
 
+{% block body %}
+  <body class="bg-grey subproject transaction">
+{% endblock %}
+
 {% block content %}
   <div class="container poen-lead project-lead bg-blue-light">
     <div class="text-center poen-breadcrumb">
@@ -284,7 +288,50 @@
       <div class="col-12 col-lg-10 offset-lg-1 poen-content bg-white">
         <div class="row">
           <div class="col-12">
-            <table class="payment-table" data-locale="nl-NL" data-detail-view="true" data-detail-view-by-click="true" data-detail-view-icon="false" data-detail-formatter="detailFormatter" data-show-export="true" data-export-data-type="all" data-export-types="['csv', 'txt', 'json', 'xml', 'sql']" data-export-options='{"fileName": "{{ timestamp }}-{{ subproject.project.name | replace(' ', '_') }}-{{ subproject.name | replace(' ', '_')  }}"}'>
+            <div id="toolbar">
+              {% if project_owner %}
+                <!-- Button trigger modal -->
+                <button type="button" class="btn button-poen-small bg-grey-blue mx-auto" data-toggle="modal" data-target="#transactie-toevoegen">
+                  + transactie
+                </button>
+
+                <!-- Modal -->
+                <div class="modal fade" id="transactie-toevoegen" tabindex="-1" role="dialog" aria-labelledby="transactieToevoegenLabel" aria-hidden="true">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <form method="POST">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="transactieToevoegenLabel">Transactie Toevoegen</h5>
+                          <button type="button" class="close" data-dismiss="modal" aria-label="Annuleren">
+                            <span aria-hidden="true">&times;</span>
+                          </button>
+                        </div>
+                        <div class="modal-body">
+                          {{ new_payment_form.csrf_token }}
+
+                          {% for f in new_payment_form %}
+                            {% if f.widget.input_type != 'hidden' and f.widget.input_type != 'submit' %}
+                              <div>
+                                {{ f.label }}
+                                <br>
+                                {{ f }}
+                                <br>
+                                <br>
+                              </div>
+                            {% endif %}
+                          {% endfor %}
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuleren</button>
+                          {{ new_payment_form.submit() }}
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+            </div>
+            <table class="payment-table" data-locale="nl-NL" data-toolbar="#toolbar" data-detail-view="true" data-detail-view-by-click="true" data-detail-view-icon="false" data-detail-formatter="detailFormatter" data-show-export="true" data-export-data-type="all" data-export-types="['csv', 'txt', 'json', 'xml', 'sql']" data-export-options='{"fileName": "{{ timestamp }}-{{ subproject.project.name | replace(' ', '_') }}-{{ subproject.name | replace(' ', '_')  }}"}'>
               <thead>
                 <tr>
                   {# Hidden column used to make search work with the detailed view; NOTE: the id should always be the first column of the table #}
@@ -308,7 +355,7 @@
               <tbody>
                 {% for payment in subproject.payments|sort(attribute='created', reverse=true) %}
                   {% if not payment.hidden or (project_owner or user_in_subproject) %}
-                    <tr>
+                    <tr{% if payment.type == 'MANUAL' %} class="manual-payment"{% endif %}>
                       <td>
                         <div class="cell">
                           {{ payment.id }}
@@ -428,6 +475,16 @@
                                 <br>
                                 <br>
 
+                                <b>Route</b>
+                                <br>
+                                {% if payment.id in payment_forms %}
+                                  {{ payment_forms[payment.id]['route'] }}
+                                {% else %}
+                                  {{ payment.route }}
+                                {% endif %}
+                                <br>
+                                <br>
+
                                 <b>Categorie</b>
                                 <br>
                                 {% if payment_forms %}
@@ -471,7 +528,15 @@
                                     {{ payment_forms[payment.id]['hidden'] }}
                                     <br>
                                   {% endif %}
+
                                   {{ payment_forms[payment.id].submit }}
+
+                                  {% if payment_forms[payment.id].remove %}
+                                    <!-- Button trigger modal -->
+                                    <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#transactie-verwijder-{{ payment.id }}">
+                                      Verwijderen
+                                    </button>
+                                  {% endif %}
                                   </form>
                                 {% endif %}
 
@@ -646,6 +711,39 @@
       {% for attachment in payment.attachments %}
         {% include 'partials/remove_attachment_form.html' %}
       {% endfor %}
+    {% endfor %}
+  {% endif %}
+
+  {% if project_owner %}
+    {% for payment in subproject.payments %}
+      {% if payment_forms[payment.id].remove %}
+        <!-- Modal -->
+        <div class="modal fade" id="transactie-verwijder-{{ payment.id }}" tabindex="-1" role="dialog" aria-labelledby="transactieVerwijderLabel" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <form method="POST">
+                <div class="modal-header">
+                  <h5 class="modal-title" id="transactieVerwijderLabel">Transactie Verwijderen</h5>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Annuleren">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <div>
+                    <p>Weet u zeker dat u deze transactie wilt verwijderen?</p>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuleren</button>
+                  {{ payment_forms[payment.id].csrf_token }}
+                  {{ payment_forms[payment.id].id }}
+                  {{ payment_forms[payment.id].remove }}
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      {% endif %}
     {% endfor %}
   {% endif %}
 

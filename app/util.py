@@ -14,7 +14,6 @@ import sys
 
 from app import app, db
 from app.email import send_invite
-from app.forms import PaymentForm, TransactionAttachmentForm, RemoveAttachmentForm
 from app.models import Payment, Project, Subproject, IBAN, User
 
 from sqlalchemy.exc import IntegrityError
@@ -271,6 +270,7 @@ def get_new_payments(project_id):
                             del payment['scheduled_id']
 
                         p = Payment(**payment)
+                        p.route = 'subsidie'
                         db.session.add(p)
                         db.session.commit()
                         new_payments_count += 1
@@ -326,21 +326,32 @@ def calculate_project_amounts(project_id):
     subproject_ibans = [s.iban for s in project.subprojects]
     project_awarded = 0
     if len(list(project.payments)) > 0:
-        project_awarded = project.payments.order_by(
+        # Initialize the project_awarded amount to the most recent payment
+        # with a balance_after_mutation_value (manually added payments don't
+        # have this value)
+        payments = project.payments.order_by(
             Payment.created.desc()
-        ).first().balance_after_mutation_value
+        )
+        for payment in payments:
+            if not payment.balance_after_mutation_value == None:
+                project_awarded = payment.balance_after_mutation_value
+                break
+
         for payment in project.payments:
+            # Don't process manually added transactions
+            if payment.type == 'MANUAL':
+                continue
             # Don't add incoming payments (as they are already
             # reflected in the current balance), but do actively
             # subtract incoming payments from our own subproject
             # IBANs
-            if payment.amount_value > 0:
+            elif payment.amount_value > 0:
                 if payment.counterparty_alias_value in subproject_ibans:
                     project_awarded -= payment.amount_value
             else:
                 project_awarded += abs(payment.amount_value)
     else:
-        # If we have not project payments (e.g. because we don't
+        # If we don't have project payments (e.g. because we don't
         # have a main IBAN), use the incomming ammounts of the sub
         # accounts
         subprojects = Subproject.query.filter_by(project_id=project_id).all()
@@ -354,8 +365,9 @@ def calculate_project_amounts(project_id):
                 )
                 for payment in subproject.payments:
                     # Don't add incoming payments (as they are already
-                    # reflected in the current balance)
-                    if payment.amount_value > 0:
+                    # reflected in the current balance) or manually added
+                    # transactions
+                    if payment.amount_value > 0 or payment.type == 'MANUAL':
                         continue
                     else:
                         project_awarded += abs(payment.amount_value)
@@ -396,11 +408,22 @@ def calculate_project_amounts(project_id):
                 amounts['spent'] / amounts['awarded']
             )
         )
+        if project.budget:
+            amounts['percentage_spent_str'] = (
+                format_percent(
+                    amounts['spent'] / project.budget
+                )
+            )
 
     amounts['spent_str'] = format_currency(amounts['spent'])
+
     amounts['left_str'] = format_currency(
         round(amounts['awarded']) - round(amounts['spent'])
     )
+    if project.budget:
+        amounts['left_str'] = format_currency(
+            round(project.budget) - round(amounts['spent'])
+        )
 
     return amounts
 
@@ -411,15 +434,21 @@ def calculate_subproject_amounts(subproject_id):
     # Calculate amounts awarded
     subproject_awarded = 0
     if len(list(subproject.payments)) > 0:
-        subproject_awarded = (
-            subproject.payments.order_by(
-                Payment.created.desc()
-            ).first().balance_after_mutation_value
+        # Initialize the subproject_awarded amount to the most recent payment
+        # with a balance_after_mutation_value (manually added payments don't
+        # have this value)
+        payments = subproject.payments.order_by(
+            Payment.created.desc()
         )
+        for payment in payments:
+            if not payment.balance_after_mutation_value == None:
+                subproject_awarded = payment.balance_after_mutation_value
+                break
+
         for payment in subproject.payments:
             # Don't add incoming payments (as they are already
             # reflected in the current balance)
-            if payment.amount_value > 0:
+            if payment.amount_value > 0 or payment.type == 'MANUAL':
                 continue
             else:
                 subproject_awarded += abs(payment.amount_value)
@@ -453,11 +482,22 @@ def calculate_subproject_amounts(subproject_id):
                 amounts['spent'] / amounts['awarded']
             )
         )
+        if subproject.budget:
+            amounts['percentage_spent_str'] = (
+                format_percent(
+                    amounts['spent'] / subproject.budget
+                )
+            )
 
     amounts['spent_str'] = format_currency(amounts['spent'])
+
     amounts['left_str'] = format_currency(
         round(amounts['awarded']) - round(amounts['spent'])
     )
+    if subproject.budget:
+        amounts['left_str'] = format_currency(
+            round(subproject.budget) - round(amounts['spent'])
+        )
 
     return amounts
 

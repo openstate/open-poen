@@ -7,7 +7,7 @@ from wtforms.validators import (
 from wtforms.widgets import HiddenInput
 from wtforms import (
     StringField, IntegerField, BooleanField, PasswordField, SubmitField,
-    SelectField, TextAreaField
+    SelectField, TextAreaField, DecimalField
 )
 from wtforms.fields.html5 import EmailField
 
@@ -128,6 +128,65 @@ class SubprojectForm(FlaskForm):
     )
 
 
+# Add a new payment manually
+class NewPaymentForm(FlaskForm):
+    project_id = IntegerField(widget=HiddenInput())
+
+    # Call the set_category function when the user selects a different
+    # subproject (only on project pages) as we need to set new categories
+    # that belong to that subproject
+    subproject_id = SelectField(
+        'Subproject',
+        coerce=int,
+        choices=[],
+        render_kw={'onchange': 'set_category(this)'}
+    )
+
+    category_id = SelectField('Categorie', validators=[Optional()], choices=[])
+
+    route = SelectField(
+        'Route',
+        choices=[
+            ('subsidie', 'subsidie'),
+            ('inbesteding', 'inbesteding'),
+            ('aanbesteding', 'aanbesteding')
+        ]
+    )
+
+    amount_value = DecimalField('Bedrag')
+
+    alias_name = StringField(
+        'Verstuurder naam', validators=[Length(max=120)]
+    )
+    alias_value = StringField(
+        'Verstuurder IBAN', validators=[Length(max=120)]
+    )
+
+    counterparty_alias_name = StringField(
+        'Ontvanger naam', validators=[Length(max=120)]
+    )
+    counterparty_alias_value = StringField(
+        'Ontvanger IBAN', validators=[Length(max=120)]
+    )
+
+    short_user_description = StringField(
+        'Korte beschrijving', validators=[Length(max=50)]
+    )
+    long_user_description = TextAreaField(
+        'Lange beschrijving', validators=[Length(max=2000)]
+    )
+
+    hidden = BooleanField('Transactie verbergen')
+
+    submit = SubmitField(
+        'Opslaan',
+        render_kw={
+            'class': 'btn btn-info'
+        }
+    )
+
+
+# Edit a payment
 class PaymentForm(FlaskForm):
     short_user_description = StringField(
         'Korte beschrijving', validators=[Length(max=50)]
@@ -137,12 +196,21 @@ class PaymentForm(FlaskForm):
     )
     hidden = BooleanField('Transactie verbergen')
     category_id = SelectField('Categorie', validators=[Optional()], choices=[])
+    route = SelectField('Route', choices=['inbesteding', 'aanbesteding', 'subsidie'])
     id = IntegerField(widget=HiddenInput())
 
     submit = SubmitField(
         'Opslaan',
         render_kw={
             'class': 'btn btn-info'
+        }
+    )
+
+    # Only manually added payments are allowed to be removed
+    remove = SubmitField(
+        'Verwijderen',
+        render_kw={
+            'class': 'btn btn-danger'
         }
     )
 
