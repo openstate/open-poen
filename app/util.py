@@ -325,10 +325,7 @@ def calculate_project_amounts(project_id):
     # Calculate amounts awarded
     subproject_ibans = [s.iban for s in project.subprojects]
     project_awarded = 0
-    # If the project has a manually set budget, then use that
-    if project.budget:
-        project_awarded = project.budget
-    elif len(list(project.payments)) > 0:
+    if len(list(project.payments)) > 0:
         # Initialize the project_awarded amount to the most recent payment
         # with a balance_after_mutation_value (manually added payments don't
         # have this value)
@@ -341,11 +338,14 @@ def calculate_project_amounts(project_id):
                 break
 
         for payment in project.payments:
+            # Don't process manually added transactions
+            if payment.type == 'MANUAL':
+                continue
             # Don't add incoming payments (as they are already
             # reflected in the current balance), but do actively
             # subtract incoming payments from our own subproject
             # IBANs
-            if payment.amount_value > 0:
+            elif payment.amount_value > 0:
                 if payment.counterparty_alias_value in subproject_ibans:
                     project_awarded -= payment.amount_value
             else:
@@ -365,8 +365,9 @@ def calculate_project_amounts(project_id):
                 )
                 for payment in subproject.payments:
                     # Don't add incoming payments (as they are already
-                    # reflected in the current balance)
-                    if payment.amount_value > 0:
+                    # reflected in the current balance) or manually added
+                    # transactions
+                    if payment.amount_value > 0 or payment.type == 'MANUAL':
                         continue
                     else:
                         project_awarded += abs(payment.amount_value)
@@ -432,10 +433,7 @@ def calculate_subproject_amounts(subproject_id):
 
     # Calculate amounts awarded
     subproject_awarded = 0
-    # If the subproject has a manually set budget, then use that
-    if subproject.budget:
-        subproject_awarded = subproject.budget
-    elif len(list(subproject.payments)) > 0:
+    if len(list(subproject.payments)) > 0:
         # Initialize the subproject_awarded amount to the most recent payment
         # with a balance_after_mutation_value (manually added payments don't
         # have this value)
@@ -450,7 +448,7 @@ def calculate_subproject_amounts(subproject_id):
         for payment in subproject.payments:
             # Don't add incoming payments (as they are already
             # reflected in the current balance)
-            if payment.amount_value > 0:
+            if payment.amount_value > 0 or payment.type == 'MANUAL':
                 continue
             else:
                 subproject_awarded += abs(payment.amount_value)

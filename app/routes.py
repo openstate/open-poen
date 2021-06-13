@@ -196,7 +196,11 @@ def index():
 
         # Retrieve the amounts for this project
         amounts = util.calculate_project_amounts(project.id)
-        total_awarded += amounts['awarded']
+        # Use budget for the awarded amount if available
+        if project.budget:
+            total_awarded += project.budget
+        else:
+            total_awarded += amounts['awarded']
         total_spent += amounts['spent']
         budget = ''
         if project.budget:
@@ -515,8 +519,6 @@ def project(project_id):
         )
         if remove_attachment_form_return:
             return remove_attachment_form_return
-
-    amounts = util.calculate_project_amounts(project_id)
 
     payments = []
     if project.contains_subprojects:
@@ -1076,8 +1078,6 @@ def subproject(project_id, subproject_id):
             )
         )
 
-    amounts = util.calculate_subproject_amounts(subproject_id)
-
     # Process filled in edit user form
     edit_user_form = EditUserForm(
         prefix="edit_user_form"
@@ -1201,6 +1201,9 @@ def subproject(project_id, subproject_id):
         )
         if remove_attachment_form_return:
             return remove_attachment_form_return
+
+    # Retrieve the amounts for this subproject
+    amounts = util.calculate_subproject_amounts(subproject_id)
 
     budget = ''
     if subproject.budget:
