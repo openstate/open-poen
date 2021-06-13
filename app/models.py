@@ -222,7 +222,7 @@ class Project(db.Model):
             project_user.c.user_id == user_id
         ).count() > 0
 
-    # Create select options to be shown in a dropdown menu
+    # Create IBAN select options to be shown in a dropdown menu
     def make_select_options(self):
         select_options = [('', '')]
         for iban in self.ibans:
@@ -296,7 +296,9 @@ class DebitCard(db.Model):
 
 
 class Payment(db.Model):
+    # Currently not used
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+
     subproject_id = db.Column(
         db.Integer, db.ForeignKey('subproject.id', ondelete='SET NULL')
     )
@@ -343,13 +345,18 @@ class Payment(db.Model):
     updated = db.Column(db.DateTime(timezone=True))
     monetary_account_id = db.Column(db.Integer(), index=True)
     sub_type = db.Column(db.String(12))
+    # Currently 'BUNQ' or 'MANUAL'
     type = db.Column(db.String(12))
+    # Can be 'inbesteding', 'aanbesteding' or 'subsidie'
+    route = db.Column(db.String(12))
 
     # Fields coming from the user
     short_user_description = db.Column(db.String(50))
     long_user_description = db.Column(db.String(1000))
     hidden = db.Column(db.Boolean, default=False)
 
+    # Initial idea to allow people to flag suspicous transactions, currently
+    # not implemented
     flag_suspicious_count = db.Column(db.Integer)
 
     attachments = db.relationship(
@@ -364,12 +371,17 @@ class Payment(db.Model):
         )
 
     def get_formatted_balance(self):
-        return locale.format(
-            "%.2f",
-            self.balance_after_mutation_value,
-            grouping=True,
-            monetary=True
-        )
+        return_value = ''
+        # Manually added payments don't have the balance_after_mutation_value
+        # field
+        if self.balance_after_mutation_value:
+            return_value = locale.format(
+                "%.2f",
+                self.balance_after_mutation_value,
+                grouping=True,
+                monetary=True
+            )
+        return return_value
 
 
 class Funder(db.Model):

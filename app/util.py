@@ -14,7 +14,6 @@ import sys
 
 from app import app, db
 from app.email import send_invite
-from app.forms import PaymentForm, TransactionAttachmentForm, RemoveAttachmentForm
 from app.models import Payment, Project, Subproject, IBAN, User
 
 from sqlalchemy.exc import IntegrityError
@@ -271,6 +270,7 @@ def get_new_payments(project_id):
                             del payment['scheduled_id']
 
                         p = Payment(**payment)
+                        p.route = 'subsidie'
                         db.session.add(p)
                         db.session.commit()
                         new_payments_count += 1
@@ -326,9 +326,17 @@ def calculate_project_amounts(project_id):
     subproject_ibans = [s.iban for s in project.subprojects]
     project_awarded = 0
     if len(list(project.payments)) > 0:
-        project_awarded = project.payments.order_by(
+        # Initialize the project_awarded amount to the most recent payment
+        # with a balance_after_mutation_value (manually added payments don't
+        # have this value)
+        payments = project.payments.order_by(
             Payment.created.desc()
-        ).first().balance_after_mutation_value
+        )
+        for payment in payments:
+            if payment.balance_after_mutation_value:
+                project_awarded = payment.balance_after_mutation_value
+                break
+
         for payment in project.payments:
             # Don't add incoming payments (as they are already
             # reflected in the current balance), but do actively
@@ -411,11 +419,17 @@ def calculate_subproject_amounts(subproject_id):
     # Calculate amounts awarded
     subproject_awarded = 0
     if len(list(subproject.payments)) > 0:
-        subproject_awarded = (
-            subproject.payments.order_by(
-                Payment.created.desc()
-            ).first().balance_after_mutation_value
+        # Initialize the subproject_awarded amount to the most recent payment
+        # with a balance_after_mutation_value (manually added payments don't
+        # have this value)
+        payments = subproject.payments.order_by(
+            Payment.created.desc()
         )
+        for payment in payments:
+            if payment.balance_after_mutation_value:
+                subproject_awarded = payment.balance_after_mutation_value
+                break
+
         for payment in subproject.payments:
             # Don't add incoming payments (as they are already
             # reflected in the current balance)

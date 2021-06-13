@@ -11,7 +11,7 @@ from app.util import flash_form_errors
 
 
 def return_redirect(project_id, subproject_id):
-    # redirect back to clear form data
+    # Redirect back to clear form data
     if subproject_id:
         return redirect(
             url_for(
@@ -86,7 +86,7 @@ def process_category_form(request):
                     'andere naam<span>'
                 )
 
-        # redirect back to clear form data
+        # Redirect back to clear form data
         return return_redirect(project_id, subproject_id)
     else:
         flash_form_errors(category_form, request)
@@ -117,38 +117,58 @@ def process_payment_form(request, project_or_subproject, project_owner, user_sub
     else:
         return
 
+    payment_form.route.choices = [
+        ('subsidie', 'subsidie'),
+        ('inbesteding', 'inbesteding'),
+        ('aanbesteding', 'aanbesteding')
+    ]
+
+    # When the user removes a manually added payment, the route selection
+    # field will have no value and validate_on_submit will fail, so add a
+    # default value
+    if payment_form.route.data == 'None':
+        payment_form.route.data = 'subsidie'
+
     if payment_form.validate_on_submit():
+        # Remove payment
+        if payment_form.remove.data:
+            Payment.query.filter_by(id=payment_form.id.data).delete()
+            db.session.commit()
+            flash(
+                '<span class="text-default-green">Transactie is verwijderd</span>'
+            )
         # Get data from the form
-        new_payment_data = {}
-        for f in payment_form:
-            if f.type != 'SubmitField' and f.type != 'CSRFTokenField':
-                # If the category is edited to be empty again, make
-                # sure to set it to None instead of ''
-                if f.short_name == 'category_id':
-                    if f.data == '':
-                        new_payment_data[f.short_name] = None
+        else:
+            new_payment_data = {}
+            for f in payment_form:
+                if f.type != 'SubmitField' and f.type != 'CSRFTokenField':
+                    # If the category is edited to be empty again, make
+                    # sure to set it to None instead of ''
+                    if f.short_name == 'category_id':
+                        if f.data == '':
+                            new_payment_data[f.short_name] = None
+                        else:
+                            new_payment_data[f.short_name] = f.data
                     else:
                         new_payment_data[f.short_name] = f.data
-                else:
-                    new_payment_data[f.short_name] = f.data
 
-        try:
-            # Update if the payment already exists
-            payments = Payment.query.filter_by(
-                id=payment_form.id.data
-            )
-            if len(payments.all()):
-                payments.update(new_payment_data)
-                db.session.commit()
-                flash(
-                    '<span class="text-default-green">Transactie is bijgewerkt</span>'
+            try:
+                # Update if the payment already exists
+                payments = Payment.query.filter_by(
+                    id=payment_form.id.data
                 )
-        except IntegrityError as e:
-            db.session().rollback()
-            app.logger.error(repr(e))
-            flash(
-                '<span class="text-default-red">Transactie bijwerken mislukt<span>'
-            )
+                if len(payments.all()):
+                    payments.update(new_payment_data)
+                    db.session.commit()
+                    flash(
+                        '<span class="text-default-green">Transactie is bijgewerkt</span>'
+                    )
+            except IntegrityError as e:
+                db.session().rollback()
+                app.logger.error(repr(e))
+                flash(
+                    '<span class="text-default-red">Transactie bijwerken mislukt<span>'
+                )
 
         if is_subproject:
             # Redirect back to clear form data
@@ -185,7 +205,8 @@ def create_payment_forms(payments, project_owner):
             'long_user_description': payment.long_user_description,
             'id': payment.id,
             'hidden': payment.hidden,
-            'category_id': selected_category
+            'category_id': selected_category,
+            'route': payment.route
         })
 
         # A project with subprojects can contain multiple editable
@@ -196,6 +217,16 @@ def create_payment_forms(payments, project_owner):
             payment_form.category_id.choices = payment.subproject.make_category_select_options()
         else:
             payment_form.category_id.choices = payment.project.make_category_select_options()
+
+        payment_form.route.choices = [
+            ('subsidie', 'subsidie'),
+            ('inbesteding', 'inbesteding'),
+            ('aanbesteding', 'aanbesteding')
+        ]
+
+        # Only allow manually added payments to be removed
+        if payment.type != 'MANUAL':
+            del payment_form.remove
 
         # Only allow project owners to hide a transaction
         if project_owner:
@@ -253,9 +284,9 @@ def process_transaction_attachment_form(request, transaction_attachment_form, pr
 
         save_attachment(transaction_attachment_form.data_file.data, payment, 'transaction-attachment')
 
-        # redirect back to clear form data
+        # Redirect back to clear form data
         if subproject_id:
-            # redirect back to clear form data
+            # Redirect back to clear form data
             return redirect(
                 url_for(
                     'subproject',
@@ -281,9 +312,9 @@ def process_remove_attachment_form(remove_attachment_form, project_id=0, subproj
         db.session.commit()
         flash('<span class="text-default-green">Media is verwijderd</span>')
 
-        # redirect back to clear form data
+        # Redirect back to clear form data
         if subproject_id:
-            # redirect back to clear form data
+            # Redirect back to clear form data
             return redirect(
                 url_for(
                     'subproject',

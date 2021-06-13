@@ -14,6 +14,7 @@ import naturalSort from 'javascript-natural-sort';
 import Router from './util/Router';
 import common from './routes/common';
 import home from './routes/home';
+import transaction from './routes/transaction';
 
 // Import the needed Font Awesome functionality
 import { config, library, dom } from '@fortawesome/fontawesome-svg-core';
@@ -32,6 +33,8 @@ const routes = new Router({
   common,
   // Home page
   home,
+  // Project and Subproject pages can add new transactions
+  transaction,
 });
 
 // Load events

@@ -21,6 +21,10 @@
     font-weight: normal;
   }
 
+  .manual-payment {
+    background-color: #A4BCEF4D;
+  }
+
   td {
     border: solid 1px #F5F5F5;
     border-style: solid none;
@@ -75,4 +79,8 @@
 .bootstrap-table .fixed-table-toolbar .columns {
   margin: 0;
   padding: 3px 10px;
+}
+
+.bootstrap-table .fixed-table-toolbar .bs-bars {
+  margin-top: 0;
 }
