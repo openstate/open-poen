@@ -404,11 +404,22 @@ def calculate_project_amounts(project_id):
                 amounts['spent'] / amounts['awarded']
             )
         )
+        if project.budget:
+            amounts['percentage_spent_str'] = (
+                format_percent(
+                    amounts['spent'] / project.budget
+                )
+            )
 
     amounts['spent_str'] = format_currency(amounts['spent'])
+
     amounts['left_str'] = format_currency(
         round(amounts['awarded']) - round(amounts['spent'])
     )
+    if project.budget:
+        amounts['left_str'] = format_currency(
+            round(project.budget) - round(amounts['spent'])
+        )
 
     return amounts
 
@@ -467,11 +478,22 @@ def calculate_subproject_amounts(subproject_id):
                 amounts['spent'] / amounts['awarded']
             )
         )
+        if subproject.budget:
+            amounts['percentage_spent_str'] = (
+                format_percent(
+                    amounts['spent'] / subproject.budget
+                )
+            )
 
     amounts['spent_str'] = format_currency(amounts['spent'])
+
     amounts['left_str'] = format_currency(
         round(amounts['awarded']) - round(amounts['spent'])
     )
+    if subproject.budget:
+        amounts['left_str'] = format_currency(
+            round(subproject.budget) - round(amounts['spent'])
+        )
 
     return amounts
 
