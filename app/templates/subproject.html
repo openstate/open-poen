@@ -455,7 +455,9 @@
                                   <br>
                                   <br>
                                 {% endif %}
-                                {{ payment.created.strftime('%d-%m-\'%y') }}
+                                {% if not (payment.id in payment_forms and 'created' in payment_forms[payment.id]) %}
+                                  {{ payment.created.strftime('%d-%m-\'%y') }}
+                                {% endif %}
                                 <br>
                                 <br>
                                 {% if payment.amount_value >= 0 %}
@@ -476,6 +478,14 @@
                                 {{ payment.counterparty_alias_name }}
                                 <br>
                                 <br>
+
+                                {% if 'created' in payment_forms[payment.id] %}
+                                  <b>Datum</b>
+                                  <br>
+                                  {{ payment_forms[payment.id]['created'] }}
+                                  <br>
+                                  <br>
+                                {% endif %}
 
                                 <b>Route</b>
                                 <br>

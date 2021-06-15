@@ -452,7 +452,6 @@ def project(project_id):
             new_payment.project_id = project_id
             new_payment.amount_currency = 'EUR'
             new_payment.type = 'MANUAL'
-            new_payment.created = datetime.now()
             new_payment.updated = datetime.now()
             db.session.add(new_payment)
             db.session.commit()
@@ -1031,7 +1030,6 @@ def subproject(project_id, subproject_id):
             new_payment.subproject_id = subproject.id
             new_payment.amount_currency = 'EUR'
             new_payment.type = 'MANUAL'
-            new_payment.created = datetime.now()
             new_payment.updated = datetime.now()
             db.session.add(new_payment)
             db.session.commit()

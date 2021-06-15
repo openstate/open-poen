@@ -7,7 +7,7 @@ from wtforms.validators import (
 from wtforms.widgets import HiddenInput
 from wtforms import (
     StringField, IntegerField, BooleanField, PasswordField, SubmitField,
-    SelectField, TextAreaField, DecimalField
+    SelectField, TextAreaField, DecimalField, DateField
 )
 from wtforms.fields.html5 import EmailField
 
@@ -163,6 +163,8 @@ class NewPaymentForm(FlaskForm):
 
     amount_value = FlexibleDecimalField('Bedrag')
 
+    created = DateField('Datum (notatie: 2020-12-31)')
+
     alias_name = StringField(
         'Verstuurder naam', validators=[Length(max=120)]
     )
@@ -202,6 +204,7 @@ class PaymentForm(FlaskForm):
     long_user_description = TextAreaField(
         'Lange beschrijving', validators=[Length(max=2000)]
     )
+    created = DateField('Datum (notatie: 2020-12-31)')
     hidden = BooleanField('Transactie verbergen')
     category_id = SelectField('Categorie', validators=[Optional()], choices=[])
     route = SelectField('Route', choices=['inbesteding', 'aanbesteding', 'subsidie'])
