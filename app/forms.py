@@ -7,7 +7,7 @@ from wtforms.validators import (
 from wtforms.widgets import HiddenInput
 from wtforms import (
     StringField, IntegerField, BooleanField, PasswordField, SubmitField,
-    SelectField, TextAreaField, DecimalField
+    SelectField, TextAreaField, DecimalField, DateField
 )
 from wtforms.fields.html5 import EmailField
 
@@ -128,6 +128,14 @@ class SubprojectForm(FlaskForm):
     )
 
 
+# Allow both dot '.' and comma ',' as decimal separator
+class FlexibleDecimalField(DecimalField):
+    def process_formdata(self, valuelist):
+        if valuelist:
+            valuelist[0] = valuelist[0].replace(",", ".")
+        return super(FlexibleDecimalField, self).process_formdata(valuelist)
+
+
 # Add a new payment manually
 class NewPaymentForm(FlaskForm):
     project_id = IntegerField(widget=HiddenInput())
@@ -153,7 +161,9 @@ class NewPaymentForm(FlaskForm):
         ]
     )
 
-    amount_value = DecimalField('Bedrag')
+    amount_value = FlexibleDecimalField('Bedrag')
+
+    created = DateField('Datum (notatie: 2020-12-31)')
 
     alias_name = StringField(
         'Verstuurder naam', validators=[Length(max=120)]
@@ -194,6 +204,7 @@ class PaymentForm(FlaskForm):
     long_user_description = TextAreaField(
         'Lange beschrijving', validators=[Length(max=2000)]
     )
+    created = DateField('Datum (notatie: 2020-12-31)')
     hidden = BooleanField('Transactie verbergen')
     category_id = SelectField('Categorie', validators=[Optional()], choices=[])
     route = SelectField('Route', choices=['inbesteding', 'aanbesteding', 'subsidie'])
