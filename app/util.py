@@ -398,22 +398,20 @@ def calculate_project_amounts(project_id):
                 amounts['spent'] += abs(payment.amount_value)
 
     # Calculate percentage spent
-    if amounts['awarded'] == 0:
+    denominator = amounts['awarded']
+    if project.budget:
+        denominator = project.budget
+
+    if denominator == 0:
         amounts['percentage_spent_str'] = (
             format_percent(0)
         )
     else:
         amounts['percentage_spent_str'] = (
             format_percent(
-                amounts['spent'] / amounts['awarded']
+                amounts['spent'] / denominator
             )
         )
-        if project.budget:
-            amounts['percentage_spent_str'] = (
-                format_percent(
-                    amounts['spent'] / project.budget
-                )
-            )
 
     amounts['spent_str'] = format_currency(amounts['spent'])
 

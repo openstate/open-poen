@@ -157,6 +157,12 @@ def process_payment_form(request, project_or_subproject, project_owner, user_sub
                 payments = Payment.query.filter_by(
                     id=payment_form.id.data
                 )
+
+                # In case of a manual payment we update the updated field with
+                # the current timestamp
+                if payments.first().type == 'MANUAL':
+                    new_payment_data['updated'] = datetime.now()
+
                 if len(payments.all()):
                     payments.update(new_payment_data)
                     db.session.commit()
@@ -203,11 +209,16 @@ def create_payment_forms(payments, project_owner):
         payment_form = PaymentForm(prefix='payment_form', **{
             'short_user_description': payment.short_user_description,
             'long_user_description': payment.long_user_description,
+            'created': payment.created,
             'id': payment.id,
             'hidden': payment.hidden,
             'category_id': selected_category,
             'route': payment.route
         })
+
+        # The created field may only be edited on manually added transactions
+        if payment.type != 'MANUAL':
+            del payment_form['created']
 
         # A project with subprojects can contain multiple editable
         # payments on the project page, so we need to retrieve the
