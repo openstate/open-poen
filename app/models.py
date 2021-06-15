@@ -345,7 +345,8 @@ class Payment(db.Model):
     updated = db.Column(db.DateTime(timezone=True))
     monetary_account_id = db.Column(db.Integer(), index=True)
     sub_type = db.Column(db.String(12))
-    # Currently 'BUNQ' or 'MANUAL'
+    # Currently 'MANUAL' or types coming from BUNQ, e.g., 'BUNQ', 'IDEAL',
+    # 'MASTERCARD', 'EBA_SCT', 'INTEREST', 'BUNQME'
     type = db.Column(db.String(12))
     # Can be 'inbesteding', 'aanbesteding' or 'subsidie'
     route = db.Column(db.String(12))
