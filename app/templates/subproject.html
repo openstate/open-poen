@@ -439,20 +439,22 @@
                                 {{ payment.alias_name }}
                                 <br>
                                 <br>
-                                <b>Betaal&shy;omschrijving</b>
-                                <br>
-                                {% if payment.description %}
-                                  {{ payment.description }}
-                                {% else %}
-                                  <i>geen beschrijving</i>
+                                {% if payment.type != 'MANUAL' %}
+                                  <b>Betaal&shy;omschrijving</b>
+                                  <br>
+                                  {% if payment.description %}
+                                    {{ payment.description }}
+                                  {% else %}
+                                    <i>geen beschrijving</i>
+                                  {% endif %}
+                                  <br>
+                                  <br>
+                                  <b>Saldo na boeking</b>
+                                  <br>
+                                  €{{ payment.get_formatted_balance() }}
+                                  <br>
+                                  <br>
                                 {% endif %}
-                                <br>
-                                <br>
-                                <b>Saldo na boeking</b>
-                                <br>
-                                €{{ payment.get_formatted_balance() }}
-                                <br>
-                                <br>
                                 {{ payment.created.strftime('%d-%m-\'%y') }}
                                 <br>
                                 <br>
