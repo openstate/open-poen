@@ -221,6 +221,7 @@ def index():
         'index.html',
         background=app.config['BACKGROUND'],
         footer=app.config['FOOTER'],
+        tagline=app.config['TAGLINE'],
         project_data=project_data,
         total_awarded_str=util.human_format(total_awarded),
         total_spent_str=util.human_format(total_spent),
