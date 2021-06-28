@@ -219,6 +219,7 @@ def index():
 
     return render_template(
         'index.html',
+        background=app.config['BACKGROUND'],
         footer=app.config['FOOTER'],
         project_data=project_data,
         total_awarded_str=util.human_format(total_awarded),

@@ -11,7 +11,7 @@
 {% endblock %}
 
 {% block content %}
-  <div class="container poen-lead index-lead bg-grey-light">
+  <div class="container poen-lead {% if background %}background{% endif %} index-lead bg-grey-light">
     <div class="row">
       <div class="col-12 col-md-6 header-logo text-center">
         <img class="index-lead-logo img-fluid" src="{{ url_for('static', filename='images/Open-Poen-Logo-2.svg') }}" alt="Open Poen logo">
