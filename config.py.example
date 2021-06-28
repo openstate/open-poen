@@ -34,6 +34,10 @@ class Config(object):
     # (Contact) info to display in the footer
     FOOTER = ''
 
+    # Set to True and add a background.jpg to app/assets/images to use that as
+    # background on the homepage
+    BACKGROUND = False
+
     BABEL_DEFAULT_LOCALE = 'nl'
     TZ = pytz.timezone('Europe/Amsterdam')
 
