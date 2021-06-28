@@ -38,6 +38,11 @@ class Config(object):
     # background on the homepage
     BACKGROUND = False
 
+    # Tagline one the homepage; leave empty if you don't want to show a tagline
+    # (e.g. Friesland has the tagline combined in the logo, so we don't show
+    # the tagline seperately)
+    TAGLINE = '<h5>ZÓ <span class="text-red">WORDT ONS</span> <span class="text-blue">GELD BESTEED</span></h5>'
+
     BABEL_DEFAULT_LOCALE = 'nl'
     TZ = pytz.timezone('Europe/Amsterdam')
 
