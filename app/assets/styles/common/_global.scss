@@ -11,6 +11,12 @@ body {
   }
 }
 
+.use-square-borders {
+  div, td, button, input, select {
+    border-radius: 0 !important;
+  }
+}
+
 .p-details {
   line-height: 16px;
 }
