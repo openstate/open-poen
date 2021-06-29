@@ -1,15 +1,12 @@
 .btn-info {
   background-color: $blue;
-  border-color: $blue-dark;
 
   &:hover {
     background-color: lighten($blue, 10%);
-    border-color: lighten($blue-dark, 10%);
   }
 
   &:focus, &:active {
-    background-color: $blue-dark !important;
-    border-color: lighten($blue-dark, 5%) !important;
+    background-color: $text-color-main !important;
   }
 }
 
