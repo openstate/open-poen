@@ -41,7 +41,7 @@
   {% endblock %}
 </head>
 {% block body %}
-<body class="bg-grey{% if use_square_borders %} use-square-borders{% endif %}">
+<body class="{% if use_square_borders %} use-square-borders{% endif %}">
 {% endblock %}
   <header class="bg-white">
     <nav class="navbar navbar-fixed-top my-auto">
@@ -88,20 +88,53 @@
     </div>
   </header>
 
-  <article class="bg-grey">
+  <article>
     {% include 'flashed-messages.html' %}
     {% block content %}
     {% endblock %}
   </article>
 
-  <footer>
-    <div class="text-center">
-      <p>
-        {{ footer|safe }}
-      </p>
-      <a href="/">
-        <img class="logo-footer img-fluid" src="{{ url_for('static', filename='images/Open-Poen-Logo.svg') }}" alt="Open Poen logo">
-      </a>
+  <footer class="container-fluid">
+    <div class="row">
+      <div class="col-12 bg-red">
+        <div class="row">
+          <div class="col-7 col-sm-5 col-md-4 col-lg-3">
+            <a href="/"><h2 class="bg-white pl-5 pt-3 pb-3 ml-n3 text-red">Iepen Jild</h2></a>
+            <br>
+            <h2><a class="text-white pl-5 ml-n3" href="{{ url_for('over') }}">Over Open Poen</a></h2>
+            <br>
+            <br>
+            <br>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 bg-white">
+        <div class="row">
+          <div class=" col-12 offset-sm-3 col-sm-6">
+            <h3 class="pt-5 pb-5" style="color: #004896">
+              {{ footer|safe }}
+            </h3>
+          </div>
+          <div class="col-3 pt-5 pb-5">
+            <a href="/">
+              <img class="img-fluid" src="{{ url_for('static', filename='images/Fryslan-logo.svg') }}" alt="Open Poen logo">
+            </a>
+          </div>
+        </div>
+      </div>
+      <div class="col-12" style="background-color: #004896">
+        <div class="row">
+          <div class="offset-3 col-9">
+            <a href="/"><h2 class="bg-white pl-5 pt-3 pb-3" style="margin-right: -15px"></h2></a>
+            <br>
+          </div>
+        </div>
+      </div>
+      <div class="col-12" style="background-color: #004896">
+        <div class="row">
+          &nbsp;
+        </div>
+      </div>
     </div>
   </footer>
 
