@@ -2,7 +2,7 @@ body {
   font-family: $font-family-lexend;
   font-size: 13px;
   line-height: 21px;
-  color: $blue-dark;
+  color: $text-color-main;
   word-wrap: break-word;
   hyphens: manual;
 
@@ -65,9 +65,9 @@ h6 {
 }
 
 hr {
-  background-color: $blue-dark;
-  border-color: $blue-dark;
-  color: $blue-dark;
+  background-color: $text-color-main;
+  border-color: $text-color-main;
+  color: $text-color-main;
 }
 
 .background {
@@ -76,8 +76,8 @@ hr {
   background-position: center center;
 }
 
-.text-blue-dark {
-  color: $blue-dark;
+.text-color-main {
+  color: $text-color-main;
 }
 
 .text-blue {
@@ -202,10 +202,10 @@ hr {
 }
 
 .amounts-card-title {
-  color: $blue-dark;
+  color: $text-color-main;
 
   a {
-    color: $blue-dark;
+    color: $text-color-main;
   }
 
   h1 {
@@ -233,7 +233,7 @@ hr {
     color: inherit;
 
     h1 {
-      color: lighten($blue-dark, 30%);
+      color: lighten($text-color-main, 30%);
     }
   }
 }
