@@ -41,7 +41,7 @@
   {% endblock %}
 </head>
 {% block body %}
-<body class="bg-grey">
+<body class="bg-grey{% if use_square_borders %} use-square-borders{% endif %}">
 {% endblock %}
   <header class="bg-white">
     <nav class="navbar navbar-fixed-top my-auto">
