@@ -231,7 +231,7 @@
             {% for project in project_data %}
               <div class="col-12 col-md-6 col-xxl-4">
                 <a class="card-button" role="button" href="{{ url_for('project', project_id=project.id) }}">
-                  <div class="amounts-card bg-green-light">
+                  <div class="amounts-card">
                     {% if project.hidden %}
                       <p><i>Dit project is verborgen en dus niet te zien door het publiek</i><p>
                     {% endif %}
