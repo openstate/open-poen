@@ -891,10 +891,10 @@
   resolved "https://registry.yarnpkg.com/@openfonts/dosis_latin/-/dosis_latin-0.0.11.tgz#87dff014babe9f48f1fea8fbec6145ecd058472c"
   integrity sha512-gTHnZ/3/YqBLxVgSTLQELck64d963gRAG/tEKq1LRyrea6uGbRweb7zug0TlT0y/nVSfEKjnEULGxTTyDU37bA==
 
-"@openfonts/lexend-deca_latin@^0.0.11":
-  version "0.0.11"
-  resolved "https://registry.yarnpkg.com/@openfonts/lexend-deca_latin/-/lexend-deca_latin-0.0.11.tgz#7b62b145f212c04a7472fa3cf88edbc97eaae298"
-  integrity sha512-KnLjqunojmNK6nJLFsGpbAM16KN+2Nm3nmsRzn5AnhgVgK3lPyK8AdFEAw9FhqIUPQKkpxOcOrWuOdHukq8XaA==
+"@openfonts/open-sans_latin-ext@^1.44.2":
+  version "1.44.2"
+  resolved "https://registry.yarnpkg.com/@openfonts/open-sans_latin-ext/-/open-sans_latin-ext-1.44.2.tgz#c33c39b13092096c0ba10a8c9c48de3905b54a4f"
+  integrity sha512-/8YN0CJY4tSceOu2DxId5QBWOUW0/Q6akvYa75PJWG656SGuFdz/LNNh8wGsSQJt0s56b768wgKawAQM7MAQKw==
 
 "@sindresorhus/is@^0.7.0":
   version "0.7.0"

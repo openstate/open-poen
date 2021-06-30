@@ -9,7 +9,7 @@
     "@fortawesome/free-regular-svg-icons": "^5.14.0",
     "@fortawesome/free-solid-svg-icons": "^5.14.0",
     "@openfonts/dosis_latin": "^0.0.11",
-    "@openfonts/lexend-deca_latin": "^0.0.11",
+    "@openfonts/open-sans_latin-ext": "^1.44.2",
     "bootstrap": "v4.5.2",
     "bootstrap-table": "^1.17.1",
     "cross-env": "^5.2.1",
