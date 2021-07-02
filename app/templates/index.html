@@ -7,17 +7,17 @@
 {% endblock %}
 
 {% block body %}
-  <body class="bg-grey home">
+  <body class="bg-grey home{% if use_square_borders %} use-square-borders{% endif %}">
 {% endblock %}
 
 {% block content %}
-  <div class="container poen-lead index-lead bg-grey-light">
+  <div class="container poen-lead {% if background %}background{% endif %} index-lead bg-grey-light">
     <div class="row">
       <div class="col-12 col-md-6 header-logo text-center">
         <img class="index-lead-logo img-fluid" src="{{ url_for('static', filename='images/Open-Poen-Logo-Amsterdam.svg') }}" alt="Open Poen Amsterdam logo">
       </div>
       <div class="col-12 col-md-6 my-auto text-center text-md-left">
-        <h5>TRANSPARANT <span class="text-red">ZAKEN </span> <span class="text-blue">DOEN</span></h5>
+        {% if tagline %}{{ tagline|safe }}{% endif %}
         <br>
         <button type="button" class="btn button-poen bg-white"><h2><a href="{{ url_for('meest_gestelde_vragen') }}">bekijk hoe het werkt ></a></h2></button>
       </div>
@@ -72,7 +72,7 @@
               <div class="row">
                 <div class="col-12">
                   <!-- Button trigger modal -->
-                  <button type="button" class="btn amounts-half-card w-100 bg-blue-dark text-white" data-toggle="modal" data-target="#admins-beheren">
+                  <button type="button" class="btn amounts-half-card w-100 bg-text-color-main text-white" data-toggle="modal" data-target="#admins-beheren">
                     <h1>admins beheren</h1>
                     <h5>+</h5>
                   </button>
@@ -182,7 +182,7 @@
 
                 <div class="col-12">
                   <!-- Button trigger modal -->
-                  <button type="button" class="btn amounts-half-card w-100 bg-blue-dark text-white" data-toggle="modal" data-target="#project-toevoegen">
+                  <button type="button" class="btn amounts-half-card w-100 bg-text-color-main text-white" data-toggle="modal" data-target="#project-toevoegen">
                     <h1>project toevoegen</h1>
                     <h5>+</h5>
                   </button>
@@ -232,7 +232,7 @@
             {% for project in project_data %}
               <div class="col-12 col-md-6 col-xxl-4">
                 <a class="card-button" role="button" href="{{ url_for('project', project_id=project.id) }}">
-                  <div class="amounts-card bg-blue-dark text-white">
+                  <div class="amounts-card bg-text-color-main text-white">
                     {% if project.hidden %}
                       <p><i>Dit project is verborgen en dus niet te zien door het publiek</i><p>
                     {% endif %}

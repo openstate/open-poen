@@ -3,7 +3,7 @@
 
   input {
     background-color: $grey-light;
-    color: black;
+    color: $text-color-main;
     height: 44px;
     border: none;
     border-radius: 22px;
@@ -11,17 +11,17 @@
 }
 
 .payment-table {
-  color: black;
+  color: $text-color-main;
   border-collapse: separate;
   border-spacing: 0 26px;
 
   thead th {
     border: none;
-    border-top: 1px solid $blue-dark;
+    border-top: 1px solid $text-color-main;
     font-weight: normal;
   }
 
-  .manual-payment {
+  .manual-payment td {
     background-color: #A4BCEF4D;
   }
 

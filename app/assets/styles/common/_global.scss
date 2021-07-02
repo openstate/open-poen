@@ -2,12 +2,18 @@ body {
   font-family: $font-family-lexend;
   font-size: 13px;
   line-height: 21px;
-  color: black;
+  color: $text-color-main;
   word-wrap: break-word;
   hyphens: manual;
 
   article {
     background-color: white;
+  }
+}
+
+.use-square-borders {
+  div, td, button, input, select {
+    border-radius: 0 !important;
   }
 }
 
@@ -65,17 +71,19 @@ h6 {
 }
 
 hr {
-  background-color: $blue-dark;
-  border-color: $blue-dark;
-  color: $blue-dark;
+  background-color: $text-color-main;
+  border-color: $text-color-main;
+  color: $text-color-main;
 }
 
-.text-black {
-  color: black;
+.background {
+  background-image: url("../images/background.jpg");
+  background-size: cover;
+  background-position: center center;
 }
 
-.text-blue-dark {
-  color: black;
+.text-color-main {
+  color: $text-color-main;
 }
 
 .text-blue {
@@ -102,8 +110,8 @@ hr {
   background-color: white;
 }
 
-.bg-blue-dark {
-  background-color: $blue-dark;
+.bg-text-color-main {
+  background-color: $text-color-main;
 }
 
 .bg-blue {
@@ -204,10 +212,10 @@ hr {
 }
 
 .amounts-card-title {
-  color: $blue-dark;
+  color: $text-color-main;
 
   a {
-    color: $blue-dark;
+    color: $text-color-main;
   }
 
   h1 {
@@ -235,7 +243,7 @@ hr {
     color: inherit;
 
     h1 {
-      color: lighten($blue-light, 20%) !important;
+      color: lighten($text-color-main, 30%) !important;
     }
   }
 }

@@ -31,6 +31,18 @@ class Config(object):
     # Uploads can be 20MB max
     MAX_CONTENT_LENGTH = 20 * 1024 * 1024
 
+    # Set to True and add a background.jpg to app/assets/images to use that as
+    # background on the homepage
+    BACKGROUND = False
+
+    # Open Poen can be configured to use square (True) or rounded borders (False)
+    USE_SQUARE_BORDERS = False
+
+    # Tagline one the homepage; leave empty if you don't want to show a tagline
+    # (e.g. Friesland has the tagline combined in the logo, so we don't show
+    # the tagline seperately)
+    TAGLINE = '<h5>ZÓ <span class="text-red">WORDT ONS</span> <span class="text-blue">GELD BESTEED</span></h5>'
+
     # (Contact) info to display in the footer
     FOOTER = ''
 

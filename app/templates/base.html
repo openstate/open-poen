@@ -41,13 +41,13 @@
   {% endblock %}
 </head>
 {% block body %}
-<body class="bg-grey">
+<body class="bg-grey{% if use_square_borders %} use-square-borders{% endif %}">
 {% endblock %}
   <header class="bg-white">
     <nav class="navbar navbar-fixed-top my-auto">
       <div class="col-4">
         {% if current_user.is_authenticated %}
-          <a class="text-blue-dark" href="{{ url_for('profile', user_id=current_user.id)}}">
+          <a class="text-color-main" href="{{ url_for('profile', user_id=current_user.id)}}">
             <h1>{{ current_user.first_name }} {{ current_user.last_name }}</h1>
           </a>
         {% endif %}

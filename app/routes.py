@@ -219,6 +219,9 @@ def index():
 
     return render_template(
         'index.html',
+        background=app.config['BACKGROUND'],
+        use_square_borders=app.config['USE_SQUARE_BORDERS'],
+        tagline=app.config['TAGLINE'],
         footer=app.config['FOOTER'],
         project_data=project_data,
         total_awarded_str=util.human_format(total_awarded),
@@ -237,6 +240,7 @@ def project(project_id):
     if not project:
         return render_template(
             '404.html',
+            use_square_borders=app.config['USE_SQUARE_BORDERS'],
             footer=app.config['FOOTER']
         )
 
@@ -251,6 +255,7 @@ def project(project_id):
     if project.hidden and not project_owner:
         return render_template(
             '404.html',
+            use_square_borders=app.config['USE_SQUARE_BORDERS'],
             footer=app.config['FOOTER']
         )
 
@@ -820,6 +825,7 @@ def project(project_id):
 
     return render_template(
         'project.html',
+        use_square_borders=app.config['USE_SQUARE_BORDERS'],
         footer=app.config['FOOTER'],
         project=project,
         project_data=project_data,
@@ -855,6 +861,7 @@ def subproject(project_id, subproject_id):
     if not subproject:
         return render_template(
             '404.html',
+            use_square_borders=app.config['USE_SQUARE_BORDERS'],
             footer=app.config['FOOTER']
         )
 
@@ -874,6 +881,7 @@ def subproject(project_id, subproject_id):
     if subproject.hidden and not project_owner and not user_in_subproject:
         return render_template(
             '404.html',
+            use_square_borders=app.config['USE_SQUARE_BORDERS'],
             footer=app.config['FOOTER']
         )
 
@@ -1208,6 +1216,7 @@ def subproject(project_id, subproject_id):
         budget = util.format_currency(subproject.budget)
     return render_template(
         'subproject.html',
+        use_square_borders=app.config['USE_SQUARE_BORDERS'],
         footer=app.config['FOOTER'],
         subproject=subproject,
         amounts=amounts,
@@ -1236,6 +1245,7 @@ def subproject(project_id, subproject_id):
 def over():
     return render_template(
         'over.html',
+        use_square_borders=app.config['USE_SQUARE_BORDERS'],
         footer=app.config['FOOTER']
     )
 
@@ -1243,6 +1253,7 @@ def over():
 def meest_gestelde_vragen():
     return render_template(
         'meest-gestelde-vragen.html',
+        use_square_borders=app.config['USE_SQUARE_BORDERS'],
         footer=app.config['FOOTER']
     )
 
@@ -1267,6 +1278,7 @@ def reset_wachtwoord_verzoek():
         return redirect(url_for('login'))
     return render_template(
         'reset-wachtwoord-verzoek.html',
+        use_square_borders=app.config['USE_SQUARE_BORDERS'],
         footer=app.config['FOOTER'],
         form=form
     )
@@ -1285,6 +1297,7 @@ def reset_wachtwoord(token):
         return redirect(url_for('login'))
     return render_template(
         'reset-wachtwoord.html',
+        use_square_borders=app.config['USE_SQUARE_BORDERS'],
         footer=app.config['FOOTER'],
         form=form
     )
@@ -1307,6 +1320,7 @@ def login():
         return redirect(url_for('index'))
     return render_template(
         'login.html',
+        use_square_borders=app.config['USE_SQUARE_BORDERS'],
         footer=app.config['FOOTER'],
         form=form
     )
@@ -1327,6 +1341,7 @@ def profile(user_id):
         'profiel.html',
         user=user,
         image=File.query.filter_by(id=user.image).first(),
+        use_square_borders=app.config['USE_SQUARE_BORDERS'],
         footer=app.config['FOOTER']
     )
 
@@ -1396,6 +1411,7 @@ def profile_edit():
     )
     return render_template(
         'profiel-bewerken.html',
+        use_square_borders=app.config['USE_SQUARE_BORDERS'],
         footer=app.config['FOOTER'],
         edit_profile_form=edit_profile_form,
         remove_attachment_form=remove_attachment_form,
