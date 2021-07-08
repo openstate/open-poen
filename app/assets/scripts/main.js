@@ -8,6 +8,7 @@ import 'bootstrap-table/dist/extensions/sticky-header/bootstrap-table-sticky-hea
 import 'bootstrap-table/dist/extensions/mobile/bootstrap-table-mobile.min.js';
 import 'tableexport.jquery.plugin/tableExport.min.js';
 import 'bootstrap-table/dist/extensions/export/bootstrap-table-export.min.js';
+import 'bootstrap-table/dist/extensions/cookie/bootstrap-table-cookie.min.js';
 import naturalSort from 'javascript-natural-sort';
 
 // Import local dependencies

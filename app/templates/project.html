@@ -452,7 +452,7 @@
                 </div>
               {% endif %}
             </div>
-            <table class="payment-table" data-locale="nl-NL" data-toolbar="#toolbar" data-detail-view="true" data-detail-view-by-click="true" data-detail-view-icon="false" data-detail-formatter="detailFormatter" data-show-export="true" data-export-data-type="all" data-export-types="['csv', 'txt', 'json', 'xml', 'sql']" data-export-options='{"fileName": "{{ timestamp }}-{{ project.name | replace(' ', '_') }}"}'>
+            <table class="payment-table" data-locale="nl-NL" data-toolbar="#toolbar" data-cookie="true" data-cookie-id-table="saveId" data-detail-view="true" data-detail-view-by-click="true" data-detail-view-icon="false" data-detail-formatter="detailFormatter" data-show-export="true" data-export-data-type="all" data-export-types="['csv', 'txt', 'json', 'xml', 'sql']" data-export-options='{"fileName": "{{ timestamp }}-{{ project.name | replace(' ', '_') }}"}'>
               <thead>
                 <tr>
                   {# Hidden field required to make search work with the detailed view; NOTE: the id should always be the first column of the table #}
