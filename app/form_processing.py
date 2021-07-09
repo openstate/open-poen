@@ -163,6 +163,12 @@ def process_payment_form(request, project_or_subproject, project_owner, user_sub
                 if payments.first().type == 'MANUAL':
                     new_payment_data['updated'] = datetime.now()
 
+                # In case of non-manual payments we don't allow the modification
+                # of the 'created' field, so we need to fill in the form with
+                # created timestamp that already exists
+                if payments.first().type != 'MANUAL':
+                    new_payment_data['created'] = payments.first().created
+
                 if len(payments.all()):
                     payments.update(new_payment_data)
                     db.session.commit()
