@@ -352,17 +352,20 @@ def calculate_project_amounts(project_id):
                 project_awarded += abs(payment.amount_value)
     else:
         # If we don't have project payments (e.g. because we don't
-        # have a main IBAN), use the incomming ammounts of the sub
+        # have a main IBAN), use the incoming ammounts of the sub
         # accounts
         subprojects = Subproject.query.filter_by(project_id=project_id).all()
         project_awarded = 0
         for subproject in subprojects:
             if len(list(subproject.payments)) > 0:
-                project_awarded += (
-                    subproject.payments.order_by(
-                        Payment.created.desc()
-                    ).first().balance_after_mutation_value
-                )
+                # Make sure that there is at least one payment with a
+                # balance_after_mutation_value
+                latest_payment_with_balance = subproject.payments.filter(
+                    Payment.balance_after_mutation_value!=None
+                ).order_by(Payment.created.desc()).first()
+                if latest_payment_with_balance:
+                    project_awarded += latest_payment_with_balance.balance_after_mutation_value
+
                 for payment in subproject.payments:
                     # Don't add incoming payments (as they are already
                     # reflected in the current balance) or manually added
