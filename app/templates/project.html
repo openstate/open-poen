@@ -297,10 +297,14 @@
                               </div>
                               <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuleren</button>
+
                                 <!-- Button trigger modal -->
                                 <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#project-verwijder-{{ project_data['id'] }}">
                                   Verwijderen
                                 </button>
+
+                                {# Make sure this 'Opslaan' submit button is listed before the 'Verwijderen' submit button to make sure that hitting 'enter' defaults to the 'Opslaan' submit button #}
+                                {{ project_data['form'].submit }}
 
                                 <!-- Modal -->
                                 <div class="modal fade" id="project-verwijder-{{ project_data['id'] }}" tabindex="-1" role="dialog" aria-labelledby="projectVerwijderLabel" aria-hidden="true">
@@ -326,7 +330,6 @@
                                     </div>
                                   </div>
                                 </div>
-                                {{ project_data['form'].submit }}
                               </div>
                             </form>
                           </div>
@@ -937,6 +940,8 @@
                     Verwijderen
                   </button>
 
+                  {{ category_form.submit }}
+
                   <!-- Modal -->
                   <div class="modal fade" id="categorie-verwijder-{{ category_form.id.data }}" tabindex="-1" role="dialog" aria-labelledby="categorieVerwijderLabel" aria-hidden="true">
                     <div class="modal-dialog" role="document">
@@ -961,7 +966,6 @@
                       </div>
                     </div>
                   </div>
-                  {{ category_form.submit }}
                 </div>
               </form>
             </div>

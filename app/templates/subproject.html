@@ -121,6 +121,8 @@
                             Verwijderen
                           </button>
 
+                          {{ subproject_form.submit }}
+
                           <!-- Modal -->
                           <div class="modal fade" id="subproject-verwijder" tabindex="-1" role="dialog" aria-labelledby="subprojectVerwijderLabel" aria-hidden="true">
                             <div class="modal-dialog" role="document">
@@ -145,7 +147,6 @@
                               </div>
                             </div>
                           </div>
-                          {{ subproject_form.submit }}
                         </div>
                       </form>
                     </div>
@@ -684,6 +685,8 @@
                   Verwijderen
                 </button>
 
+                {{ category_form.submit }}
+
                 <!-- Modal -->
                 <div class="modal fade" id="categorie-verwijder-{{ category_form.id.data }}" tabindex="-1" role="dialog" aria-labelledby="categorieVerwijderLabel" aria-hidden="true">
                   <div class="modal-dialog" role="document">
@@ -708,7 +711,6 @@
                     </div>
                   </div>
                 </div>
-                {{ category_form.submit }}
               </div>
             </form>
           </div>
