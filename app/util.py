@@ -325,55 +325,25 @@ def calculate_project_amounts(project_id):
     # Calculate amounts awarded
     subproject_ibans = [s.iban for s in project.subprojects]
     project_awarded = 0
-    if len(list(project.payments)) > 0:
-        # Initialize the project_awarded amount to the most recent payment
-        # with a balance_after_mutation_value (manually added payments don't
-        # have this value)
-        payments = project.payments.order_by(
-            Payment.created.desc()
-        )
-        for payment in payments:
-            if not payment.balance_after_mutation_value == None:
-                project_awarded = payment.balance_after_mutation_value
-                break
-
-        for payment in project.payments:
-            # Don't process manually added transactions
-            if payment.type == 'MANUAL':
-                continue
-            # Don't add incoming payments (as they are already
-            # reflected in the current balance), but do actively
-            # subtract incoming payments from our own subproject
-            # IBANs
-            elif payment.amount_value > 0:
-                if payment.counterparty_alias_value in subproject_ibans:
-                    project_awarded -= payment.amount_value
-            else:
-                project_awarded += abs(payment.amount_value)
-    else:
-        # If we don't have project payments (e.g. because we don't
-        # have a main IBAN), use the incoming ammounts of the sub
-        # accounts
+    if project.contains_subprojects:
         subprojects = Subproject.query.filter_by(project_id=project_id).all()
         project_awarded = 0
         for subproject in subprojects:
             if len(list(subproject.payments)) > 0:
-                # Make sure that there is at least one payment with a
-                # balance_after_mutation_value
-                latest_payment_with_balance = subproject.payments.filter(
-                    Payment.balance_after_mutation_value!=None
-                ).order_by(Payment.created.desc()).first()
-                if latest_payment_with_balance:
-                    project_awarded += latest_payment_with_balance.balance_after_mutation_value
-
                 for payment in subproject.payments:
-                    # Don't add incoming payments (as they are already
-                    # reflected in the current balance) or manually added
-                    # transactions
-                    if payment.amount_value > 0 or payment.type == 'MANUAL':
-                        continue
-                    else:
-                        project_awarded += abs(payment.amount_value)
+                    if payment.amount_value > 0:
+                        # If the project contains an IBAN and the payment is to
+                        # that IBAN then subtract the payment to make sure
+                        # it isn't counted double
+                        if payment.counterparty_alias_value == project.iban:
+                            project_awarded -= payment.amount_value
+                        else:
+                            project_awarded += payment.amount_value
+    else:
+        for payment in project.payments:
+            if payment.amount_value > 0:
+                project_awarded += abs(payment.amount_value)
+
     amounts = {
         'id': project.id,
         'awarded': project_awarded,
@@ -435,24 +405,10 @@ def calculate_subproject_amounts(subproject_id):
     # Calculate amounts awarded
     subproject_awarded = 0
     if len(list(subproject.payments)) > 0:
-        # Initialize the subproject_awarded amount to the most recent payment
-        # with a balance_after_mutation_value (manually added payments don't
-        # have this value)
-        payments = subproject.payments.order_by(
-            Payment.created.desc()
-        )
-        for payment in payments:
-            if not payment.balance_after_mutation_value == None:
-                subproject_awarded = payment.balance_after_mutation_value
-                break
-
         for payment in subproject.payments:
-            # Don't add incoming payments (as they are already
-            # reflected in the current balance)
-            if payment.amount_value > 0 or payment.type == 'MANUAL':
-                continue
-            else:
-                subproject_awarded += abs(payment.amount_value)
+            if payment.amount_value > 0:
+                subproject_awarded += payment.amount_value
+
     amounts = {
         'id': subproject.id,
         'awarded': subproject_awarded,
