@@ -417,7 +417,7 @@ def calculate_subproject_amounts(subproject_id):
     # Calculate amounts spent
     subproject_spent = 0
     for payment in subproject.payments:
-        if payment.amount_value < 0 and not payment.counterparty_alias_value == subproject.project.iban::
+        if payment.amount_value < 0 and not payment.counterparty_alias_value == subproject.project.iban:
             amounts['spent'] += abs(payment.amount_value)
 
     # Calculate percentage spent
