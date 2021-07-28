@@ -454,7 +454,13 @@ def project(project_id):
                         new_payment_data[f.short_name] = f.data
 
             new_payment = Payment(**new_payment_data)
-            new_payment.project_id = project_id
+
+            # A payment can only be linked to a project or a subproject,
+            # so only add a project_id if this project doesn't contain
+            # subprojects
+            if not project.contains_subprojects:
+                new_payment.project_id = project_id
+
             new_payment.amount_currency = 'EUR'
             new_payment.type = 'MANUAL'
             new_payment.updated = datetime.now()
@@ -1034,7 +1040,6 @@ def subproject(project_id, subproject_id):
                         new_payment_data[f.short_name] = f.data
 
             new_payment = Payment(**new_payment_data)
-            new_payment.project_id = subproject.project_id
             new_payment.subproject_id = subproject.id
             new_payment.amount_currency = 'EUR'
             new_payment.type = 'MANUAL'
