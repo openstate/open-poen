@@ -325,24 +325,28 @@ def calculate_project_amounts(project_id):
     # Calculate amounts awarded
     subproject_ibans = [s.iban for s in project.subprojects]
     project_awarded = 0
+    # If the project has payments then add the incoming/positive
+    # payments, but skip the incoming/positive payments from
+    # subprojects as we don't want to count them double
+    if len(list(project.payments)) > 0:
+        for payment in project.payments:
+            if payment.amount_value > 0:
+                if payment.counterparty_alias_value in subproject_ibans:
+                    continue
+                else:
+                    project_awarded += payment.amount_value
+
+    # Also add any incoming/positive payments for all subprojects, which
+    # can come from external IBANs or by manually adding transactions
     if project.contains_subprojects:
         subprojects = Subproject.query.filter_by(project_id=project_id).all()
-        project_awarded = 0
         for subproject in subprojects:
             if len(list(subproject.payments)) > 0:
                 for payment in subproject.payments:
-                    if payment.amount_value > 0:
-                        # If the project contains an IBAN and the payment is to
-                        # that IBAN then subtract the payment to make sure
-                        # it isn't counted double
-                        if payment.counterparty_alias_value == project.iban:
-                            project_awarded -= payment.amount_value
-                        else:
-                            project_awarded += payment.amount_value
-    else:
-        for payment in project.payments:
-            if payment.amount_value > 0:
-                project_awarded += abs(payment.amount_value)
+                    # We don't add payments coming from the project
+                    # IBAN to make sure that they aren't counted double
+                    if payment.amount_value > 0 and (project.iban and payment.counterparty_alias_value != project.iban):
+                        project_awarded += payment.amount_value
 
     amounts = {
         'id': project.id,
@@ -357,14 +361,8 @@ def calculate_project_amounts(project_id):
         for subproject in subprojects:
             subproject_spent = 0
             for payment in subproject.payments:
-                if payment.amount_value < 0:
-                    # If the project contains an IBAN and the payment is to
-                    # that IBAN then don't count the payment
-                    if (subproject.project.iban == None or
-                            (not payment.counterparty_alias_value ==
-                            subproject.project.iban)):
-                        subproject_spent += abs(payment.amount_value)
-            amounts['spent'] += subproject_spent
+                if payment.amount_value < 0 and not payment.counterparty_alias_value == subproject.project.iban:
+                    amounts['spent']+= abs(payment.amount_value)
     else:
         for payment in project.payments:
             if payment.amount_value < 0:
@@ -419,14 +417,8 @@ def calculate_subproject_amounts(subproject_id):
     # Calculate amounts spent
     subproject_spent = 0
     for payment in subproject.payments:
-        if payment.amount_value < 0:
-            # If the project contains an IBAN and the payment is to
-            # that IBAN then don't count the payment
-            if (subproject.project.iban == None or
-                    (not payment.counterparty_alias_value ==
-                    subproject.project.iban)):
-                subproject_spent += abs(payment.amount_value)
-    amounts['spent'] += subproject_spent
+        if payment.amount_value < 0 and not payment.counterparty_alias_value == subproject.project.iban::
+            amounts['spent'] += abs(payment.amount_value)
 
     # Calculate percentage spent
     if amounts['awarded'] == 0:
