@@ -298,10 +298,12 @@
                               <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuleren</button>
 
-                                <!-- Button trigger modal -->
-                                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#project-verwijder-{{ project_data['id'] }}">
-                                  Verwijderen
-                                </button>
+                                {% if current_user.admin %}
+                                  <!-- Button trigger modal -->
+                                  <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#project-verwijder-{{ project_data['id'] }}">
+                                    Verwijderen
+                                  </button>
+                                {% endif %}
 
                                 {# Make sure this 'Opslaan' submit button is listed before the 'Verwijderen' submit button to make sure that hitting 'enter' defaults to the 'Opslaan' submit button #}
                                 {{ project_data['form'].submit }}

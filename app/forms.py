@@ -144,7 +144,7 @@ class NewPaymentForm(FlaskForm):
     # subproject (only on project pages) as we need to set new categories
     # that belong to that subproject
     subproject_id = SelectField(
-        'Subproject',
+        'Initiatief',
         coerce=int,
         choices=[],
         render_kw={'onchange': 'set_category(this)'}
@@ -161,7 +161,7 @@ class NewPaymentForm(FlaskForm):
         ]
     )
 
-    amount_value = FlexibleDecimalField('Bedrag')
+    amount_value = FlexibleDecimalField('Bedrag (begin met een "-" als het een uitgave is)')
 
     created = DateField('Datum (notatie: 2020-12-31)')
 
@@ -397,7 +397,7 @@ class CategoryForm(FlaskForm):
     subproject_id = IntegerField(widget=HiddenInput())
 
     submit = SubmitField(
-        'Toevoegen',
+        'Opslaan',
         render_kw={
             'class': 'btn btn-info'
         }

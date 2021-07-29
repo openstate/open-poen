@@ -351,6 +351,18 @@ def project(project_id):
                     new_subproject_data[f.short_name] = f.data
 
         try:
+            # Check if the IBAN is not already used by a project (the same
+            # check for subprojects is automatically done by MySQL as the iban
+            # field is unique for the Subproject model)
+            if new_subproject_data['iban']:
+                project_with_same_iban = Project.query.filter_by(
+                    iban=new_subproject_data['iban']
+                ).first()
+                if project_with_same_iban:
+                    raise ValueError(
+                        f'IBAN already used by project "{project_with_same_iban.name}"'
+                    )
+
             # Save a new subproject
             subproject = Subproject(**new_subproject_data)
             db.session.add(subproject)
@@ -368,7 +380,7 @@ def project(project_id):
                     new_subproject_data['name']
                 )
             )
-        except IntegrityError as e:
+        except (ValueError, IntegrityError) as e:
             db.session().rollback()
             app.logger.error(repr(e))
             flash(
@@ -619,6 +631,18 @@ def project(project_id):
     # Process filled in project form
     project_form = ProjectForm(prefix="project_form")
 
+    # Remove project
+    if project_form.remove.data and current_user.admin:
+        Project.query.filter_by(id=project.id).delete()
+        db.session.commit()
+        flash(
+            '<span class="text-default-green">Project "%s" is verwijderd</span>' % (
+                project.name
+            )
+        )
+        # redirect back to clear form data
+        return redirect(url_for('index'))
+
     # Save or update project
     # Somehow we need to repopulate the iban.choices with the same
     # values as used when the form was generated for this project.
@@ -653,19 +677,34 @@ def project(project_id):
         try:
             # Update if the project already exists
             if len(projects.all()):
-                # If the IBAN changes, then link the correct payments
-                # to this project
-                changed_project = projects.first()
-
                 # We don't allow editing of the 'contains_subprojects' value after a project is created
                 del new_project_data['contains_subprojects']
 
+                # Check if the IBAN is not already used by a subproject (the same
+                # check for projects is automatically done by MySQL as the iban
+                # field is unique for the Project model)
+                if new_project_data['iban']:
+                    subproject_with_same_iban = Subproject.query.filter_by(
+                        iban=new_project_data['iban']
+                    ).first()
+                    if subproject_with_same_iban:
+                        raise ValueError(
+                            f'IBAN already used by subproject "{subproject_with_same_iban.name}"'
+                        )
+
+                # If the IBAN is changed, then unlink the payments of the old
+                # IBAN and link the payments of the new IBAN
+                changed_project = projects.first()
                 if changed_project.iban != new_project_data['iban']:
                     for payment in changed_project.payments:
+                        # Don't remove manually added payments from the project
+                        if payment.type == 'MANUAL':
+                            continue
                         payment.project_id = None
-                    Payment.query.filter_by(
-                        alias_value=new_project_data['iban']
-                    ).update({'project_id': changed_project.id})
+                    if new_project_data['iban']:
+                        Payment.query.filter_by(
+                            alias_value=new_project_data['iban']
+                        ).update({'project_id': changed_project.id})
 
                 projects.update(new_project_data)
                 db.session.commit()
@@ -690,7 +729,7 @@ def project(project_id):
                         new_project_data['name']
                     )
                 )
-        except IntegrityError as e:
+        except (ValueError, IntegrityError) as e:
             db.session().rollback()
             app.logger.error(repr(e))
             flash(
@@ -705,18 +744,6 @@ def project(project_id):
         return redirect(url_for('project', project_id=project.id))
     else:
         util.flash_form_errors(project_form, request)
-
-    # Remove project
-    if project_form.remove.data:
-        Project.query.filter_by(id=project.id).delete()
-        db.session.commit()
-        flash(
-            '<span class="text-default-green">Project "%s" is verwijderd</span>' % (
-                project.name
-            )
-        )
-        # redirect back to clear form data
-        return redirect(url_for('index'))
 
     # Process filled in category form
     category_form = ''
@@ -898,6 +925,23 @@ def subproject(project_id, subproject_id):
                 subproject.project.make_select_options()
             )
 
+    # Remove subproject
+    if subproject_form.remove.data:
+        Subproject.query.filter_by(id=subproject_form.id.data).delete()
+        db.session.commit()
+        flash(
+            '<span class="text-default-green">Subproject "%s" is verwijderd</span>' % (
+                subproject_form.name.data
+            )
+        )
+        # redirect back to clear form data
+        return redirect(
+            url_for(
+                'project',
+                project_id=project_id,
+            )
+        )
+
     if subproject_form.validate_on_submit():
         # Get data from the form
         new_subproject_data = {}
@@ -921,15 +965,32 @@ def subproject(project_id, subproject_id):
                 id=subproject_form.id.data
             )
             if len(subprojects.all()):
-                # If the IBAN changes, then link the correct payments
-                # to this subproject
-                subproject = subprojects.first()
-                if subproject.iban != new_subproject_data['iban']:
-                    for payment in subproject.payments:
+                # Check if the IBAN is not already used by a project (the same
+                # check for subprojects is automatically done by MySQL as the iban
+                # field is unique for the Subproject model)
+                if new_subproject_data['iban']:
+                    project_with_same_iban = Project.query.filter_by(
+                        iban=new_subproject_data['iban']
+                    ).first()
+                    if project_with_same_iban:
+                        raise ValueError(
+                            f'IBAN already used by project "{project_with_same_iban.name}"'
+                        )
+
+                # If the IBAN is changed, then unlink the payments of the old
+                # IBAN and link the payments of the new IBAN
+                changed_subproject = subprojects.first()
+                if changed_subproject.iban != new_subproject_data['iban']:
+                    for payment in changed_subproject.payments:
+                        # Don't remove manually added payments from the subproject
+                        if payment.type == 'MANUAL':
+                            continue
                         payment.subproject_id = None
-                    Payment.query.filter_by(
-                        alias_value=new_subproject_data['iban']
-                    ).update({'subproject_id': subproject.id})
+                    if new_subproject_data['iban']:
+                        Payment.query.filter_by(
+                            alias_value=new_subproject_data['iban']
+                        ).update({'subproject_id': changed_subproject.id})
+
                 subprojects.update(new_subproject_data)
                 db.session.commit()
                 flash(
@@ -938,7 +999,7 @@ def subproject(project_id, subproject_id):
                         new_subproject_data['name']
                     )
                 )
-        except IntegrityError as e:
+        except (ValueError, IntegrityError) as e:
             db.session().rollback()
             app.logger.error(repr(e))
             flash(
@@ -959,23 +1020,6 @@ def subproject(project_id, subproject_id):
         )
     else:
         util.flash_form_errors(subproject_form, request)
-
-    # Remove subproject
-    if subproject_form.remove.data:
-        Subproject.query.filter_by(id=subproject_form.id.data).delete()
-        db.session.commit()
-        flash(
-            '<span class="text-default-green">Subproject "%s" is verwijderd</span>' % (
-                subproject_form.name.data
-            )
-        )
-        # redirect back to clear form data
-        return redirect(
-            url_for(
-                'project',
-                project_id=project_id,
-            )
-        )
 
     # Populate the subproject's form which allows the user to edit it
     subproject_form = SubprojectForm(prefix='subproject_form', **{
