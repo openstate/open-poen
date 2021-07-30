@@ -7,7 +7,7 @@ from wtforms.validators import (
 from wtforms.widgets import HiddenInput
 from wtforms import (
     StringField, IntegerField, BooleanField, PasswordField, SubmitField,
-    SelectField, TextAreaField, DecimalField, DateField
+    SelectField, TextAreaField, DecimalField, DateField, RadioField
 )
 from wtforms.fields.html5 import EmailField
 
@@ -144,7 +144,7 @@ class NewPaymentForm(FlaskForm):
     # subproject (only on project pages) as we need to set new categories
     # that belong to that subproject
     subproject_id = SelectField(
-        'Subproject',
+        'Initiatief',
         coerce=int,
         choices=[],
         render_kw={'onchange': 'set_category(this)'}
@@ -161,7 +161,7 @@ class NewPaymentForm(FlaskForm):
         ]
     )
 
-    amount_value = FlexibleDecimalField('Bedrag')
+    amount_value = FlexibleDecimalField('Bedrag (begin met een "-" als het een uitgave is)')
 
     created = DateField('Datum (notatie: 2020-12-31)')
 
@@ -246,6 +246,14 @@ class TransactionAttachmentForm(FlaskForm):
             )
         ]
     )
+    mediatype = RadioField(
+        'Media type',
+        choices=[
+            ('media', 'media'),
+            ('bon', 'bon')
+        ],
+        validators=[DataRequired()]
+    )
     payment_id = IntegerField(widget=HiddenInput())
     submit = SubmitField(
         'Uploaden',
@@ -255,8 +263,23 @@ class TransactionAttachmentForm(FlaskForm):
     )
 
 
-class RemoveAttachmentForm(FlaskForm):
+class EditAttachmentForm(FlaskForm):
     id = IntegerField(widget=HiddenInput())
+    mediatype = RadioField(
+        'Media type',
+        choices=[
+            ('media', 'media'),
+            ('bon', 'bon')
+        ],
+        validators=[DataRequired()]
+    )
+
+    submit = SubmitField(
+        'Opslaan',
+        render_kw={
+            'class': 'btn btn-info'
+        }
+    )
 
     remove = SubmitField(
         'Verwijderen',
@@ -397,7 +420,7 @@ class CategoryForm(FlaskForm):
     subproject_id = IntegerField(widget=HiddenInput())
 
     submit = SubmitField(
-        'Toevoegen',
+        'Opslaan',
         render_kw={
             'class': 'btn btn-info'
         }

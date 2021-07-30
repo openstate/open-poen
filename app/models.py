@@ -425,6 +425,7 @@ class File(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     filename = db.Column(db.String(255), index=True)
     mimetype = db.Column(db.String(255))
+    mediatype = db.Column(db.String(32))
 
 
 class Category(db.Model):

@@ -37,24 +37,23 @@
 
     <div class="col-12 col-sm-3">
       <div class="attachment-div">
-        {% if image.mimetype in ['image/jpeg', 'image/jpg', 'image/png'] %}
-          <a class="embed-responsive embed-responsive-1by1" href="{{ url_for('upload', filename='user-image/' + image.filename) }}" data-toggle="lightbox" data-gallery="image-gallery-{{ current_user.id }}">
-            <img class="img-fluid embed-responsive-item attachment" src="{{ url_for('upload', filename='user-image/' + image.filename) }}">
+        {% if attachment.mimetype in ['image/jpeg', 'image/jpg', 'image/png'] %}
+          <a class="embed-responsive embed-responsive-1by1" href="{{ url_for('upload', filename='user-image/' + attachment.filename) }}" data-toggle="lightbox" data-gallery="image-gallery-{{ current_user.id }}">
+            <img class="img-fluid embed-responsive-item attachment" src="{{ url_for('upload', filename='user-image/' + attachment.filename) }}">
           </a>
         {% endif %}
       </div>
     </div>
 
-    {% if image and remove_attachment_form %}
-      <!-- create an 'attachment' dict as remove_attachment_form.html expect that --!>
-      {% set attachment = dict() %}
-      {% set _dummy = attachment.update({ 'id': image.id }) %}
-      <!-- Button trigger modal -->
-      <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#bijlage-verwijder-{{ attachment.id }}">
-        Verwijderen
-      </button>
-      {% include 'partials/remove_attachment_form.html' %}
-    {% endif %}
+    {% for edit_attachment_form in edit_attachment_forms %}
+      {% if attachment.id in edit_attachment_forms %}
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#bijlage-verwijder-{{ attachment.id }}">
+          Verwijderen
+        </button>
+        {% include 'partials/remove_attachment_form.html' %}
+      {% endif %}
+    {% endfor %}
 
     <br>
     <br>
