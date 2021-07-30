@@ -3,8 +3,9 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <form method="POST">
-        {{ remove_attachment_form.csrf_token }}
-        {{ remove_attachment_form.id(**{'value': attachment.id}) }}
+        {{ edit_attachment_forms[attachment.id].csrf_token }}
+        {{ edit_attachment_forms[attachment.id].id }}
+        <div style="display: none">{{ edit_attachment_forms[attachment.id].mediatype }}</div>
         <div class="modal-header">
           <h5 class="modal-title" id="bijlageVerwijderLabel">Media Verwijderen</h5>
           <button type="button" class="close" data-dismiss="modal" aria-label="Annuleren">
@@ -18,7 +19,7 @@
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuleren</button>
-          {{ remove_attachment_form.remove() }}
+          {{ edit_attachment_forms[attachment.id].remove() }}
         </div>
       </form>
     </div>

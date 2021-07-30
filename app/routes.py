@@ -8,7 +8,7 @@ from app import app, db
 from app.forms import (
     ResetPasswordRequestForm, ResetPasswordForm, LoginForm, ProjectForm,
     SubprojectForm, TransactionAttachmentForm,
-    RemoveAttachmentForm, FunderForm, AddUserForm, EditAdminForm,
+    EditAttachmentForm, FunderForm, AddUserForm, EditAdminForm,
     EditProjectOwnerForm, EditUserForm, EditProfileForm, CategoryForm,
     NewPaymentForm
 )
@@ -19,8 +19,8 @@ from app.models import (
 from app import util
 from app.form_processing import (
     process_category_form, process_payment_form, create_payment_forms,
-    process_transaction_attachment_form, process_remove_attachment_form,
-    save_attachment
+    process_transaction_attachment_form, create_edit_attachment_forms,
+    process_edit_attachment_form, save_attachment
 )
 from sqlalchemy.exc import IntegrityError
 
@@ -484,7 +484,8 @@ def project(project_id):
     # Process/create (filled in) payment form
     payment_forms = {}
     transaction_attachment_form = ''
-    remove_attachment_form = ''
+    edit_attachment_forms = {}
+    edit_attachment_form = ''
     if project_owner or user_subproject_ids:
         # Process filled in payment form
         payment_form_return = process_payment_form(request, project, project_owner, user_subproject_ids, is_subproject=False)
@@ -493,25 +494,31 @@ def project(project_id):
 
         # Populate the payment forms which allows the user to edit it
         editable_payments = []
+        editable_attachments = []
         if project.contains_subprojects:
             for subproject in project.subprojects:
                 if project_owner:
                     editable_payments += subproject.payments
+                    for payment in subproject.payments:
+                        editable_attachments += payment.attachments
                 # If the user is not an admin/project owner then only allow it
                 # to edit payments from its subprojects
                 elif user_subproject_ids:
                     for payment in subproject.payments:
                         if payment.subproject_id in user_subproject_ids:
                             editable_payments.append(payment)
+                            editable_attachments.append(payment.attachment)
         else:
             editable_payments = project.payments
+            for payment in project.payments:
+                editable_attachments += payment.attachments
 
         payment_forms = create_payment_forms(
             editable_payments,
             project_owner
         )
 
-        # Process transaction attachment form
+        # Process new transaction attachment form
         transaction_attachment_form = TransactionAttachmentForm(
             prefix="transaction_attachment_form"
         )
@@ -525,16 +532,20 @@ def project(project_id):
         if transaction_attachment_form_return:
             return transaction_attachment_form_return
 
-        # Process transaction attachment removal form
-        remove_attachment_form = RemoveAttachmentForm(
-            prefix="remove_attachment_form"
+        # Process transaction attachment edit form
+        edit_attachment_form = EditAttachmentForm(
+            prefix="edit_attachment_form"
         )
-        remove_attachment_form_return = process_remove_attachment_form(
-            remove_attachment_form,
+        edit_attachment_form_return = process_edit_attachment_form(
+            request,
+            edit_attachment_form,
             project.id,
         )
-        if remove_attachment_form_return:
-            return remove_attachment_form_return
+        if edit_attachment_form_return:
+            return edit_attachment_form_return
+
+        # Fill in attachment form data which allow a user to edit it
+        edit_attachment_forms = create_edit_attachment_forms(editable_attachments)
 
     payments = []
     if project.contains_subprojects:
@@ -867,7 +878,7 @@ def project(project_id):
         categories_dict=categories_dict,
         payment_forms=payment_forms,
         transaction_attachment_form=transaction_attachment_form,
-        remove_attachment_form=remove_attachment_form,
+        edit_attachment_forms=edit_attachment_forms,
         funder_forms=funder_forms,
         new_funder_form=FunderForm(prefix="funder_form"),
         project_owner=project_owner,
@@ -1223,9 +1234,10 @@ def subproject(project_id, subproject_id):
         util.flash_form_errors(add_user_form, request)
 
     transaction_attachment_form = ''
-    remove_attachment_form = ''
+    edit_attachment_forms = {}
+    edit_attachment_form = ''
     if project_owner or user_in_subproject:
-        # Process transaction attachment form
+        # Process new transaction attachment form
         transaction_attachment_form = TransactionAttachmentForm(
             prefix="transaction_attachment_form"
         )
@@ -1240,17 +1252,24 @@ def subproject(project_id, subproject_id):
         if transaction_attachment_form_return:
             return transaction_attachment_form_return
 
-        # Process transaction attachment removal form
-        remove_attachment_form = RemoveAttachmentForm(
-            prefix="remove_attachment_form"
+        # Process transaction attachment edit form
+        edit_attachment_form = EditAttachmentForm(
+            prefix="edit_attachment_form"
         )
-        remove_attachment_form_return = process_remove_attachment_form(
-            remove_attachment_form,
+        edit_attachment_form_return = process_edit_attachment_form(
+            request,
+            edit_attachment_form,
             subproject.project.id,
             subproject.id
         )
-        if remove_attachment_form_return:
-            return remove_attachment_form_return
+        if edit_attachment_form_return:
+            return edit_attachment_form_return
+
+        # Fill in attachment form data which allow a user to edit it
+        attachments = []
+        for payment in subproject.payments:
+            attachments += payment.attachments
+        edit_attachment_forms = create_edit_attachment_forms(attachments)
 
     # Retrieve the amounts for this subproject
     amounts = util.calculate_subproject_amounts(subproject_id)
@@ -1269,7 +1288,7 @@ def subproject(project_id, subproject_id):
         new_payment_form=new_payment_form,
         payment_forms=payment_forms,
         transaction_attachment_form=transaction_attachment_form,
-        remove_attachment_form=remove_attachment_form,
+        edit_attachment_forms=edit_attachment_forms,
         edit_user_forms=edit_user_forms,
         add_user_form=AddUserForm(prefix='add_user_form'),
         project_owner=project_owner,
@@ -1398,12 +1417,12 @@ def profile_edit():
         prefix="edit_profile_form"
     )
 
-    # Process image removal form
-    remove_attachment_form = RemoveAttachmentForm(
-        prefix="remove_attachment_form"
+    # Process image edit form (only used to remove an image)
+    edit_attachment_form = EditAttachmentForm(
+        prefix="edit_attachment_form"
     )
-    if remove_attachment_form.remove.data:
-        File.query.filter_by(id=remove_attachment_form.id.data).delete()
+    if edit_attachment_form.remove.data:
+        File.query.filter_by(id=edit_attachment_form.id.data).delete()
         db.session.commit()
         flash('<span class="text-default-green">Media is verwijderd</span>')
 
@@ -1414,6 +1433,12 @@ def profile_edit():
                 user_id=current_user.id
             )
         )
+
+    # Fill in attachment form data which allows a user to edit it
+    edit_attachment_forms = {}
+    attachment = File.query.filter_by(id=current_user.image).first()
+    if attachment:
+        edit_attachment_forms = create_edit_attachment_forms([attachment])
 
     # Update profile
     if edit_profile_form.validate_on_submit():
@@ -1431,7 +1456,7 @@ def profile_edit():
             db.session.commit()
 
             if edit_profile_form.data_file.data:
-                save_attachment(edit_profile_form.data_file.data, users[0], 'user-image')
+                save_attachment(edit_profile_form.data_file.data, '', users[0], 'user-image')
 
             flash('<span class="text-default-green">gebruiker is bijgewerkt</span>')
 
@@ -1453,13 +1478,14 @@ def profile_edit():
             'biography': current_user.biography
         }
     )
+
     return render_template(
         'profiel-bewerken.html',
         use_square_borders=app.config['USE_SQUARE_BORDERS'],
         footer=app.config['FOOTER'],
         edit_profile_form=edit_profile_form,
-        remove_attachment_form=remove_attachment_form,
-        image=File.query.filter_by(id=current_user.image).first()
+        edit_attachment_forms=edit_attachment_forms,
+        attachment=attachment
     )
 
 

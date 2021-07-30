@@ -7,7 +7,7 @@ from wtforms.validators import (
 from wtforms.widgets import HiddenInput
 from wtforms import (
     StringField, IntegerField, BooleanField, PasswordField, SubmitField,
-    SelectField, TextAreaField, DecimalField, DateField
+    SelectField, TextAreaField, DecimalField, DateField, RadioField
 )
 from wtforms.fields.html5 import EmailField
 
@@ -246,6 +246,14 @@ class TransactionAttachmentForm(FlaskForm):
             )
         ]
     )
+    mediatype = RadioField(
+        'Media type',
+        choices=[
+            ('media', 'media'),
+            ('bon', 'bon')
+        ],
+        validators=[DataRequired()]
+    )
     payment_id = IntegerField(widget=HiddenInput())
     submit = SubmitField(
         'Uploaden',
@@ -255,8 +263,23 @@ class TransactionAttachmentForm(FlaskForm):
     )
 
 
-class RemoveAttachmentForm(FlaskForm):
+class EditAttachmentForm(FlaskForm):
     id = IntegerField(widget=HiddenInput())
+    mediatype = RadioField(
+        'Media type',
+        choices=[
+            ('media', 'media'),
+            ('bon', 'bon')
+        ],
+        validators=[DataRequired()]
+    )
+
+    submit = SubmitField(
+        'Opslaan',
+        render_kw={
+            'class': 'btn btn-info'
+        }
+    )
 
     remove = SubmitField(
         'Verwijderen',
