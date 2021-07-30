@@ -298,10 +298,12 @@
                               <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuleren</button>
 
-                                <!-- Button trigger modal -->
-                                <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#project-verwijder-{{ project_data['id'] }}">
-                                  Verwijderen
-                                </button>
+                                {% if current_user.admin %}
+                                  <!-- Button trigger modal -->
+                                  <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#project-verwijder-{{ project_data['id'] }}">
+                                    Verwijderen
+                                  </button>
+                                {% endif %}
 
                                 {# Make sure this 'Opslaan' submit button is listed before the 'Verwijderen' submit button to make sure that hitting 'enter' defaults to the 'Opslaan' submit button #}
                                 {{ project_data['form'].submit }}
@@ -481,6 +483,16 @@
               </thead>
               <tbody>
                 {% for payment in payments|sort(attribute='created', reverse=true) %}
+                  {% set bonnen = [] %}
+                  {% set media = [] %}
+                  {% for attachment in payment.attachments %}
+                    {% if attachment.mediatype == 'bon' %}
+                      {{ bonnen.append(attachment)|default("", True) }}
+                    {% elif attachment.mediatype == 'media' %}
+                      {{ media.append(attachment)|default("", True) }}
+                    {% endif %}
+                  {% endfor %}
+
                   {% if not payment.hidden or (project_owner or payment.subproject.id in user_subproject_ids) %}
                   <tr{% if payment.type == 'MANUAL' %} class="manual-payment"{% endif %}>
                     <td>
@@ -533,7 +545,13 @@
                     </td>
                     <td>
                       <div class="cell justify-content-center">
-                        {% if payment.attachments.all() %}
+                        {% if bonnen %}
+                          <i class="fas fa-2x fa-receipt"></i></center>
+                        {% endif %}
+                        {% if bonnen and media %}
+                          &nbsp;
+                        {% endif %}
+                        {% if media %}
                           <i class="fas fa-2x fa-camera"></i></center>
                         {% endif %}
                       </div>
@@ -694,43 +712,97 @@
                               </form>
                             {% endif %}
 
-                            {% if payment.attachments.all() or project_owner or payment.id in payment_forms %}
+                            {% if payment.attachments.all() %}
                               <br>
                               <hr>
-                              <b>Media</b>
                               <div class="row">
-                                {% for attachment in payment.attachments %}
-                                  <div class="col-6 col-sm-4">
-                                    <div class="attachment-div">
-                                      {% if project_owner or payment.subproject.id in user_subproject_ids %}
-                                        {% if remove_attachment_form %}
-                                          <!-- Button trigger modal -->
-                                          <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#bijlage-verwijder-{{ attachment.id }}">
-                                            Verwijderen
-                                          </button>
-                                        {% endif %}
-                                      {% endif %}
-                                      {% if attachment.mimetype in ['image/jpeg', 'image/jpg', 'image/png'] %}
-                                        <a class="embed-responsive embed-responsive-1by1" href="{{ url_for('upload', filename='transaction-attachment/' + attachment.filename) }}" data-toggle="lightbox" data-gallery="transaction-gallery-{{ payment.id }}">
-                                          <img class="img-fluid embed-responsive-item attachment" src="{{ url_for('upload', filename='transaction-attachment/' + attachment.filename) }}">
-                                        </a>
-                                      {% else %}
-                                        <a class="embed-responsive embed-responsive-1by1" href="{{ url_for('upload', filename='transaction-attachment/' + attachment.filename) }}">
-                                          <div class="embed-responsive-item bg-grey attachment d-flex" style="word-wrap: break-word">
-                                            <i class="fas fa-file w-75 h-75 mx-auto my-auto text-blue-light"></i>
-                                            <span class="w-100 fa-layers-text text-color-main">{{ attachment.mimetype.split('/')[1] }}</span>
-                                          </div>
-                                        </a>
-                                      {% endif %}
-                                    </div>
+                                {% if bonnen %}
+                                  <div class="col-12">
+                                    <b>Bonnen</b>
                                   </div>
-                                {% endfor %}
+                                  {% for attachment in bonnen %}
+                                    <div class="col-6 col-sm-4">
+                                      <div class="attachment-div">
+                                        {% if attachment.mimetype in ['image/jpeg', 'image/jpg', 'image/png'] %}
+                                          <a class="embed-responsive embed-responsive-1by1" href="{{ url_for('upload', filename='transaction-attachment/' + attachment.filename) }}" data-toggle="lightbox" data-gallery="transaction-gallery-{{ payment.id }}">
+                                            <img class="img-fluid embed-responsive-item attachment" src="{{ url_for('upload', filename='transaction-attachment/' + attachment.filename) }}">
+                                          </a>
+                                        {% else %}
+                                          <a class="embed-responsive embed-responsive-1by1" href="{{ url_for('upload', filename='transaction-attachment/' + attachment.filename) }}">
+                                            <div class="embed-responsive-item bg-grey attachment d-flex" style="word-wrap: break-word">
+                                              <i class="fas fa-file w-75 h-75 mx-auto my-auto text-blue-light"></i>
+                                              <span class="w-100 fa-layers-text text-color-main">{{ attachment.mimetype.split('/')[1] }}</span>
+                                            </div>
+                                          </a>
+                                        {% endif %}
+
+                                        {% if project_owner or payment.subproject.id in user_subproject_ids %}
+                                          {% if attachment.id in edit_attachment_forms %}
+                                            <form method="post">
+                                              {{ edit_attachment_forms[attachment.id]['csrf_token'] }}
+                                              {{ edit_attachment_forms[attachment.id]['id'] }}
+                                              {{ edit_attachment_forms[attachment.id]['mediatype'] }}
+                                              {{ edit_attachment_forms[attachment.id]['submit'] }}
+                                            </form>
+                                            <br>
+                                            <!-- Button trigger modal -->
+                                            <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#bijlage-verwijder-{{ attachment.id }}">
+                                              Verwijderen
+                                            </button>
+                                          {% endif %}
+                                        {% endif %}
+                                      </div>
+                                    </div>
+                                  {% endfor %}
+                                {% endif %}
+
+                                {% if media %}
+                                  <div class="col-12">
+                                    <b>Media</b>
+                                  </div>
+                                  {% for attachment in media %}
+                                    <div class="col-6 col-sm-4">
+                                      <div class="attachment-div">
+                                        {% if attachment.mimetype in ['image/jpeg', 'image/jpg', 'image/png'] %}
+                                          <a class="embed-responsive embed-responsive-1by1" href="{{ url_for('upload', filename='transaction-attachment/' + attachment.filename) }}" data-toggle="lightbox" data-gallery="transaction-gallery-{{ payment.id }}">
+                                            <img class="img-fluid embed-responsive-item attachment" src="{{ url_for('upload', filename='transaction-attachment/' + attachment.filename) }}">
+                                          </a>
+                                        {% else %}
+                                          <a class="embed-responsive embed-responsive-1by1" href="{{ url_for('upload', filename='transaction-attachment/' + attachment.filename) }}">
+                                            <div class="embed-responsive-item bg-grey attachment d-flex" style="word-wrap: break-word">
+                                              <i class="fas fa-file w-75 h-75 mx-auto my-auto text-blue-light"></i>
+                                              <span class="w-100 fa-layers-text text-color-main">{{ attachment.mimetype.split('/')[1] }}</span>
+                                            </div>
+                                          </a>
+                                        {% endif %}
+
+                                        {% if project_owner or payment.subproject.id in user_subproject_ids %}
+                                          {% if attachment.id in edit_attachment_forms %}
+                                            <form method="post">
+                                              {{ edit_attachment_forms[attachment.id]['csrf_token'] }}
+                                              {{ edit_attachment_forms[attachment.id]['id'] }}
+                                              {{ edit_attachment_forms[attachment.id]['mediatype'] }}
+                                              {{ edit_attachment_forms[attachment.id]['submit'] }}
+                                            </form>
+                                            <br>
+                                            <!-- Button trigger modal -->
+                                            <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#bijlage-verwijder-{{ attachment.id }}">
+                                              Verwijderen
+                                            </button>
+                                          {% endif %}
+                                        {% endif %}
+                                      </div>
+                                    </div>
+                                  {% endfor %}
+                                {% endif %}
                               </div>
                             {% endif %}
 
                             {# Make sure the user is allowed to edit this payment (especially needed when a normal users edits a subproject payment on a project page #}
                             {% if project_owner or payment.subproject.id in user_subproject_ids %}
                               {% if transaction_attachment_form %}
+                              <hr>
+                              <b>Nieuwe media toevoegen</b>
                                 <form method="POST" enctype="multipart/form-data">
                                   {{ transaction_attachment_form.csrf_token }}
                                   {% for f in transaction_attachment_form %}
@@ -766,7 +838,7 @@
   </div>
 
   {# We can't put the modal code next to the button code, because it doesn't seem to work in combination with Bootstrap Table's detail view #}
-  {% if remove_attachment_form %}
+  {% if edit_attachment_forms %}
     {% for payment in payments %}
       {% if project_owner or payment.subproject.id in user_subproject_ids %}
         {% for attachment in payment.attachments %}

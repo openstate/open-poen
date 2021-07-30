@@ -5,7 +5,7 @@ from werkzeug.utils import secure_filename
 import os
 
 from app import app, db
-from app.forms import CategoryForm, PaymentForm
+from app.forms import CategoryForm, PaymentForm, EditAttachmentForm
 from app.models import Category, Payment, File, User
 from app.util import flash_form_errors
 
@@ -255,7 +255,7 @@ def create_payment_forms(payments, project_owner):
 
 
 # Save attachment to disk
-def save_attachment(f, db_object, folder):
+def save_attachment(f, mediatype, db_object, folder):
     filename = secure_filename(f.filename)
     filename = '%s_%s' % (
         datetime.now(app.config['TZ']).isoformat()[:19], filename
@@ -272,7 +272,7 @@ def save_attachment(f, db_object, folder):
         filename
     )
     f.save(filepath)
-    new_file = File(filename=filename, mimetype=f.headers[1][1])
+    new_file = File(filename=filename, mimetype=f.headers[1][1], mediatype=mediatype)
     db.session.add(new_file)
     db.session.commit()
 
@@ -299,7 +299,7 @@ def process_transaction_attachment_form(request, transaction_attachment_form, pr
         if not project_owner and not payment.subproject.id in user_subproject_ids:
             return
 
-        save_attachment(transaction_attachment_form.data_file.data, payment, 'transaction-attachment')
+        save_attachment(transaction_attachment_form.data_file.data, transaction_attachment_form.mediatype.data, payment, 'transaction-attachment')
 
         # Redirect back to clear form data
         if subproject_id:
@@ -321,13 +321,52 @@ def process_transaction_attachment_form(request, transaction_attachment_form, pr
     else:
         flash_form_errors(transaction_attachment_form, request)
 
+# Populate the edit attachment forms which allows the user to edit it
+def create_edit_attachment_forms(attachments):
+    edit_attachment_forms = {}
+    for attachment in attachments:
+        edit_attachment_form = EditAttachmentForm(prefix='edit_attachment_form', **{
+            'id': attachment.id,
+            'mediatype': attachment.mediatype
+        })
 
-def process_remove_attachment_form(remove_attachment_form, project_id=0, subproject_id=0):
-    # Remove attachment
-    if remove_attachment_form.remove.data:
-        File.query.filter_by(id=remove_attachment_form.id.data).delete()
-        db.session.commit()
-        flash('<span class="text-default-green">Media is verwijderd</span>')
+        edit_attachment_forms[attachment.id] = edit_attachment_form
+
+    return edit_attachment_forms
+
+def process_edit_attachment_form(request, edit_attachment_form, project_id=0, subproject_id=0):
+    edit_attachment_form = EditAttachmentForm(prefix="edit_attachment_form")
+
+    if edit_attachment_form.validate_on_submit():
+        # Remove attachment
+        if edit_attachment_form.remove.data:
+            File.query.filter_by(id=edit_attachment_form.id.data).delete()
+            db.session.commit()
+            flash('<span class="text-default-green">Media is verwijderd</span>')
+        else:
+            new_data = {}
+            for f in edit_attachment_form:
+                if f.type != 'SubmitField' and f.type != 'CSRFTokenField':
+                    new_data[f.short_name] = f.data
+
+            try:
+                # Update if the attachment already exists
+                attachments = File.query.filter_by(
+                    id=edit_attachment_form.id.data
+                )
+
+                if len(attachments.all()):
+                    attachments.update(new_data)
+                    db.session.commit()
+                    flash(
+                        '<span class="text-default-green">Media is bijgewerkt</span>'
+                    )
+            except IntegrityError as e:
+                db.session().rollback()
+                app.logger.error(repr(e))
+                flash(
+                    '<span class="text-default-red">Media bijwerken mislukt<span>'
+                )
 
         # Redirect back to clear form data
         if subproject_id:
@@ -346,3 +385,5 @@ def process_remove_attachment_form(remove_attachment_form, project_id=0, subproj
                 project_id=project_id,
             )
         )
+    else:
+        flash_form_errors(edit_attachment_form, request)

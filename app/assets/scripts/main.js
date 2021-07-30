@@ -20,10 +20,10 @@ import transaction from './routes/transaction';
 // Import the needed Font Awesome functionality
 import { config, library, dom } from '@fortawesome/fontawesome-svg-core';
 // Import required icons
-import { faBars, faChevronDown, faFile, faCamera, faDownload } from '@fortawesome/free-solid-svg-icons';
+import { faBars, faChevronDown, faFile, faCamera, faDownload, faReceipt } from '@fortawesome/free-solid-svg-icons';
 
 // Add the imported icons to the library
-library.add(faBars, faChevronDown, faFile, faCamera, faDownload);
+library.add(faBars, faChevronDown, faFile, faCamera, faDownload, faReceipt);
 
 // Tell FontAwesome to watch the DOM and add the SVGs when it detects icon markup
 dom.watch();
