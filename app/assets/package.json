@@ -11,13 +11,14 @@
     "@openfonts/dosis_latin": "^0.0.11",
     "@openfonts/open-sans_latin-ext": "^1.44.2",
     "bootstrap": "v4.5.2",
-    "bootstrap-table": "^1.17.1",
+    "bootstrap-table": "^1.18.3",
     "cross-env": "^5.2.1",
     "ekko-lightbox": "^5.3.0",
     "javascript-natural-sort": "^0.7.1",
     "jquery": "^3.5.1",
     "popper.js": "^1.16.1",
-    "tableexport.jquery.plugin": "1.10.2"
+    "tableexport.jquery.plugin": "1.10.2",
+    "moment": "2.29.1"
   },
   "scripts": {
     "dev": "npm run development",

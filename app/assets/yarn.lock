@@ -1705,10 +1705,10 @@ boolbase@^1.0.0, boolbase@~1.0.0:
   resolved "https://registry.yarnpkg.com/boolbase/-/boolbase-1.0.0.tgz#68dff5fbe60c51eb37725ea9e3ed310dcc1e776e"
   integrity sha1-aN/1++YMUes3cl6p4+0xDcwed24=
 
-bootstrap-table@^1.17.1:
-  version "1.17.1"
-  resolved "https://registry.yarnpkg.com/bootstrap-table/-/bootstrap-table-1.17.1.tgz#53b9062d1b9e3ba59a4a47d14d90e81fb54195b0"
-  integrity sha512-FEBd8xwaOLOLwtdme3HVr0RI0TPnvoMd/M3iVSX1w5ZLrbbMHU+Eh0YbGvOLSAfduL+9rDZ/cG/5Qe057o0cIg==
+bootstrap-table@^1.18.3:
+  version "1.18.3"
+  resolved "https://registry.yarnpkg.com/bootstrap-table/-/bootstrap-table-1.18.3.tgz#071173f8071235563a7361b5ce7f5ba613eb37b4"
+  integrity sha512-/eFLkldDlNFi37qC/d9THfRVxMUGD34E8fQBFtXJLDHLBOVKWDTq7BV+udoP7k3FfCEyhM1jWQnQ0rMQdBv//w==
 
 bootstrap@v4.5.2:
   version "4.5.2"
@@ -5587,6 +5587,11 @@ mkdirp@^0.5.1, mkdirp@^0.5.3, mkdirp@^0.5.5, mkdirp@~0.5.1:
   integrity sha512-NKmAlESf6jMGym1++R0Ra7wvhV+wFW63FaSOFPwRahvea0gMUcGUhVeAg/0BC0wiv9ih5NYPB1Wn1UEI1/L+xQ==
   dependencies:
     minimist "^1.2.5"
+
+moment@2.29.1:
+  version "2.29.1"
+  resolved "https://registry.yarnpkg.com/moment/-/moment-2.29.1.tgz#b2be769fa31940be9eeea6469c075e35006fa3d3"
+  integrity sha512-kHmoybcPV8Sqy59DwNDY3Jefr64lK/by/da0ViFcuA4DH0vQg5Q6Ze5VimxkfQNSC+Mls/Kx53s7TjP1RhFEDQ==
 
 move-concurrently@^1.0.1:
   version "1.0.1"
