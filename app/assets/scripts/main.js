@@ -10,6 +10,7 @@ import 'tableexport.jquery.plugin/tableExport.min.js';
 import 'bootstrap-table/dist/extensions/export/bootstrap-table-export.min.js';
 import 'bootstrap-table/dist/extensions/cookie/bootstrap-table-cookie.min.js';
 import naturalSort from 'javascript-natural-sort';
+import moment from 'moment';
 
 // Import local dependencies
 import Router from './util/Router';
@@ -47,6 +48,17 @@ window.customSort = function(a, b) {
   var bb = b.match('[^>]*>(.*)</h1>')[1].replace(',', '.').replace(/\s/g, '');
   return naturalSort(aa, bb);
 };
+
+// Needed to sort dates in payment tables
+window.sortByDate = function(a, b) {
+    var aValue = moment(a, "DD-MM-'YY").format('YYYYMMDD');
+    if (a === '' || a === null) { aValue = 0; }
+
+    var bValue = moment(b, "DD-MM-'YY").format('YYYYMMDD');
+    if (b === '' || b === null) { bValue = 0; }
+
+    return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+}
 
 // Format detail view of payment table row
 window.detailFormatter = function(index, row) {
