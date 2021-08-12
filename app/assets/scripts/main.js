@@ -1,4 +1,5 @@
 // Import external dependencies
+import * as d3 from 'd3';
 import 'jquery';
 import 'bootstrap';
 import 'ekko-lightbox/dist/ekko-lightbox.min.js';
@@ -51,13 +52,13 @@ window.customSort = function(a, b) {
 
 // Needed to sort dates in payment tables
 window.sortByDate = function(a, b) {
-    var aValue = moment(a, "DD-MM-'YY").format('YYYYMMDD');
-    if (a === '' || a === null) { aValue = 0; }
+  var aValue = moment(a, "DD-MM-'YY").format('YYYYMMDD');
+  if (a === '' || a === null) { aValue = 0; }
 
-    var bValue = moment(b, "DD-MM-'YY").format('YYYYMMDD');
-    if (b === '' || b === null) { bValue = 0; }
+  var bValue = moment(b, "DD-MM-'YY").format('YYYYMMDD');
+  if (b === '' || b === null) { bValue = 0; }
 
-    return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+  return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
 }
 
 // Format detail view of payment table row
@@ -65,3 +66,98 @@ window.detailFormatter = function(index, row) {
   var id = row[0].match(/>\s+(\d+)\s+<\/div>/)[1]
   return $('#detail-' + id).html()
 }
+
+// Create a donut with of the spent percentage
+window.donut = function(thisObj) {
+  // Clear HTML, otherwise you generate more donuts when resizing the window
+  $(thisObj).html('');
+
+  // Get the percentage from this custom attribute we set
+  var uses = parseInt($(thisObj).attr('data-percentage'));
+
+  var chart = d3.select(thisObj);
+
+  var width = $(thisObj).width();
+
+  var height = width;
+
+  var radius = Math.min(width, height) / 2;
+
+  var color = d3.scale.ordinal()
+    .range(["#b82466", "#265ed4"]);
+
+  var arc = d3.svg.arc()
+    .outerRadius(radius)
+    .innerRadius(radius - width / 6);
+
+  var pie = d3.layout.pie()
+    .value(function (d) {
+    return d.value;
+  }).sort(null);
+
+  chart = chart
+    .append('svg')
+    .attr("width", width)
+    .attr("height", height)
+    .append("g")
+    .attr("transform", "translate(" + (width / 2) + "," + (height / 2) + ")");
+
+  // just abort and leave it blank if something's wrong
+  // (instead of showing "NaN%" visually)
+  if (isNaN(uses))
+    return;
+
+  var pie_data = [
+    {status: 'active', value: uses},
+    {status: 'inactive', value: (100-uses)},
+  ]
+
+  var g = chart.selectAll(".arc")
+    .data(pie(pie_data))
+    .enter().append("g")
+    .attr("class", "arc");
+
+  g.append("path")
+    .style("fill", function(d) {
+    return color(d.data.status);
+  })
+    .transition().delay(function(d, i) {
+    return i *400;
+  }).duration(400)
+    .attrTween('d', function(d) {
+    var i = d3.interpolate(d.startAngle+ 0.1, d.endAngle);
+    return function(t) {
+      d.endAngle = i(t);
+      return arc(d);
+    }
+  });
+
+  // Add text inside the donut
+  g.append("text")
+    .attr("text-anchor", "middle")
+    .attr("font-size", "10")
+    .attr("class", "total-type")
+    .attr("dy", "-0.2em")
+    .attr("fill", "#000059")
+    .text(function(d){
+      return "besteed";
+  });
+
+  // Add percentage inside the donut
+  g.append("text")
+    .attr("text-anchor", "middle")
+    .attr("font-size", "10")
+    .attr("class", "total-type")
+    .attr("class", "total-value")
+    .attr("dy", "1.0em")
+    .attr("fill", "#000059")
+    .text(function(d){
+      return "" + pie_data[0].value + "%";
+  });
+}
+
+window.createDonuts = function() {
+  $('.donut').each(function() {window.donut(this)});
+}
+
+createDonuts();
