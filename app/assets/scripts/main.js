@@ -136,13 +136,18 @@ window.donut = function(thisObj) {
     }
   });
 
+  var fillColor = "#ffffff";
+  if ($('body').hasClass('project') || $('body').hasClass('subproject')) {
+    var fillColor = "#004699";
+  }
+
   // Add text inside the donut
   g.append("text")
     .attr("text-anchor", "middle")
     .attr("font-size", "10")
     .attr("class", "total-type")
     .attr("dy", "-0.2em")
-    .attr("fill", "#ffffff")
+    .attr("fill", fillColor)
     .text(function(d){
       return "besteed";
   });
@@ -154,7 +159,7 @@ window.donut = function(thisObj) {
     .attr("class", "total-type")
     .attr("class", "total-value")
     .attr("dy", "1.0em")
-    .attr("fill", "#ffffff")
+    .attr("fill", fillColor)
     .text(function(d){
       return "" + uses + "%";
   });
