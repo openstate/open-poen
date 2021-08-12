@@ -84,7 +84,7 @@ window.donut = function(thisObj) {
   var radius = Math.min(width, height) / 2;
 
   var color = d3.scale.ordinal()
-    .range(["#0096dc", "#c60060"]);
+    .range(["#c60060", "#0096dc"]);
 
   var arc = d3.svg.arc()
     .outerRadius(radius)
