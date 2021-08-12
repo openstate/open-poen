@@ -262,6 +262,17 @@ hr {
   padding: 10px;
 }
 
+.wide-modal {
+  max-width:1000px;
+}
+
+// Force a scrollbar on large modals; normally this isn't necessary, but e.g.
+// on the 'alle media' modal we lose 'focus' after opening a gallery and
+// closing it, which removes the ability to scroll
+.modal {
+  overflow-y: auto;
+}
+
 @media (max-width: 1199px) {
   .poen-lead {
     min-height: 420px;
