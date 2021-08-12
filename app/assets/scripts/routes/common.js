@@ -13,8 +13,6 @@ export default {
         search: true,
         pagination: true,
         stickyHeader: true,
-        stickyHeaderOffsetLeft: 1,
-        stickyHeaderOffsetRight: 1,
         classes: 'table'
       }
     );
