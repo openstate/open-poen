@@ -107,9 +107,13 @@ window.donut = function(thisObj) {
   if (isNaN(uses))
     return;
 
+  var pie_uses = uses;
+  if (uses > 100) {
+    pie_uses = 100;
+  }
   var pie_data = [
-    {status: 'active', value: uses},
-    {status: 'inactive', value: (100-uses)},
+    {status: 'active', value: pie_uses},
+    {status: 'inactive', value: (100 - pie_uses)},
   ]
 
   var g = chart.selectAll(".arc")
@@ -152,7 +156,7 @@ window.donut = function(thisObj) {
     .attr("dy", "1.0em")
     .attr("fill", "#000059")
     .text(function(d){
-      return "" + pie_data[0].value + "%";
+      return "" + uses + "%";
   });
 }
 
