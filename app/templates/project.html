@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block body %}
-  <body class="bg-grey project transaction{% if use_square_borders %} use-square-borders{% endif %}">
+  <body onresize="createDonuts()" class="bg-grey project transaction{% if use_square_borders %} use-square-borders{% endif %}">
 {% endblock %}
 
 {% block content %}
@@ -166,8 +166,7 @@
                   <h3 class="text-blue">resterend</h3>
                   <h2>{{ amounts.left_str }}</h2>
                 </div>
-                <div class="col-4 text-center">
-                  <h2>{{ amounts.percentage_spent_str }}</h2>
+                <div class="col-4 text-center donut" data-percentage="{{ amounts.percentage_spent_str }}">
                 </div>
                 <div class="col-4 small-gutter">
                   <h3 class="text-red">uitgegeven</h3>
