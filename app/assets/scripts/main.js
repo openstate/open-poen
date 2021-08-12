@@ -84,7 +84,7 @@ window.donut = function(thisObj) {
   var radius = Math.min(width, height) / 2;
 
   var color = d3.scale.ordinal()
-    .range(["#b82466", "#265ed4"]);
+    .range(["#0096dc", "#265ed4"]);
 
   var arc = d3.svg.arc()
     .outerRadius(radius)
@@ -142,7 +142,7 @@ window.donut = function(thisObj) {
     .attr("font-size", "10")
     .attr("class", "total-type")
     .attr("dy", "-0.2em")
-    .attr("fill", "#000059")
+    .attr("fill", "#000000")
     .text(function(d){
       return "besteed";
   });
@@ -154,7 +154,7 @@ window.donut = function(thisObj) {
     .attr("class", "total-type")
     .attr("class", "total-value")
     .attr("dy", "1.0em")
-    .attr("fill", "#000059")
+    .attr("fill", "#000000")
     .text(function(d){
       return "" + uses + "%";
   });
