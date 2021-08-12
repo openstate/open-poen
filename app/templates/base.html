@@ -41,7 +41,7 @@
   {% endblock %}
 </head>
 {% block body %}
-<body class="{% if use_square_borders %} use-square-borders{% endif %}">
+<body onresize="createDonuts()" class="{% if use_square_borders %} use-square-borders{% endif %}">
 {% endblock %}
   <header class="bg-white">
     <nav class="navbar navbar-fixed-top my-auto">
