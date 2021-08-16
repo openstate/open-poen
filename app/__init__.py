@@ -25,7 +25,7 @@ app = Flask(__name__, static_url_path='/static/dist')
 app.config.from_object(Config)
 
 db = SQLAlchemy(app)
-migrate = Migrate(app, db)
+migrate = Migrate(app, db, compare_type=True)
 
 mail = Mail(app)
 
