@@ -266,8 +266,13 @@ def get_new_payments(project_id):
                         if subproject:
                             payment['subproject_id'] = subproject.id
 
+                        # Remove these values that sometimes occur in Bunq
+                        # payments as we don't use them
                         if 'scheduled_id' in payment:
                             del payment['scheduled_id']
+
+                        if 'batch_id' in payment:
+                            del payment['batch_id']
 
                         p = Payment(**payment)
                         p.route = 'subsidie'
