@@ -17,7 +17,7 @@
     "javascript-natural-sort": "^0.7.1",
     "jquery": "^3.5.1",
     "popper.js": "^1.16.1",
-    "tableexport.jquery.plugin": "1.10.2",
+    "tableexport.jquery.plugin": "1.25.0",
     "moment": "2.29.1",
     "d3": "3.5.5"
   },
